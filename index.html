@@ -14,7 +14,6 @@
     --teal: #0F6E56; --teal-light: #E1F5EE; --teal-mid: #1D9E75;
     --purple: #533AB7; --purple-light: #EEEDFE; --purple-dark: #3C3489;
     --gray-50: #F1EFE8; --gray-200: #B4B2A9; --gray-400: #888780; --gray-800: #444441;
-    --green: #3B6D11; --green-light: #EAF3DE;
     --red: #A32D2D; --red-light: #FCEBEB;
     --amber: #854F0B; --amber-light: #FAEEDA;
     --bg: #f5f4f0; --surface: #ffffff; --border: rgba(0,0,0,0.1);
@@ -24,31 +23,64 @@
   }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* Layout */
-  #app { display: flex; flex-direction: column; min-height: 100vh; }
+  /* LOGIN SCREEN */
+  #loginScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  .login-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 420px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .login-logo i { font-size: 28px; color: var(--blue); }
+  .login-logo span { font-size: 18px; font-weight: 600; }
+  .login-logo em { font-size: 12px; font-style: normal; color: var(--text-faint); background: var(--gray-50); padding: 2px 8px; border-radius: 20px; }
+  .login-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+  .login-label { font-size: 12px; color: var(--text-faint); display: block; margin-bottom: 6px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  .login-input {
+    width: 100%; padding: 11px 14px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 14px; font-family: var(--mono);
+    background: var(--bg); color: var(--text); outline: none;
+    transition: border-color 0.15s; margin-bottom: 8px;
+  }
+  .login-input:focus { border-color: var(--blue); }
+  .login-hint { font-size: 11px; color: var(--text-faint); margin-bottom: 20px; }
+  .login-hint a { color: var(--blue); text-decoration: none; }
+  .login-btn {
+    width: 100%; padding: 11px; background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius); font-size: 14px;
+    font-family: var(--font); font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.15s;
+  }
+  .login-btn:hover { background: var(--blue-dark); }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-error { margin-top: 12px; padding: 10px 14px; background: var(--red-light); border: 1px solid #F09595; border-radius: var(--radius); font-size: 13px; color: var(--red); display: none; }
+  .login-security { display: flex; align-items: center; gap: 6px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-faint); }
+
+  /* APP */
+  #appScreen { display: none; flex-direction: column; min-height: 100vh; }
   .topbar {
     background: var(--surface); border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 12px; padding: 0 24px; height: 56px;
     position: sticky; top: 0; z-index: 10;
   }
   .topbar-title { font-weight: 600; font-size: 15px; }
-  .topbar-pill {
-    font-size: 11px; background: var(--gray-50); color: var(--gray-400);
-    padding: 2px 10px; border-radius: 20px; border: 1px solid var(--border);
-  }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--gray-400);
-    transition: background 0.3s, box-shadow 0.3s; flex-shrink: 0;
-  }
+  .topbar-pill { font-size: 11px; background: var(--gray-50); color: var(--gray-400); padding: 2px 10px; border-radius: 20px; border: 1px solid var(--border); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-400); transition: all 0.3s; flex-shrink: 0; }
   .status-dot.active { background: var(--teal-mid); box-shadow: 0 0 0 3px var(--teal-light); }
   .status-label { font-size: 12px; color: var(--text-faint); }
   .status-label.active { color: var(--teal); }
-
-  .main-wrap { display: flex; flex: 1; }
-  .sidebar {
-    width: 210px; background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; padding: 12px 0; flex-shrink: 0;
+  .logout-btn {
+    margin-left: 16px; font-size: 12px; padding: 5px 12px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; color: var(--text-muted);
+    font-family: var(--font); display: flex; align-items: center; gap: 5px;
   }
+  .main-wrap { display: flex; flex: 1; }
+  .sidebar { width: 210px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 12px 0; flex-shrink: 0; }
   .nav-btn {
     display: flex; align-items: center; gap: 10px; width: 100%;
     padding: 10px 20px; background: transparent; border: none;
@@ -59,137 +91,116 @@
   .nav-btn:hover { background: var(--bg); color: var(--text); }
   .nav-btn.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); font-weight: 500; }
   .nav-btn .ti { font-size: 17px; }
-  .notif-badge {
-    margin-left: auto; background: var(--blue); color: #fff;
-    font-size: 10px; padding: 1px 7px; border-radius: 20px; font-family: var(--mono);
-  }
+  .notif-badge { margin-left: auto; background: var(--blue); color: #fff; font-size: 10px; padding: 1px 7px; border-radius: 20px; font-family: var(--mono); }
   .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
   .toggle-btn {
     width: 100%; padding: 9px 0; border-radius: var(--radius);
     background: var(--blue); color: #fff; border: none; cursor: pointer;
     font-size: 13px; font-family: var(--font); font-weight: 500;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
   }
   .toggle-btn.running { background: var(--teal-light); color: var(--teal); }
   .toggle-btn:hover { opacity: 0.88; }
-
   .content { flex: 1; padding: 28px 32px; overflow: auto; max-width: 900px; }
   h2 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 20px; }
   h3 { font-size: 13px; font-weight: 500; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
-
-  /* Cards */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
   .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .metric { background: var(--gray-50); border-radius: var(--radius); padding: 14px 16px; }
   .metric label { font-size: 12px; color: var(--text-faint); display: block; margin-bottom: 4px; }
   .metric .val { font-size: 24px; font-weight: 600; color: var(--text); font-family: var(--mono); }
   .metric .val.accent { color: var(--blue); font-size: 14px; font-weight: 500; font-family: var(--font); }
-
-  /* Team rows */
-  .team-row {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
-  }
+  .team-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .team-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .team-name { font-weight: 500; font-size: 14px; }
-  .team-sub { font-size: 12px; color: var(--text-faint); }
   .team-count { font-size: 22px; font-weight: 600; font-family: var(--mono); margin-left: auto; }
-
-  /* Notification card */
-  .notif-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px;
-    border-left-width: 3px; animation: slideIn 0.2s ease;
-  }
+  .notif-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px; border-left-width: 3px; animation: slideIn 0.2s ease; }
   @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   .notif-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .notif-time { font-size: 12px; color: var(--text-faint); margin-left: auto; font-family: var(--mono); }
   .notif-subject { font-weight: 500; font-size: 14px; margin-bottom: 2px; }
   .notif-from { font-size: 13px; color: var(--text-muted); }
   .notif-slack { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; }
-
-  /* Badge pill */
   .pill { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
   .pill .ti { font-size: 11px; }
   .pill-sent { background: var(--teal-light); color: var(--teal); }
-  .pill-pending { background: var(--amber-light); color: var(--amber); }
-  .pill-error { background: var(--red-light); color: var(--red); }
-
-  /* Action button */
-  .action-btn {
-    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
-    background: var(--blue); color: #fff; border: none; border-radius: var(--radius);
-    cursor: pointer; font-size: 14px; font-family: var(--font); font-weight: 500;
-    transition: all 0.15s;
-  }
+  .action-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; font-size: 14px; font-family: var(--font); font-weight: 500; transition: all 0.15s; }
   .action-btn:hover { background: var(--blue-dark); }
   .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .action-btn .ti { font-size: 16px; }
-
-  /* Result banner */
   .result-banner { margin-top: 16px; padding: 12px 16px; border-radius: var(--radius); font-size: 13px; }
   .result-banner.success { background: var(--teal-light); border: 1px solid #5DCAA5; color: var(--teal); }
   .result-banner.error { background: var(--red-light); border: 1px solid #F09595; color: var(--red); }
-
-  /* Config */
   .config-section { margin-bottom: 16px; }
   .config-section label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; }
-  .config-section input[type=text] {
-    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
-    border-radius: var(--radius); font-size: 14px; font-family: var(--font);
-    background: var(--bg); color: var(--text); outline: none;
-    transition: border-color 0.15s;
-  }
+  .config-section input[type=text] { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: var(--font); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
   .config-section input[type=text]:focus { border-color: var(--blue); }
   .config-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
   .config-row:last-child { border-bottom: none; }
   .toggle-switch { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .toggle-track {
-    position: absolute; inset: 0; background: var(--gray-200); border-radius: 22px;
-    cursor: pointer; transition: background 0.2s;
-  }
-  .toggle-track::after {
-    content: ''; position: absolute; left: 3px; top: 3px;
-    width: 16px; height: 16px; border-radius: 50%; background: #fff;
-    transition: transform 0.2s;
-  }
+  .toggle-track { position: absolute; inset: 0; background: var(--gray-200); border-radius: 22px; cursor: pointer; transition: background 0.2s; }
+  .toggle-track::after { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
   .toggle-switch input:checked + .toggle-track { background: var(--blue); }
   .toggle-switch input:checked + .toggle-track::after { transform: translateX(16px); }
-
-  /* Logs terminal */
-  .terminal {
-    background: #0f0f1a; border-radius: var(--radius-lg); padding: 16px;
-    font-family: var(--mono); font-size: 12px; max-height: 460px; overflow-y: auto;
-    border: 1px solid #222;
-  }
+  .terminal { background: #0f0f1a; border-radius: var(--radius-lg); padding: 16px; font-family: var(--mono); font-size: 12px; max-height: 460px; overflow-y: auto; border: 1px solid #222; }
   .log-line { margin-bottom: 5px; line-height: 1.5; }
   .log-ts { color: #444; margin-right: 8px; }
   .log-info { color: #B4B2A9; }
   .log-success { color: #5DCAA5; }
   .log-warn { color: #EF9F27; }
   .log-error { color: #F09595; }
-
-  /* Empty state */
   .empty { text-align: center; padding: 60px 0; color: var(--text-faint); }
   .empty .ti { font-size: 44px; display: block; margin-bottom: 12px; }
   .empty p { font-size: 14px; line-height: 1.7; }
-
-  /* Spinning loader */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spin { animation: spin 0.8s linear infinite; display: inline-block; }
-
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* API key section in config */
+  .api-key-row { display: flex; align-items: center; gap: 8px; }
+  .api-key-row input { flex: 1; }
+  .api-key-row button { padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); cursor: pointer; font-size: 13px; font-family: var(--font); color: var(--text-muted); white-space: nowrap; }
+  .api-key-row button:hover { background: var(--gray-50); }
+  .api-saved { font-size: 11px; color: var(--teal); margin-top: 4px; display: none; }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- TOPBAR -->
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <i class="ti ti-brand-slack"></i>
+      <span>Email Monitor</span>
+      <em>para Slack</em>
+    </div>
+    <p class="login-desc">
+      Para funcionar, o app precisa da sua <strong>Anthropic API Key</strong>. Ela é usada para acessar seu Gmail e enviar notificações ao Slack. A chave fica salva apenas no seu navegador.
+    </p>
+    <label class="login-label">Anthropic API Key</label>
+    <input class="login-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" />
+    <p class="login-hint">
+      Não tem uma chave? <a href="https://console.anthropic.com/settings/keys" target="_blank">Crie em console.anthropic.com →</a>
+    </p>
+
+    <label class="login-label" style="margin-top:4px">Canal Slack</label>
+    <input class="login-input" type="text" id="loginChannelInput" placeholder="#notificacoes-email" value="#notificacoes-email" />
+    <p class="login-hint">Canal onde as notificações serão enviadas.</p>
+
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">
+      <i class="ti ti-player-play"></i> Entrar e abrir o app
+    </button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-security">
+      <i class="ti ti-lock" style="font-size:13px"></i>
+      Sua API Key é salva apenas localmente (localStorage) e nunca enviada a terceiros.
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="appScreen">
   <div class="topbar">
     <i class="ti ti-brand-slack" style="font-size:22px;color:var(--blue)"></i>
     <span class="topbar-title">Email Monitor</span>
@@ -197,11 +208,13 @@
     <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Inativo</span>
+      <button class="logout-btn" onclick="doLogout()">
+        <i class="ti ti-logout" style="font-size:13px"></i> Sair
+      </button>
     </div>
   </div>
 
   <div class="main-wrap">
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')">
         <i class="ti ti-layout-dashboard"></i> Dashboard
@@ -223,9 +236,7 @@
       </div>
     </div>
 
-    <!-- CONTENT -->
     <div class="content">
-
       <!-- DASHBOARD -->
       <div id="view-dashboard">
         <h2>Dashboard</h2>
@@ -246,10 +257,7 @@
       <div id="view-notifications" style="display:none">
         <h2>Notificações enviadas</h2>
         <div id="notifList">
-          <div class="empty">
-            <i class="ti ti-bell-off"></i>
-            <p>Nenhuma notificação ainda.<br>Inicie o monitor para começar.</p>
-          </div>
+          <div class="empty"><i class="ti ti-bell-off"></i><p>Nenhuma notificação ainda.<br>Inicie o monitor para começar.</p></div>
         </div>
       </div>
 
@@ -261,6 +269,17 @@
           <div class="config-section">
             <label>Nome do canal para receber notificações</label>
             <input type="text" id="slackChannelInput" value="#notificacoes-email" placeholder="#canal" oninput="updateChannel()" />
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <h3 style="margin-bottom:14px;font-size:15px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text)">API Key da Anthropic</h3>
+          <div class="config-section">
+            <label>Chave usada para acessar Gmail e Slack</label>
+            <div class="api-key-row">
+              <input type="password" id="apiKeyDisplay" placeholder="sk-ant-api03-..." />
+              <button onclick="updateApiKey()"><i class="ti ti-device-floppy" style="font-size:14px;vertical-align:-2px"></i> Salvar</button>
+            </div>
+            <div class="api-saved" id="apiSaved">✓ API Key atualizada com sucesso</div>
           </div>
         </div>
         <div class="card">
@@ -279,13 +298,11 @@
           <div class="log-line log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>
         </div>
       </div>
-
-    </div><!-- /content -->
-  </div><!-- /main-wrap -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────────────────
 const TEAMS = [
   { id: "n3",              label: "Time N3",           color: "#185FA5", bg: "#E6F1FB", textColor: "#0C447C", icon: "ti-users" },
   { id: "data-protection", label: "Proteção de Dados", color: "#533AB7", bg: "#EEEDFE", textColor: "#3C3489", icon: "ti-shield-lock" },
@@ -293,15 +310,68 @@ const TEAMS = [
 ];
 
 const state = {
-  monitoring: false,
-  loading: false,
+  apiKey: "", monitoring: false, loading: false, polling: false,
   slackChannel: "#notificacoes-email",
   activeTeams: { n3: true, "data-protection": true, medical: true },
-  notifications: [],
-  logs: [],
-  interval: null,
-  polling: false,
+  notifications: [], logs: [], interval: null,
 };
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  const saved = localStorage.getItem("ems_apikey");
+  const savedChannel = localStorage.getItem("ems_channel");
+  if (saved) {
+    state.apiKey = saved;
+    state.slackChannel = savedChannel || "#notificacoes-email";
+    showApp();
+  }
+};
+
+function doLogin() {
+  const key = document.getElementById("apiKeyInput").value.trim();
+  const channel = document.getElementById("loginChannelInput").value.trim() || "#notificacoes-email";
+  const errEl = document.getElementById("loginError");
+  if (!key.startsWith("sk-ant-")) {
+    errEl.textContent = "A API Key deve começar com sk-ant-... Verifique e tente novamente.";
+    errEl.style.display = "block"; return;
+  }
+  errEl.style.display = "none";
+  state.apiKey = key;
+  state.slackChannel = channel;
+  localStorage.setItem("ems_apikey", key);
+  localStorage.setItem("ems_channel", channel);
+  showApp();
+}
+
+function showApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("appScreen").style.display = "flex";
+  document.getElementById("slackChannelInput").value = state.slackChannel;
+  document.getElementById("metricChannel").textContent = state.slackChannel;
+  document.getElementById("apiKeyDisplay").value = state.apiKey;
+  renderAll();
+}
+
+function doLogout() {
+  localStorage.removeItem("ems_apikey");
+  localStorage.removeItem("ems_channel");
+  clearInterval(state.interval);
+  state.monitoring = false;
+  document.getElementById("appScreen").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("apiKeyInput").value = "";
+}
+
+function updateApiKey() {
+  const val = document.getElementById("apiKeyDisplay").value.trim();
+  if (!val.startsWith("sk-ant-")) { alert("API Key inválida."); return; }
+  state.apiKey = val;
+  localStorage.setItem("ems_apikey", val);
+  const saved = document.getElementById("apiSaved");
+  saved.style.display = "block";
+  setTimeout(() => saved.style.display = "none", 2500);
+  addLog("API Key atualizada.", "success");
+}
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 function switchView(v) {
@@ -311,7 +381,7 @@ function switchView(v) {
   });
 }
 
-// ── Render helpers ────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function timeAgo(iso) {
   const d = Math.floor((Date.now() - new Date(iso)) / 1000);
   if (d < 60) return d + "s atrás";
@@ -319,79 +389,56 @@ function timeAgo(iso) {
   if (d < 86400) return Math.floor(d/3600) + "h atrás";
   return Math.floor(d/86400) + "d atrás";
 }
-
 function pillHtml(team) {
-  return `<span class="pill" style="background:${team.bg};color:${team.textColor};border:1px solid ${team.color}33">
-    <i class="ti ${team.icon}"></i>${team.label}</span>`;
+  return `<span class="pill" style="background:${team.bg};color:${team.textColor};border:1px solid ${team.color}33"><i class="ti ${team.icon}"></i>${team.label}</span>`;
+}
+function escHtml(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
+// ── Render ────────────────────────────────────────────────────────────────────
 function renderDashboard() {
-  const total = state.notifications.length;
-  document.getElementById("metricTotal").textContent = total;
+  document.getElementById("metricTotal").textContent = state.notifications.length;
   document.getElementById("metricChannel").textContent = state.slackChannel;
-  const active = Object.values(state.activeTeams).filter(Boolean).length;
-  document.getElementById("metricTeams").textContent = active;
-
-  const rows = document.getElementById("teamRows");
-  rows.innerHTML = TEAMS.map(t => {
+  document.getElementById("metricTeams").textContent = Object.values(state.activeTeams).filter(Boolean).length;
+  document.getElementById("teamRows").innerHTML = TEAMS.map(t => {
     const count = state.notifications.filter(n => n.teamId === t.id).length;
     return `<div class="team-row">
-      <div class="team-avatar" style="background:${t.bg}">
-        <i class="ti ${t.icon}" style="font-size:17px;color:${t.color}"></i>
-      </div>
-      <div>
-        <div class="team-name">${t.label}</div>
-        <div class="team-sub">${state.activeTeams[t.id] ? "Monitorado" : "Inativo"}</div>
-      </div>
-      <div class="team-count" style="color:${count > 0 ? t.color : 'var(--gray-200)'}">${count}</div>
+      <div class="team-avatar" style="background:${t.bg}"><i class="ti ${t.icon}" style="font-size:17px;color:${t.color}"></i></div>
+      <div><div style="font-weight:500;font-size:14px">${t.label}</div><div style="font-size:12px;color:var(--text-faint)">${state.activeTeams[t.id]?"Monitorado":"Inativo"}</div></div>
+      <div class="team-count" style="color:${count>0?t.color:"var(--gray-200)"}">${count}</div>
     </div>`;
   }).join("");
 }
 
 function renderNotifications() {
-  const badge = document.getElementById("notifBadge");
   const total = state.notifications.length;
-  badge.textContent = total;
-  badge.style.display = total > 0 ? "" : "none";
-
+  const badge = document.getElementById("notifBadge");
+  badge.textContent = total; badge.style.display = total > 0 ? "" : "none";
   const list = document.getElementById("notifList");
-  if (total === 0) {
-    list.innerHTML = `<div class="empty"><i class="ti ti-bell-off"></i><p>Nenhuma notificação ainda.<br>Inicie o monitor para começar.</p></div>`;
-    return;
-  }
+  if (total === 0) { list.innerHTML = `<div class="empty"><i class="ti ti-bell-off"></i><p>Nenhuma notificação ainda.<br>Inicie o monitor para começar.</p></div>`; return; }
   list.innerHTML = state.notifications.map(n => {
     const team = TEAMS.find(t => t.id === n.teamId);
-    return `<div class="notif-card" style="border-left-color:${team?.color || '#888'}">
-      <div class="notif-meta">
-        ${team ? pillHtml(team) : ""}
-        <span class="notif-time">${timeAgo(n.receivedAt)}</span>
-      </div>
+    return `<div class="notif-card" style="border-left-color:${team?.color||"#888"}">
+      <div class="notif-meta">${team?pillHtml(team):""}<span class="notif-time">${timeAgo(n.receivedAt)}</span></div>
       <div class="notif-subject">${escHtml(n.subject)}</div>
       <div class="notif-from">De: <strong>${escHtml(n.from)}</strong></div>
       <div class="notif-slack">
         <i class="ti ti-brand-slack" style="color:#1D9E75;font-size:13px"></i>
-        <span style="color:#0F6E56">Enviado para Slack · ${escHtml(n.slackChannel)}</span>
-        <span style="margin-left:auto">
-          ${n.slackStatus === "sent"
-            ? `<span class="pill pill-sent"><i class="ti ti-check"></i>entregue</span>`
-            : `<span class="pill pill-pending"><i class="ti ti-clock"></i>aguardando</span>`}
-        </span>
+        <span style="color:#0F6E56">Enviado · ${escHtml(n.slackChannel)}</span>
+        <span style="margin-left:auto"><span class="pill pill-sent"><i class="ti ti-check"></i>entregue</span></span>
       </div>
     </div>`;
   }).join("");
 }
 
 function renderConfig() {
-  document.getElementById("slackChannelInput").value = state.slackChannel;
-  const rows = document.getElementById("teamConfigRows");
-  rows.innerHTML = TEAMS.map(t => `
+  document.getElementById("teamConfigRows").innerHTML = TEAMS.map(t => `
     <div class="config-row">
-      <div class="team-avatar" style="background:${t.bg};width:32px;height:32px;flex-shrink:0">
-        <i class="ti ${t.icon}" style="font-size:15px;color:${t.color}"></i>
-      </div>
-      <div style="flex:1"><div class="team-name">${t.label}</div></div>
+      <div class="team-avatar" style="background:${t.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${t.icon}" style="font-size:15px;color:${t.color}"></i></div>
+      <div style="flex:1"><div style="font-weight:500;font-size:14px">${t.label}</div></div>
       <label class="toggle-switch">
-        <input type="checkbox" ${state.activeTeams[t.id] ? "checked" : ""} onchange="toggleTeam('${t.id}',this.checked)" />
+        <input type="checkbox" ${state.activeTeams[t.id]?"checked":""} onchange="toggleTeam('${t.id}',this.checked)" />
         <div class="toggle-track"></div>
       </label>
     </div>`).join("");
@@ -399,72 +446,42 @@ function renderConfig() {
 
 function renderLogs() {
   const term = document.getElementById("terminalOutput");
-  if (state.logs.length === 0) {
-    term.innerHTML = `<div class="log-line log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>`;
-    return;
-  }
-  term.innerHTML = state.logs.map(l => {
-    const ts = new Date(l.ts).toLocaleTimeString("pt-BR");
-    return `<div class="log-line log-${l.type}"><span class="log-ts">[${ts}]</span>${escHtml(l.msg)}</div>`;
-  }).join("");
+  if (state.logs.length === 0) { term.innerHTML = `<div class="log-line log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>`; return; }
+  term.innerHTML = state.logs.map(l => `<div class="log-line log-${l.type}"><span class="log-ts">[${new Date(l.ts).toLocaleTimeString("pt-BR")}]</span>${escHtml(l.msg)}</div>`).join("");
   term.scrollTop = 0;
 }
 
-function renderAll() {
-  renderDashboard();
-  renderNotifications();
-  renderConfig();
-  renderLogs();
-}
+function renderAll() { renderDashboard(); renderNotifications(); renderConfig(); renderLogs(); }
 
-function escHtml(s) {
-  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-// ── Status bar ────────────────────────────────────────────────────────────────
+// ── Status ────────────────────────────────────────────────────────────────────
 function updateStatusBar() {
   const dot = document.getElementById("statusDot");
   const lbl = document.getElementById("statusLabel");
   const btn = document.getElementById("toggleBtn");
   if (state.monitoring) {
-    dot.classList.add("active");
-    lbl.textContent = "Monitorando";
-    lbl.classList.add("active");
-    btn.classList.add("running");
-    btn.innerHTML = `<i class="ti ti-player-pause"></i> Pausar Monitor`;
+    dot.classList.add("active"); lbl.textContent = "Monitorando"; lbl.classList.add("active");
+    btn.classList.add("running"); btn.innerHTML = `<i class="ti ti-player-pause"></i> Pausar Monitor`;
   } else {
-    dot.classList.remove("active");
-    lbl.textContent = "Inativo";
-    lbl.classList.remove("active");
-    btn.classList.remove("running");
-    btn.innerHTML = `<i class="ti ti-player-play"></i> Iniciar Monitor`;
+    dot.classList.remove("active"); lbl.textContent = "Inativo"; lbl.classList.remove("active");
+    btn.classList.remove("running"); btn.innerHTML = `<i class="ti ti-player-play"></i> Iniciar Monitor`;
   }
 }
 
-// ── Config actions ────────────────────────────────────────────────────────────
+// ── Config ────────────────────────────────────────────────────────────────────
 function updateChannel() {
   state.slackChannel = document.getElementById("slackChannelInput").value;
+  localStorage.setItem("ems_channel", state.slackChannel);
   document.getElementById("metricChannel").textContent = state.slackChannel;
 }
-
-function toggleTeam(id, val) {
-  state.activeTeams[id] = val;
-  renderDashboard();
-}
-
-function clearLogs() {
-  state.logs = [];
-  renderLogs();
-}
-
-// ── Logging ───────────────────────────────────────────────────────────────────
-function addLog(msg, type = "info") {
+function toggleTeam(id, val) { state.activeTeams[id] = val; renderDashboard(); }
+function clearLogs() { state.logs = []; renderLogs(); }
+function addLog(msg, type="info") {
   state.logs.unshift({ msg, type, ts: new Date().toISOString() });
   if (state.logs.length > 100) state.logs.pop();
   renderLogs();
 }
 
-// ── Monitor toggle ────────────────────────────────────────────────────────────
+// ── Monitor ───────────────────────────────────────────────────────────────────
 function toggleMonitor() {
   state.monitoring = !state.monitoring;
   updateStatusBar();
@@ -478,101 +495,92 @@ function toggleMonitor() {
   }
 }
 
-// ── Check emails via Anthropic API + Gmail MCP ────────────────────────────────
+// ── API call ──────────────────────────────────────────────────────────────────
+async function callClaude(system, userMsg, mcpServers) {
+  const body = {
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1000,
+    messages: [{ role: "user", content: userMsg }],
+  };
+  if (system) body.system = system;
+  if (mcpServers) body.mcp_servers = mcpServers;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": state.apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-beta": "mcp-client-2025-04-04"
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 async function checkEmails() {
   if (state.loading || state.polling) return;
-  state.polling = true;
-  state.loading = true;
-
+  state.polling = true; state.loading = true;
   const btn = document.getElementById("checkBtn");
-  btn.disabled = true;
-  btn.innerHTML = `<i class="ti ti-loader-2 spin"></i> Verificando...`;
-
-  const resultEl = document.getElementById("checkResult");
-  resultEl.style.display = "none";
-
+  btn.disabled = true; btn.innerHTML = `<i class="ti ti-loader-2 spin"></i> Verificando...`;
+  document.getElementById("checkResult").style.display = "none";
   addLog("Verificando emails via Gmail...", "info");
 
   const activeTeamLabels = TEAMS.filter(t => state.activeTeams[t.id]).map(t => t.label);
-
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system: `Você é um assistente que monitora emails e classifica se pertencem a times específicos.
-Times monitorados: ${activeTeamLabels.join(", ")}.
-Acesse o Gmail via MCP, liste os últimos 10 emails não lidos e classifique.
-Retorne APENAS um JSON (sem markdown, sem backticks):
-{"emails":[{"from":"email@ex.com","fromName":"Nome","subject":"Assunto","teamId":"n3|data-protection|medical|none","receivedAt":"ISO","snippet":"prévia"}],"summary":"resumo"}`,
-        messages: [{ role: "user", content: "Verifique os emails e classifique os pertencentes aos times monitorados." }],
-        mcp_servers: [{ type: "url", url: "https://gmailmcp.googleapis.com/mcp/v1", name: "gmail" }]
-      })
-    });
+    const data = await callClaude(
+      `Você é um assistente que monitora emails. Times monitorados: ${activeTeamLabels.join(", ")}.
+Acesse o Gmail via MCP, liste os últimos 10 emails não lidos e classifique se pertencem a algum dos times.
+Retorne APENAS um JSON sem markdown:
+{"emails":[{"from":"email","fromName":"Nome","subject":"Assunto","teamId":"n3|data-protection|medical|none","receivedAt":"ISO","snippet":"prévia"}],"summary":"resumo"}`,
+      "Verifique os emails e classifique os pertencentes aos times monitorados.",
+      [{ type: "url", url: "https://gmailmcp.googleapis.com/mcp/v1", name: "gmail" }]
+    );
 
-    const data = await res.json();
-    const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-    const clean = text.replace(/```json|```/g, "").trim();
+    const text = (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
     let parsed;
-    try { parsed = JSON.parse(clean); }
-    catch {
-      addLog("Resposta inesperada do Gmail. Tente novamente.", "warn");
-      showResult("error", "Não foi possível interpretar a resposta. Tente novamente.");
-      return;
-    }
+    try { parsed = JSON.parse(text.replace(/```json|```/g,"").trim()); }
+    catch { throw new Error("Resposta inesperada do Gmail. Tente novamente."); }
 
-    const relevant = (parsed.emails || []).filter(e => e.teamId !== "none" && state.activeTeams[e.teamId]);
+    const relevant = (parsed.emails||[]).filter(e => e.teamId !== "none" && state.activeTeams[e.teamId]);
     addLog(`${relevant.length} email(s) relevante(s) encontrado(s).`, relevant.length > 0 ? "success" : "info");
-
     if (relevant.length > 0) await sendToSlack(relevant);
-
-    showResult("success", `✓ ${relevant.length} email(s) dos times monitorados. ${parsed.summary || ""}`);
+    showResult("success", `✓ ${relevant.length} email(s) dos times monitorados. ${parsed.summary||""}`);
     renderAll();
-
-  } catch (err) {
-    addLog("Erro ao verificar emails: " + err.message, "error");
+  } catch(err) {
+    addLog("Erro: " + err.message, "error");
     showResult("error", "Erro: " + err.message);
   } finally {
-    state.loading = false;
-    state.polling = false;
-    btn.disabled = false;
-    btn.innerHTML = `<i class="ti ti-refresh"></i> Verificar agora`;
+    state.loading = false; state.polling = false;
+    btn.disabled = false; btn.innerHTML = `<i class="ti ti-refresh"></i> Verificar agora`;
   }
 }
 
-// ── Send to Slack via Anthropic API + Slack MCP ───────────────────────────────
 async function sendToSlack(emails) {
-  addLog(`Enviando ${emails.length} notificação(ões) para Slack...`, "info");
+  addLog(`Enviando ${emails.length} notificação(ões) para o Slack...`, "info");
   for (const email of emails) {
     const team = TEAMS.find(t => t.id === email.teamId);
     if (!team) continue;
-    const msg = `📧 *Novo email do ${team.label}*\n*De:* ${email.fromName || email.from}\n*Assunto:* ${email.subject}${email.snippet ? `\n_${email.snippet}_` : ""}`;
+    const msg = `📧 *Novo email do ${team.label}*\n*De:* ${email.fromName||email.from}\n*Assunto:* ${email.subject}${email.snippet?`\n_${email.snippet}_`:""}`;
     try {
-      await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 200,
-          messages: [{ role: "user", content: `Envie esta mensagem para o canal Slack "${state.slackChannel}": ${msg}` }],
-          mcp_servers: [{ type: "url", url: "https://mcp.slack.com/mcp", name: "slack" }]
-        })
+      await callClaude(
+        null,
+        `Envie esta mensagem para o canal Slack "${state.slackChannel}": ${msg}`,
+        [{ type: "url", url: "https://mcp.slack.com/mcp", name: "slack" }]
+      );
+      state.notifications.unshift({
+        id: Date.now()+Math.random(), teamId: email.teamId,
+        from: email.fromName||email.from, subject: email.subject,
+        receivedAt: email.receivedAt||new Date().toISOString(),
+        slackChannel: state.slackChannel, slackStatus: "sent"
       });
-      const notif = {
-        id: Date.now() + Math.random(),
-        teamId: email.teamId,
-        from: email.fromName || email.from,
-        subject: email.subject,
-        receivedAt: email.receivedAt || new Date().toISOString(),
-        slackChannel: state.slackChannel,
-        slackStatus: "sent"
-      };
-      state.notifications.unshift(notif);
       if (state.notifications.length > 100) state.notifications.pop();
       addLog(`✓ Notificação enviada: "${email.subject.slice(0,45)}..."`, "success");
-    } catch (err) {
+    } catch(err) {
       addLog("Erro ao enviar para Slack: " + err.message, "error");
     }
   }
@@ -584,10 +592,6 @@ function showResult(type, msg) {
   el.textContent = msg;
   el.style.display = "";
 }
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-renderAll();
-updateStatusBar();
 </script>
 </body>
 </html>
