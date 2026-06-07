@@ -243,6 +243,7 @@ const BG_MODES=[
 
 // ── State ──────────────────────────────────────────────────────────────────
 const NOTES_KEY = "ems_notes_v2";
+const NOTIF_KEY = "ems_notifications_v1";
 let saveTimer = null;
 
 function loadNotesFromStorage() {
@@ -257,6 +258,41 @@ function loadNotesFromStorage() {
     {id:1,text:"Verificar tickets pendentes do Time N3 toda segunda-feira.",pinned:true,createdAt:new Date(Date.now()-7*86400000).toISOString(),updatedAt:null},
     {id:2,text:"Canal #notificacoes-email criado em 06/06/2026.",pinned:false,createdAt:new Date().toISOString(),updatedAt:null},
   ];
+}
+
+function loadNotificationsFromStorage() {
+  try {
+    const saved = localStorage.getItem(NOTIF_KEY);
+    if(saved) {
+      const parsed = JSON.parse(saved);
+      if(Array.isArray(parsed)) return parsed;
+    }
+  } catch(e) {}
+  // Pre-load with emails found on 07/06/2026
+  return [
+    {id:1,teamId:"all",from:"meetings-noreply@google.com",subject:"Acontecendo agora: adriana.lima@conexasaude.com.br está convidando você para uma videochamada",receivedAt:"2026-06-07T15:04:31Z",slackChannel:"#notificacoes-email"},
+    {id:2,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2342369: [N3] - | Agendamento",receivedAt:"2026-06-05T20:58:16Z",slackChannel:"#notificacoes-email"},
+    {id:3,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2342369 marcado como RESOLVIDO!",receivedAt:"2026-06-05T20:58:16Z",slackChannel:"#notificacoes-email"},
+    {id:4,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2347411 marcado como RESOLVIDO!",receivedAt:"2026-06-05T19:50:18Z",slackChannel:"#notificacoes-email"},
+    {id:5,teamId:"data-protection",from:"support@conexasaude3465.zendesk.com",subject:"Exclusão de dados – JÉSSIKA LORRANE ALBUQUERQUE MATOS DE AMORIM",receivedAt:"2026-06-05T19:42:01Z",slackChannel:"#notificacoes-email"},
+    {id:6,teamId:"medical",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2347665 marcado como RESOLVIDO!",receivedAt:"2026-06-05T19:13:53Z",slackChannel:"#notificacoes-email"},
+    {id:7,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2349751 marcado como RESOLVIDO!",receivedAt:"2026-06-05T18:13:35Z",slackChannel:"#notificacoes-email"},
+    {id:8,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2340842: [N3] - | Liberação de consulta",receivedAt:"2026-06-05T17:55:40Z",slackChannel:"#notificacoes-email"},
+    {id:9,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2340842 marcado como RESOLVIDO!",receivedAt:"2026-06-05T17:55:40Z",slackChannel:"#notificacoes-email"},
+    {id:10,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2330083: [N3] - | Incidente na plataforma",receivedAt:"2026-06-05T17:35:53Z",slackChannel:"#notificacoes-email"},
+    {id:11,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2330083 marcado como RESOLVIDO!",receivedAt:"2026-06-05T17:35:53Z",slackChannel:"#notificacoes-email"},
+    {id:12,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2332322 marcado como RESOLVIDO!",receivedAt:"2026-06-05T17:29:07Z",slackChannel:"#notificacoes-email"},
+    {id:13,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2332122: [N3] - | Incidente na plataforma",receivedAt:"2026-06-05T17:17:06Z",slackChannel:"#notificacoes-email"},
+    {id:14,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2332122 marcado como RESOLVIDO!",receivedAt:"2026-06-05T17:17:06Z",slackChannel:"#notificacoes-email"},
+    {id:15,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2328385 marcado como RESOLVIDO!",receivedAt:"2026-06-05T17:00:36Z",slackChannel:"#notificacoes-email"},
+    {id:16,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2328385: [N3] - | Agendamento",receivedAt:"2026-06-05T17:00:36Z",slackChannel:"#notificacoes-email"},
+    {id:17,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2381146 marcado como RESOLVIDO!",receivedAt:"2026-06-05T16:57:32Z",slackChannel:"#notificacoes-email"},
+    {id:18,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2381146: [N3] 3299 - Monumenta | Sessões",receivedAt:"2026-06-05T16:57:32Z",slackChannel:"#notificacoes-email"},
+  ];
+}
+
+function saveNotificationsToStorage() {
+  try { localStorage.setItem(NOTIF_KEY, JSON.stringify(S.notifications)); } catch(e) {}
 }
 
 function saveNotesToStorage() {
@@ -285,7 +321,7 @@ const S={
   slackChannel:"#notificacoes-email",
   activeTeams:{n3:true,"data-protection":true,medical:true,all:true},
   monitoring:false, loading:false, polling:false, interval:null,
-  notifications:[], logs:[],
+  notifications: loadNotificationsFromStorage(), logs:[],
   notes: loadNotesFromStorage(),
   editingNote:null,
 };
@@ -694,6 +730,7 @@ async function sendToSlack(emails){
       await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,messages:[{role:"user",content:`Envie para "${S.slackChannel}": ${msg}`}],mcp_servers:[{type:"url",url:"https://mcp.slack.com/mcp",name:"slack"}]})});
       S.notifications.unshift({id:Date.now()+Math.random(),teamId:email.teamId,from:email.fromName||email.from,subject:email.subject,receivedAt:email.receivedAt||new Date().toISOString(),slackChannel:S.slackChannel});
       if(S.notifications.length>100)S.notifications.pop();
+      saveNotificationsToStorage();
       addLog(`✓ Enviado: "${email.subject.slice(0,45)}..."`,"success");
     }catch(err){addLog("Erro Slack: "+err.message,"error");}
   }
