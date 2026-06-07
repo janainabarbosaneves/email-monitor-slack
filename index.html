@@ -113,8 +113,11 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
 
     <!-- NOTES -->
     <div id="view-notes" style="display:none">
-      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Anotações</h2>
-      <p style="margin:0 0 20px;font-size:13px" id="notesSubtitle">Salve, edite e pesquise anotações por texto ou data.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+        <h2 style="margin:0;font-size:22px;font-weight:700">Anotações</h2>
+        <div id="noteSaveStatus" style="display:none;align-items:center;gap:4px;font-size:12px;color:#0F6E56"></div>
+      </div>
+      <p style="margin:0 0 20px;font-size:13px" id="notesSubtitle">Suas anotações são salvas automaticamente no navegador.</p>
       <div id="newNoteCard" style="border-radius:14px;padding:16px;margin-bottom:20px">
         <div style="font-size:13px;font-weight:700;margin-bottom:8px" id="newNoteLabel">Nova anotação</div>
         <textarea id="newNoteText" placeholder="Digite sua anotação aqui..." onkeydown="if(event.ctrlKey&&event.key==='Enter')addNote()" style="width:100%;min-height:80px;padding:10px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box"></textarea>
@@ -239,16 +242,51 @@ const BG_MODES=[
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
+const NOTES_KEY = "ems_notes_v2";
+let saveTimer = null;
+
+function loadNotesFromStorage() {
+  try {
+    const saved = localStorage.getItem(NOTES_KEY);
+    if(saved) {
+      const parsed = JSON.parse(saved);
+      if(Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch(e) {}
+  return [
+    {id:1,text:"Verificar tickets pendentes do Time N3 toda segunda-feira.",pinned:true,createdAt:new Date(Date.now()-7*86400000).toISOString(),updatedAt:null},
+    {id:2,text:"Canal #notificacoes-email criado em 06/06/2026.",pinned:false,createdAt:new Date().toISOString(),updatedAt:null},
+  ];
+}
+
+function saveNotesToStorage() {
+  try { localStorage.setItem(NOTES_KEY, JSON.stringify(S.notes)); } catch(e) {}
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveNotesToStorage();
+    showSaveStatus();
+  }, 300);
+}
+
+function showSaveStatus() {
+  const el = document.getElementById("noteSaveStatus");
+  if(!el) return;
+  el.innerHTML = '<i class="ti ti-cloud-check" style="font-size:13px"></i> Salvo automaticamente';
+  el.style.color = "#0F6E56";
+  el.style.display = "flex";
+  setTimeout(() => { if(el) { el.style.display = "none"; } }, 2500);
+}
+
 const S={
   view:"dashboard", themeId:"blue", fontSizeId:"md", bgModeId:"light",
   slackChannel:"#notificacoes-email",
   activeTeams:{n3:true,"data-protection":true,medical:true,all:false},
   monitoring:false, loading:false, polling:false, interval:null,
   notifications:[], logs:[],
-  notes:[
-    {id:1,text:"Verificar tickets pendentes do Time N3 toda segunda-feira.",pinned:true,createdAt:new Date(Date.now()-7*86400000).toISOString(),updatedAt:null},
-    {id:2,text:"Canal #notificacoes-email criado em 06/06/2026.",pinned:false,createdAt:new Date().toISOString(),updatedAt:null},
-  ],
+  notes: loadNotesFromStorage(),
   editingNote:null,
 };
 
@@ -586,15 +624,15 @@ function addNote(){
   if(!txt)return;
   S.notes.push({id:Date.now(),text:txt,pinned:false,createdAt:new Date().toISOString(),updatedAt:null});
   document.getElementById("newNoteText").value="";
-  renderNotes(); renderDashboard();
+  renderNotes(); renderDashboard(); scheduleSave();
 }
-function deleteNote(id){S.notes=S.notes.filter(n=>n.id!==id);renderNotes();renderDashboard();}
-function togglePin(id){S.notes=S.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n);renderNotes();}
+function deleteNote(id){S.notes=S.notes.filter(n=>n.id!==id);renderNotes();renderDashboard();scheduleSave();}
+function togglePin(id){S.notes=S.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n);renderNotes();scheduleSave();}
 function saveNote(id){
-  const txt=document.getElementById("edit-"+id).value.trim();
+  const txt=document.getElementById("edit-"+id)?.value.trim();
   if(!txt)return;
   S.notes=S.notes.map(n=>n.id===id?{...n,text:txt,updatedAt:new Date().toISOString()}:n);
-  S.editingNote=null; renderNotes();
+  S.editingNote=null; renderNotes(); scheduleSave();
 }
 function clearNoteFilters(){
   document.getElementById("noteSearch").value="";
