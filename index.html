@@ -1,139 +1,100 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Email Monitor · Slack</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
-    --teal: #0F6E56; --teal-light: #E1F5EE; --teal-mid: #1D9E75;
-    --purple: #533AB7; --purple-light: #EEEDFE; --purple-dark: #3C3489;
-    --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #633806;
-    --gray-50: #F1EFE8; --gray-200: #B4B2A9; --gray-400: #888780;
-    --red: #A32D2D; --red-light: #FCEBEB;
-    --bg: #f5f4f0; --surface: #ffffff; --border: rgba(0,0,0,0.1);
-    --text: #1a1a1a; --text-muted: #555; --text-faint: #999;
-    --radius: 10px; --radius-lg: 14px;
-    --font: 'Sora', sans-serif; --mono: 'IBM Plex Mono', monospace;
-  }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; padding: 0 24px; height: 56px; position: sticky; top: 0; z-index: 10; }
-  .topbar-title { font-weight: 600; font-size: 15px; }
-  .topbar-pill { font-size: 11px; background: var(--gray-50); color: var(--gray-400); padding: 2px 10px; border-radius: 20px; border: 1px solid var(--border); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-400); transition: all 0.3s; flex-shrink: 0; }
-  .status-dot.active { background: var(--teal-mid); box-shadow: 0 0 0 3px var(--teal-light); }
-  .status-label { font-size: 12px; color: var(--text-faint); }
-  .status-label.active { color: var(--teal); }
-  .main-wrap { display: flex; flex: 1; }
-  .sidebar { width: 210px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 12px 0; flex-shrink: 0; min-height: calc(100vh - 56px); }
-  .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 20px; background: transparent; border: none; border-left: 3px solid transparent; cursor: pointer; color: var(--text-muted); font-size: 14px; font-family: var(--font); font-weight: 400; text-align: left; transition: all 0.15s; }
-  .nav-btn:hover { background: var(--bg); color: var(--text); }
-  .nav-btn.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); font-weight: 500; }
-  .notif-badge { margin-left: auto; background: var(--blue); color: #fff; font-size: 10px; padding: 1px 7px; border-radius: 20px; font-family: var(--mono); }
-  .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
-  .toggle-btn { width: 100%; padding: 9px 0; border-radius: var(--radius); background: var(--blue); color: #fff; border: none; cursor: pointer; font-size: 13px; font-family: var(--font); font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
-  .toggle-btn.running { background: var(--teal-light); color: var(--teal); }
-  .toggle-btn:hover { opacity: 0.88; }
-  .content { flex: 1; padding: 28px 32px; overflow: auto; max-width: 900px; }
-  h2 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 20px; }
-  h3 { font-size: 13px; font-weight: 500; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  .metric { background: var(--gray-50); border-radius: var(--radius); padding: 14px 16px; }
-  .metric label { font-size: 12px; color: var(--text-faint); display: block; margin-bottom: 4px; }
-  .metric .val { font-size: 24px; font-weight: 600; color: var(--text); font-family: var(--mono); }
-  .metric .val.sm { font-size: 13px; font-weight: 500; font-family: var(--font); }
-  .metric .val.blue { color: var(--blue); }
-  .metric .val.amber { color: var(--amber); }
-  .alert-banner { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-  .alert-amber { background: var(--amber-light); border: 1px solid #EF9F27; color: var(--amber-dark); }
-  .team-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; transition: opacity 0.2s; }
-  .team-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .team-count { font-size: 22px; font-weight: 600; font-family: var(--mono); margin-left: auto; }
-  .notif-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px; border-left-width: 3px; animation: slideIn 0.2s ease; }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-  .notif-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .notif-time { font-size: 12px; color: var(--text-faint); margin-left: auto; font-family: var(--mono); }
-  .notif-subject { font-weight: 500; font-size: 14px; margin-bottom: 2px; }
-  .notif-from { font-size: 13px; color: var(--text-muted); }
-  .notif-slack { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; }
-  .pill { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-  .pill-sent { background: var(--teal-light); color: var(--teal); }
-  .action-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; font-size: 14px; font-family: var(--font); font-weight: 500; transition: all 0.15s; }
-  .action-btn:hover { background: var(--blue-dark); }
-  .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .result-banner { margin-top: 16px; padding: 12px 16px; border-radius: var(--radius); font-size: 13px; }
-  .result-banner.success { background: var(--teal-light); border: 1px solid #5DCAA5; color: var(--teal); }
-  .result-banner.error { background: var(--red-light); border: 1px solid #F09595; color: var(--red); }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
-  .config-section label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; }
-  .config-section input[type=text] { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: var(--font); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
-  .config-section input[type=text]:focus { border-color: var(--blue); }
-  .all-emails-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius); margin-bottom: 14px; border: 1.5px solid var(--border); background: var(--gray-50); transition: all 0.2s; cursor: pointer; }
-  .all-emails-card.on { background: var(--amber-light); border-color: #EF9F27; }
-  .config-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .config-row:last-child { border-bottom: none; }
-  .toggle-switch { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .toggle-track { position: absolute; inset: 0; background: var(--gray-200); border-radius: 22px; cursor: pointer; transition: background 0.2s; }
-  .toggle-track::after { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
-  .toggle-switch input:checked + .toggle-track { background: var(--blue); }
-  .toggle-switch input:checked + .toggle-track::after { transform: translateX(16px); }
-  .toggle-switch.amber input:checked + .toggle-track { background: var(--amber); }
-  .section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin: 14px 0 10px; }
-  .terminal { background: #0f0f1a; border-radius: var(--radius-lg); padding: 16px; font-family: var(--mono); font-size: 12px; max-height: 460px; overflow-y: auto; border: 1px solid #222; }
-  .log-line { margin-bottom: 5px; line-height: 1.5; }
-  .log-ts { color: #444; margin-right: 8px; }
-  .log-info { color: #B4B2A9; } .log-success { color: #5DCAA5; } .log-warn { color: #EF9F27; } .log-error { color: #F09595; }
-  .empty { text-align: center; padding: 60px 0; color: var(--text-faint); }
-  .empty .ti { font-size: 44px; display: block; margin-bottom: 12px; }
-  .empty p { font-size: 14px; line-height: 1.7; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spin { animation: spin 0.8s linear infinite; display: inline-block; }
-  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,color 0.3s;}
+.topbar{display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;position:sticky;top:0;z-index:10;transition:background 0.3s,border-color 0.3s;}
+.main-wrap{display:flex;min-height:calc(100vh - 56px);}
+.sidebar{width:210px;display:flex;flex-direction:column;padding:12px 0;flex-shrink:0;transition:background 0.3s;}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 20px;background:transparent;border:none;border-left:3px solid transparent;cursor:pointer;font-size:14px;font-family:'Sora',sans-serif;font-weight:400;text-align:left;transition:all 0.15s;}
+.sidebar-bottom{margin-top:auto;padding:16px 20px;}
+.content{flex:1;padding:28px 32px;overflow:auto;max-width:960px;}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+.metric{border-radius:10px;padding:14px 16px;}
+.team-row{border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:opacity 0.2s;}
+.team-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notif-card{border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left-width:3px;animation:slideIn 0.2s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+.note-card{border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left-width:3px;}
+.pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.pill-sent{background:#E1F5EE;color:#085041;}
+.action-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Sora',sans-serif;font-weight:700;transition:opacity 0.15s;}
+.action-btn:hover{opacity:0.85;}
+.action-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.result-banner{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13px;}
+.result-success{background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C;}
+.result-error{background:#FCEBEB;border:1px solid #F09595;color:#501313;}
+.toggle-track{position:absolute;inset:0;border-radius:22px;cursor:pointer;transition:background 0.2s;}
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s;}
+.toggle-on::after{left:19px!important;}
+.terminal{background:#0f0f1a;border-radius:14px;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;max-height:460px;overflow-y:auto;border:1px solid #222;}
+.log-info{color:#B4B2A9;} .log-success{color:#5DCAA5;} .log-warn{color:#EF9F27;} .log-error{color:#F09595;}
+.log-ts{color:#444;margin-right:8px;}
+.empty{text-align:center;padding:60px 0;}
+.empty .ti{font-size:44px;display:block;margin-bottom:12px;}
+.empty p{font-size:14px;line-height:1.7;}
+.search-bar{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 14px;margin-bottom:20px;}
+.search-bar input{flex:1;border:none;background:transparent;font-size:14px;font-family:'Sora',sans-serif;outline:none;}
+.bg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.bg-btn{padding:12px 8px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.15s;}
+.bg-swatches{display:flex;gap:3px;margin-top:2px;}
+.bg-swatch{width:10px;height:10px;border-radius:3px;}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin{animation:spin 0.8s linear infinite;display:inline-block;}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{border-radius:3px;}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <i class="ti ti-brand-slack" style="font-size:22px;color:var(--blue)"></i>
-  <span class="topbar-title">Email Monitor</span>
-  <span class="topbar-pill">para Slack</span>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-    <div class="status-dot" id="statusDot"></div>
-    <span class="status-label" id="statusLabel">Inativo</span>
+<div id="topbar" class="topbar">
+  <i class="ti ti-brand-slack" id="topbarIcon" style="font-size:22px"></i>
+  <span id="topbarTitle" style="font-weight:700;font-size:16px">Email Monitor</span>
+  <span id="topbarPill" style="font-size:11px;padding:2px 10px;border-radius:20px">para Slack</span>
+  <div id="clockBox" style="margin-left:16px;display:flex;align-items:center;gap:16px"></div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <button id="bgCycleBtn" onclick="cycleBgMode()" style="border-radius:8px;padding:4px 10px;cursor:pointer;font-size:15px;font-family:'Sora',sans-serif;font-weight:500;display:flex;align-items:center;gap:5px;border:1px solid transparent"></button>
+    <span id="statusDot" style="width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;background:#888;transition:all 0.3s"></span>
+    <span id="statusLabel" style="font-size:12px">Inativo</span>
   </div>
 </div>
 
 <div class="main-wrap">
-  <div class="sidebar">
+  <div id="sidebar" class="sidebar">
     <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
-    <button class="nav-btn" data-view="notifications" onclick="switchView('notifications')"><i class="ti ti-bell"></i> Notificações<span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
+    <button class="nav-btn" data-view="notifications" onclick="switchView('notifications')"><i class="ti ti-bell"></i> Notificações <span id="notifBadge" style="display:none;margin-left:auto;background:#185FA5;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
+    <button class="nav-btn" data-view="notes" onclick="switchView('notes')"><i class="ti ti-notes"></i> Anotações <span id="notesBadge" style="display:none;margin-left:auto;background:#BA7517;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
     <button class="nav-btn" data-view="config" onclick="switchView('config')"><i class="ti ti-settings"></i> Configurações</button>
     <button class="nav-btn" data-view="logs" onclick="switchView('logs')"><i class="ti ti-terminal-2"></i> Logs</button>
     <div class="sidebar-bottom">
-      <button class="toggle-btn" id="toggleBtn" onclick="toggleMonitor()"><i class="ti ti-player-play"></i> Iniciar Monitor</button>
+      <button id="toggleBtn" onclick="toggleMonitor()" style="width:100%;padding:9px 0;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s">
+        <i class="ti ti-player-play"></i> Iniciar Monitor
+      </button>
     </div>
   </div>
 
   <div class="content">
     <!-- DASHBOARD -->
     <div id="view-dashboard">
-      <h2>Dashboard</h2>
+      <h2 id="dashTitle" style="margin:0 0 4px;font-size:22px;font-weight:700"></h2>
+      <p id="dashDate" style="margin:0 0 20px;font-size:13px"></p>
       <div class="metric-grid">
-        <div class="metric"><label>Total notificações</label><div class="val" id="metricTotal">0</div></div>
-        <div class="metric"><label>Canal Slack</label><div class="val sm blue" id="metricChannel">#notificacoes-email</div></div>
-        <div class="metric"><label>Modo</label><div class="val sm blue" id="metricMode">Times específicos</div></div>
+        <div class="metric" id="m1"><div style="font-size:12px;margin-bottom:4px" id="m1l">Total notificações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m1v">0</div></div>
+        <div class="metric" id="m2"><div style="font-size:12px;margin-bottom:4px">Canal Slack</div><div style="font-size:13px;font-weight:700" id="m2v">#notificacoes-email</div></div>
+        <div class="metric" id="m3"><div style="font-size:12px;margin-bottom:4px">Modo</div><div style="font-size:13px;font-weight:700" id="m3v">🎯 Times</div></div>
+        <div class="metric" id="m4"><div style="font-size:12px;margin-bottom:4px">Anotações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m4v">0</div></div>
       </div>
-      <div id="allEmailsAlert" style="display:none" class="alert-banner alert-amber">
-        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
-        Modo <strong>"Todos os Emails"</strong> ativo — notificação de todos os emails recebidos.
+      <div id="allEmailsAlert" style="display:none;margin-bottom:16px;padding:10px 14px;border-radius:10px;background:#FAEEDA;border:1px solid #EF9F27;color:#633806;font-size:13px;align-items:center;gap:8px">
+        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i> Modo <strong>"Todos os Emails"</strong> ativo.
       </div>
-      <h3>Notificações por categoria</h3>
+      <div class="section-label" id="dashCatLabel">Por categoria</div>
       <div id="teamRows"></div>
       <button class="action-btn" id="checkBtn" onclick="checkEmails()"><i class="ti ti-refresh"></i> Verificar agora</button>
       <div id="checkResult" style="display:none"></div>
@@ -141,41 +102,98 @@
 
     <!-- NOTIFICATIONS -->
     <div id="view-notifications" style="display:none">
-      <h2>Notificações enviadas</h2>
-      <div id="notifList"><div class="empty"><i class="ti ti-bell-off"></i><p>Nenhuma notificação ainda.<br>Inicie o monitor para começar.</p></div></div>
+      <h2 style="margin:0 0 16px;font-size:22px;font-weight:700">Notificações enviadas</h2>
+      <div class="search-bar" id="notifSearchBar">
+        <i class="ti ti-search" style="font-size:16px;flex-shrink:0"></i>
+        <input type="text" id="notifSearch" oninput="renderNotifications()" placeholder="Pesquisar por assunto ou remetente..."/>
+        <button id="notifSearchClear" onclick="document.getElementById('notifSearch').value='';renderNotifications()" style="background:none;border:none;cursor:pointer;font-size:14px;display:none">✕</button>
+      </div>
+      <div id="notifList"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="view-notes" style="display:none">
+      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Anotações</h2>
+      <p style="margin:0 0 20px;font-size:13px" id="notesSubtitle">Salve, edite e pesquise anotações por texto ou data.</p>
+      <div id="newNoteCard" style="border-radius:14px;padding:16px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px" id="newNoteLabel">Nova anotação</div>
+        <textarea id="newNoteText" placeholder="Digite sua anotação aqui..." onkeydown="if(event.ctrlKey&&event.key==='Enter')addNote()" style="width:100%;min-height:80px;padding:10px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span style="font-size:11px" id="noteSaveHint"><i class="ti ti-keyboard" style="font-size:11px;margin-right:4px"></i>Ctrl+Enter para salvar</span>
+          <button onclick="addNote()" id="addNoteBtn" style="padding:7px 18px;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:6px">
+            <i class="ti ti-plus" style="font-size:13px"></i> Salvar anotação
+          </button>
+        </div>
+      </div>
+      <!-- Filters -->
+      <div id="noteFilterCard" style="border-radius:14px;padding:16px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px" id="noteFilterLabel">
+          <i class="ti ti-filter" style="font-size:14px"></i> Pesquisar anotações
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div id="noteSearchWrap" style="flex:2;min-width:180px;display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 12px">
+            <i class="ti ti-search" style="font-size:15px;flex-shrink:0"></i>
+            <input type="text" id="noteSearch" oninput="renderNotes()" placeholder="Pesquisar por texto..." style="flex:1;border:none;background:transparent;font-size:14px;font-family:'Sora',sans-serif;outline:none"/>
+            <button onclick="document.getElementById('noteSearch').value='';renderNotes()" style="background:none;border:none;cursor:pointer;font-size:13px">✕</button>
+          </div>
+          <div style="flex:1;min-width:140px">
+            <div style="font-size:11px;margin-bottom:4px;display:flex;align-items:center;gap:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div>
+            <input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
+          </div>
+          <div style="flex:1;min-width:140px">
+            <div style="font-size:11px;margin-bottom:4px;display:flex;align-items:center;gap:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div>
+            <input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button onclick="clearNoteFilters()" id="clearFilterBtn" style="padding:9px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px">
+              <i class="ti ti-x" style="font-size:12px"></i> Limpar
+            </button>
+          </div>
+        </div>
+        <div id="noteFilterResult" style="margin-top:10px;font-size:12px;display:none"></div>
+      </div>
+      <div id="noteList"></div>
     </div>
 
     <!-- CONFIG -->
     <div id="view-config" style="display:none">
-      <h2>Configurações</h2>
-      <div class="card" style="margin-bottom:16px">
-        <h3 style="margin-bottom:14px;font-size:15px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text)">Canal Slack</h3>
-        <div class="config-section">
-          <label>Nome do canal para receber notificações</label>
-          <input type="text" id="slackChannelInput" value="#notificacoes-email" placeholder="#canal" oninput="updateChannel()" />
+      <h2 style="margin:0 0 20px;font-size:22px;font-weight:700">Configurações</h2>
+      <div id="configAppearance" style="border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:16px">Aparência</div>
+        <div style="margin-bottom:16px">
+          <div class="section-label" style="margin-top:0" id="themeColorLabel">Cor do tema</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="themeSwatches"></div>
+          <div style="font-size:12px;margin-top:6px" id="themeCurrentLabel"></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div class="section-label" id="fontSizeLabel">Tamanho da fonte</div>
+          <div style="display:flex;gap:8px" id="fontSizeBtns"></div>
+        </div>
+        <div style="margin-bottom:4px">
+          <div class="section-label" id="bgModeLabel">Plano de fundo</div>
+          <div class="bg-grid" id="bgModeGrid"></div>
+          <div style="font-size:12px;margin-top:8px" id="bgCurrentLabel"></div>
         </div>
       </div>
-      <div class="card">
-        <h3 style="margin-bottom:4px;font-size:15px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text)">Emails monitorados</h3>
-        <p style="font-size:13px;color:var(--text-faint);margin-bottom:16px">Ative "Todos os Emails" para receber notificação de qualquer email recebido.</p>
-
-        <!-- Todos os Emails -->
-        <div class="all-emails-card" id="allEmailsCard" onclick="toggleAllEmails()">
-          <div class="team-avatar" style="background:var(--amber-light);width:40px;height:40px">
-            <i class="ti ti-mail" style="font-size:20px;color:var(--amber)"></i>
-          </div>
+      <div id="configSlack" style="border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px">Canal Slack</div>
+        <div style="font-size:13px;margin-bottom:6px" id="slackChannelDesc">Nome do canal para receber notificações</div>
+        <input type="text" id="slackChannelInput" value="#notificacoes-email" oninput="updateChannel()" placeholder="#canal" style="width:100%;padding:9px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
+      </div>
+      <div id="configTeams" style="border-radius:14px;padding:20px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px">Emails monitorados</div>
+        <div style="font-size:13px;margin-bottom:16px" id="teamsDesc">Ative "Todos os Emails" para notificação de qualquer email.</div>
+        <div id="allEmailsToggleCard" onclick="toggleAllEmails()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;margin-bottom:14px;cursor:pointer;transition:all 0.2s">
+          <div class="team-avatar" style="background:#FAEEDA;width:40px;height:40px"><i class="ti ti-mail" style="font-size:20px;color:#BA7517"></i></div>
           <div style="flex:1">
-            <div style="font-weight:500;font-size:14px">Todos os Emails</div>
-            <div style="font-size:12px;color:var(--text-faint)">Receber notificação de todos os emails da caixa de entrada</div>
+            <div style="font-weight:700;font-size:14px">Todos os Emails</div>
+            <div style="font-size:12px" id="allEmailsSubtitle">Receber notificação de todos os emails</div>
           </div>
-          <label class="toggle-switch amber" onclick="event.stopPropagation()">
-            <input type="checkbox" id="allEmailsToggle" onchange="toggleAllEmails()" />
-            <div class="toggle-track"></div>
-          </label>
+          <div id="allEmailsSwitch" style="width:38px;height:22px;border-radius:22px;background:#ccc;position:relative;transition:background 0.2s;flex-shrink:0">
+            <div id="allEmailsThumb" class="toggle-track" style="background:#ccc"><div class="toggle-track::after"></div></div>
+          </div>
         </div>
-
-        <!-- Divisor -->
-        <div class="section-label">Ou por time específico</div>
+        <div class="section-label" id="teamsSpecificLabel">Ou por time específico</div>
         <div id="teamConfigRows"></div>
       </div>
     </div>
@@ -183,193 +201,487 @@
     <!-- LOGS -->
     <div id="view-logs" style="display:none">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <h2 style="margin:0">Logs do sistema</h2>
-        <button onclick="clearLogs()" style="margin-left:auto;font-size:12px;padding:5px 14px;background:transparent;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--text-muted);font-family:var(--font)">Limpar</button>
+        <h2 style="margin:0;font-size:22px;font-weight:700">Logs do sistema</h2>
+        <button onclick="clearLogs()" id="clearLogsBtn" style="margin-left:auto;font-size:12px;padding:5px 14px;background:transparent;border-radius:8px;cursor:pointer;font-family:'Sora',sans-serif">Limpar</button>
       </div>
-      <div class="terminal" id="terminalOutput"><div class="log-line log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div></div>
+      <div class="terminal" id="terminalOutput"><div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div></div>
     </div>
   </div>
 </div>
 
 <script>
-const TEAMS = [
-  { id:"n3",              label:"Time N3",           color:"#185FA5", bg:"#E6F1FB", textColor:"#0C447C", icon:"ti-users" },
-  { id:"data-protection", label:"Proteção de Dados", color:"#533AB7", bg:"#EEEDFE", textColor:"#3C3489", icon:"ti-shield-lock" },
-  { id:"medical",         label:"Gestão Médica",     color:"#0F6E56", bg:"#E1F5EE", textColor:"#085041", icon:"ti-heart-rate-monitor" },
-  { id:"all",             label:"Todos os Emails",   color:"#BA7517", bg:"#FAEEDA", textColor:"#633806", icon:"ti-mail" },
+const TEAMS=[
+  {id:"n3",label:"Time N3",color:"#185FA5",bg:"#E6F1FB",textColor:"#0C447C",icon:"ti-users"},
+  {id:"data-protection",label:"Proteção de Dados",color:"#533AB7",bg:"#EEEDFE",textColor:"#3C3489",icon:"ti-shield-lock"},
+  {id:"medical",label:"Gestão Médica",color:"#0F6E56",bg:"#E1F5EE",textColor:"#085041",icon:"ti-heart-rate-monitor"},
+  {id:"all",label:"Todos os Emails",color:"#BA7517",bg:"#FAEEDA",textColor:"#633806",icon:"ti-mail"},
+];
+const THEMES=[
+  {id:"blue",label:"Azul",primary:"#185FA5",light:"#E6F1FB"},
+  {id:"teal",label:"Verde",primary:"#0F6E56",light:"#E1F5EE"},
+  {id:"purple",label:"Roxo",primary:"#533AB7",light:"#EEEDFE"},
+  {id:"amber",label:"Âmbar",primary:"#BA7517",light:"#FAEEDA"},
+  {id:"rose",label:"Rosa",primary:"#9D3060",light:"#FBEAF0"},
+  {id:"slate",label:"Grafite",primary:"#3D3D3D",light:"#F1EFE8"},
+];
+const FONT_SIZES=[
+  {id:"sm",label:"Pequena",base:13},
+  {id:"md",label:"Média",base:15},
+  {id:"lg",label:"Grande",base:17},
+];
+const BG_MODES=[
+  {id:"day",label:"Dia",icon:"ti-sun-high",bg:"#ffffff",surface:"#ffffff",surfaceAlt:"#f5f4f0",border:"rgba(0,0,0,0.1)",text:"#1a1a1a",textMuted:"#555",textFaint:"#999"},
+  {id:"light",label:"Claro",icon:"ti-sun",bg:"#f5f4f0",surface:"#ffffff",surfaceAlt:"#eeece6",border:"rgba(0,0,0,0.1)",text:"#1a1a1a",textMuted:"#555",textFaint:"#999"},
+  {id:"neutral",label:"Neutro",icon:"ti-circle-half",bg:"#e8e6e0",surface:"#f4f2ec",surfaceAlt:"#dddbd4",border:"rgba(0,0,0,0.12)",text:"#222",textMuted:"#555",textFaint:"#888"},
+  {id:"dusk",label:"Entardecer",icon:"ti-sunset-2",bg:"#2a2438",surface:"#342d4a",surfaceAlt:"#3e3558",border:"rgba(255,255,255,0.1)",text:"#e8e0f8",textMuted:"#b0a8cc",textFaint:"#7a6f96"},
+  {id:"night",label:"Noite",icon:"ti-moon",bg:"#111118",surface:"#1c1c26",surfaceAlt:"#25252f",border:"rgba(255,255,255,0.1)",text:"#e8e8f0",textMuted:"#aaa",textFaint:"#555"},
+  {id:"midnight",label:"Meia-noite",icon:"ti-moon-stars",bg:"#000008",surface:"#0d0d14",surfaceAlt:"#16161f",border:"rgba(255,255,255,0.08)",text:"#d0d0e8",textMuted:"#888",textFaint:"#444"},
 ];
 
-const state = {
-  monitoring: false, loading: false, polling: false,
-  slackChannel: localStorage.getItem("ems_channel") || "#notificacoes-email",
-  activeTeams: { n3: true, "data-protection": true, medical: true, all: false },
-  notifications: [], logs: [], interval: null,
+// ── State ──────────────────────────────────────────────────────────────────
+const S={
+  view:"dashboard", themeId:"blue", fontSizeId:"md", bgModeId:"light",
+  slackChannel:"#notificacoes-email",
+  activeTeams:{n3:true,"data-protection":true,medical:true,all:false},
+  monitoring:false, loading:false, polling:false, interval:null,
+  notifications:[], logs:[],
+  notes:[
+    {id:1,text:"Verificar tickets pendentes do Time N3 toda segunda-feira.",pinned:true,createdAt:new Date(Date.now()-7*86400000).toISOString(),updatedAt:null},
+    {id:2,text:"Canal #notificacoes-email criado em 06/06/2026.",pinned:false,createdAt:new Date().toISOString(),updatedAt:null},
+  ],
+  editingNote:null,
 };
 
-function switchView(v) {
-  ["dashboard","notifications","config","logs"].forEach(id => {
-    document.getElementById("view-"+id).style.display = id===v?"":"none";
-    document.querySelector(`[data-view="${id}"]`).classList.toggle("active", id===v);
+function theme(){return THEMES.find(t=>t.id===S.themeId)||THEMES[0];}
+function fsz(){return FONT_SIZES.find(f=>f.id===S.fontSizeId)||FONT_SIZES[1];}
+function bgm(){return BG_MODES.find(b=>b.id===S.bgModeId)||BG_MODES[1];}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function fmtDate(iso){return new Date(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});}
+function fmtTime(iso){return new Date(iso).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});}
+function fmtFull(iso){return fmtDate(iso)+" às "+fmtTime(iso);}
+function isoToInput(iso){return new Date(iso).toISOString().slice(0,10);}
+function timeAgo(iso){const d=Math.floor((Date.now()-new Date(iso))/1000);if(d<60)return d+"s atrás";if(d<3600)return Math.floor(d/60)+"min atrás";if(d<86400)return Math.floor(d/3600)+"h atrás";return Math.floor(d/86400)+"d atrás";}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function pillHtml(t){return`<span class="pill" style="background:${t.bg};color:${t.textColor};border:1px solid ${t.color}33"><i class="ti ${t.icon}"></i> ${t.label}</span>`;}
+
+// ── Apply theme ────────────────────────────────────────────────────────────
+function applyTheme(){
+  const b=bgm(),t=theme(),f=fsz();
+  document.body.style.background=b.bg;
+  document.body.style.color=b.text;
+  document.body.style.fontSize=f.base+"px";
+  // topbar
+  const tb=document.getElementById("topbar");
+  tb.style.background=b.surface; tb.style.borderBottom="1px solid "+b.border;
+  document.getElementById("topbarIcon").style.color=t.primary;
+  document.getElementById("topbarTitle").style.color=b.text;
+  document.getElementById("topbarPill").style.background=b.surfaceAlt;
+  document.getElementById("topbarPill").style.color=b.textFaint;
+  document.getElementById("topbarPill").style.border="1px solid "+b.border;
+  // bg cycle btn
+  const bcb=document.getElementById("bgCycleBtn");
+  bcb.style.background=b.surfaceAlt; bcb.style.border="1px solid "+b.border;
+  bcb.style.color=b.text;
+  bcb.innerHTML=`<i class="ti ${b.icon}"></i><span style="font-size:11px">${b.label}</span>`;
+  // sidebar
+  const sb=document.getElementById("sidebar");
+  sb.style.background=b.surface; sb.style.borderRight="1px solid "+b.border;
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    const active=btn.classList.contains("active");
+    btn.style.background=active?t.light:"transparent";
+    btn.style.borderLeftColor=active?t.primary:"transparent";
+    btn.style.color=active?t.primary:b.textMuted;
   });
+  // toggle btn
+  const tb2=document.getElementById("toggleBtn");
+  if(S.monitoring){tb2.style.background=b.id==="day"||b.id==="light"||b.id==="neutral"?"#E1F5EE":t.light;tb2.style.color="#0F6E56";}
+  else{tb2.style.background=t.primary;tb2.style.color="#fff";}
+  // metrics
+  ["m1","m2","m3","m4"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=b.surfaceAlt;}});
+  document.querySelectorAll(".metric label,.metric div[id]").forEach(el=>el.style.color=b.textFaint);
+  document.getElementById("m2v").style.color=t.primary;
+  document.getElementById("m3v").style.color=S.activeTeams.all?"#BA7517":t.primary;
+  // cards
+  document.querySelectorAll(".notif-card,.note-card,[id='newNoteCard'],[id='noteFilterCard'],[id='configAppearance'],[id='configSlack'],[id='configTeams']").forEach(el=>{
+    el.style.background=b.surface; el.style.border="1px solid "+b.border;
+  });
+  // inputs
+  document.querySelectorAll("input[type=text],input[type=date],textarea").forEach(el=>{
+    el.style.background=b.surfaceAlt; el.style.color=b.text; el.style.border="1px solid "+b.border;
+  });
+  // search bars
+  document.querySelectorAll(".search-bar,[id='noteSearchWrap']").forEach(el=>{
+    el.style.background=b.surface; el.style.border="1px solid "+b.border;
+  });
+  document.querySelectorAll(".search-bar input").forEach(el=>el.style.color=b.text);
+  // buttons
+  document.querySelectorAll("#clearLogsBtn,#clearFilterBtn").forEach(el=>{
+    el.style.border="1px solid "+b.border; el.style.color=b.textMuted;
+  });
+  document.getElementById("addNoteBtn").style.background=t.primary;
+  document.querySelectorAll(".action-btn").forEach(el=>el.style.background=t.primary);
+  // text colors
+  document.querySelectorAll("[id$='Label'],[id$='Subtitle'],[id$='Hint'],[id$='Desc'],[id='notesSubtitle'],[id='dashDate']").forEach(el=>el.style.color=b.textFaint);
+  document.querySelectorAll("h2").forEach(el=>el.style.color=b.text);
+  document.querySelectorAll(".section-label").forEach(el=>el.style.color=b.textFaint);
+  // config appearance card content
+  renderConfigAppearance();
 }
 
-function timeAgo(iso) {
-  const d = Math.floor((Date.now()-new Date(iso))/1000);
-  if(d<60) return d+"s atrás"; if(d<3600) return Math.floor(d/60)+"min atrás";
-  if(d<86400) return Math.floor(d/3600)+"h atrás"; return Math.floor(d/86400)+"d atrás";
+// ── Clock ──────────────────────────────────────────────────────────────────
+function updateClock(){
+  const b=bgm(),f=fsz(),now=new Date();
+  document.getElementById("clockBox").innerHTML=`
+    <div style="display:flex;align-items:center;gap:6px">
+      <i class="ti ti-calendar" style="font-size:14px;color:${b.textFaint}"></i>
+      <span style="font-size:${f.base-1}px;color:${b.text};font-weight:500">${now.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <i class="ti ti-clock" style="font-size:14px;color:${b.textFaint}"></i>
+      <span style="font-size:${f.base-1}px;color:${b.text};font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:1px">${now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span>
+    </div>`;
 }
-function pillHtml(t) {
-  return `<span class="pill" style="background:${t.bg};color:${t.textColor};border:1px solid ${t.color}33"><i class="ti ${t.icon}"></i>${t.label}</span>`;
+setInterval(updateClock,1000);
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function switchView(v){
+  ["dashboard","notifications","notes","config","logs"].forEach(id=>{
+    document.getElementById("view-"+id).style.display=id===v?"":"none";
+    const btn=document.querySelector(`[data-view="${id}"]`);
+    btn.classList.toggle("active",id===v);
+  });
+  S.view=v; applyTheme();
+  if(v==="notes") renderNotes();
+  if(v==="notifications") renderNotifications();
+  if(v==="dashboard") renderDashboard();
 }
-function escHtml(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-function renderDashboard() {
-  const monitorAll = state.activeTeams.all;
-  document.getElementById("metricTotal").textContent = state.notifications.length;
-  document.getElementById("metricChannel").textContent = state.slackChannel;
-  document.getElementById("metricMode").textContent = monitorAll ? "📬 Todos os emails" : "🎯 Times específicos";
-  document.getElementById("metricMode").className = "val sm " + (monitorAll ? "amber" : "blue");
-  document.getElementById("allEmailsAlert").style.display = monitorAll ? "flex" : "none";
+// ── Bg mode ────────────────────────────────────────────────────────────────
+function cycleBgMode(){
+  const idx=BG_MODES.findIndex(b=>b.id===S.bgModeId);
+  S.bgModeId=BG_MODES[(idx+1)%BG_MODES.length].id;
+  applyTheme(); updateClock(); renderAll();
+}
 
-  document.getElementById("teamRows").innerHTML = TEAMS.map(t => {
-    const count = state.notifications.filter(n=>n.teamId===t.id).length;
-    const dimmed = (t.id !== "all" && monitorAll) || (t.id === "all" && !monitorAll);
-    return `<div class="team-row" style="opacity:${dimmed?0.4:1}">
-      <div class="team-avatar" style="background:${t.bg}"><i class="ti ${t.icon}" style="font-size:17px;color:${t.color}"></i></div>
-      <div><div style="font-weight:500;font-size:14px">${t.label}</div>
-      <div style="font-size:12px;color:var(--text-faint)">${state.activeTeams[t.id]?"Monitorado":"Inativo"}</div></div>
-      <div class="team-count" style="color:${count>0?t.color:"var(--gray-200)"}">${count}</div>
+// ── Status bar ─────────────────────────────────────────────────────────────
+function updateStatus(){
+  const b=bgm(),t=theme();
+  const dot=document.getElementById("statusDot"),lbl=document.getElementById("statusLabel"),btn=document.getElementById("toggleBtn");
+  if(S.monitoring){
+    dot.style.background="#1D9E75"; dot.style.boxShadow="0 0 0 3px #E1F5EE";
+    lbl.textContent="Monitorando"; lbl.style.color="#0F6E56";
+    btn.innerHTML=`<i class="ti ti-player-pause"></i> Pausar Monitor`;
+    btn.style.background="#E1F5EE"; btn.style.color="#0F6E56";
+  } else {
+    dot.style.background="#888"; dot.style.boxShadow="none";
+    lbl.textContent="Inativo"; lbl.style.color=b.textFaint;
+    btn.innerHTML=`<i class="ti ti-player-play"></i> Iniciar Monitor`;
+    btn.style.background=t.primary; btn.style.color="#fff";
+  }
+}
+
+// ── Render Dashboard ───────────────────────────────────────────────────────
+function renderDashboard(){
+  const b=bgm(),t=theme(),f=fsz();
+  document.getElementById("dashTitle").textContent="Dashboard";
+  document.getElementById("dashDate").textContent="Hoje é "+new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  document.getElementById("m1v").textContent=S.notifications.length;
+  document.getElementById("m2v").textContent=S.slackChannel;
+  document.getElementById("m3v").textContent=S.activeTeams.all?"📬 Todos":"🎯 Times";
+  document.getElementById("m4v").textContent=S.notes.length;
+  const alert=document.getElementById("allEmailsAlert");
+  alert.style.display=S.activeTeams.all?"flex":"none";
+  document.getElementById("teamRows").innerHTML=TEAMS.map(tm=>{
+    const count=S.notifications.filter(n=>n.teamId===tm.id).length;
+    const dim=(tm.id!=="all"&&S.activeTeams.all)||(tm.id==="all"&&!S.activeTeams.all);
+    return `<div class="team-row" style="background:${b.surface};border:1px solid ${b.border};opacity:${dim?0.4:1}">
+      <div class="team-avatar" style="background:${tm.bg}"><i class="ti ${tm.icon}" style="font-size:17px;color:${tm.color}"></i></div>
+      <div><div style="font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div>
+      <div style="font-size:12px;color:${b.textFaint}">${S.activeTeams[tm.id]?"Monitorado":"Inativo"}</div></div>
+      <span style="font-size:22px;font-weight:700;color:${count>0?tm.color:b.border};font-family:'IBM Plex Mono',monospace;margin-left:auto">${count}</span>
     </div>`;
   }).join("");
 }
 
-function renderNotifications() {
-  const total = state.notifications.length;
-  const badge = document.getElementById("notifBadge");
-  badge.textContent = total; badge.style.display = total>0?"":"none";
-  const list = document.getElementById("notifList");
-  if(!total){ list.innerHTML=`<div class="empty"><i class="ti ti-bell-off"></i><p>Nenhuma notificação ainda.<br>Inicie o monitor para começar.</p></div>`; return; }
-  list.innerHTML = state.notifications.map(n => {
-    const team = TEAMS.find(t=>t.id===n.teamId) || TEAMS.find(t=>t.id==="all");
-    return `<div class="notif-card" style="border-left-color:${team?.color||"#888"}">
-      <div class="notif-meta">${team?pillHtml(team):""}<span class="notif-time">${timeAgo(n.receivedAt)}</span></div>
-      <div class="notif-subject">${escHtml(n.subject)}</div>
-      <div class="notif-from">De: <strong>${escHtml(n.from)}</strong></div>
-      <div class="notif-slack">
+// ── Render Notifications ───────────────────────────────────────────────────
+function renderNotifications(){
+  const b=bgm(),f=fsz();
+  const q=(document.getElementById("notifSearch")||{}).value||"";
+  document.getElementById("notifSearchClear").style.display=q?"":"none";
+  document.getElementById("notifSearchBar").style.background=b.surface;
+  document.getElementById("notifSearchBar").style.border="1px solid "+b.border;
+  document.querySelector("#notifSearchBar input").style.color=b.text;
+  const filtered=S.notifications.filter(n=>!q||n.subject.toLowerCase().includes(q.toLowerCase())||n.from.toLowerCase().includes(q.toLowerCase()));
+  if(!filtered.length){
+    document.getElementById("notifList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-bell-off"></i><p>${S.notifications.length===0?"Nenhuma notificação ainda.<br>Inicie o monitor para começar.":"Nenhum resultado encontrado."}</p></div>`;
+    return;
+  }
+  document.getElementById("notifList").innerHTML=filtered.map(n=>{
+    const team=TEAMS.find(t=>t.id===n.teamId)||TEAMS.find(t=>t.id==="all");
+    return `<div class="notif-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${team?.color||"#888"}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        ${team?pillHtml(team):""}
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:${b.textFaint};display:flex;align-items:center;gap:4px"><i class="ti ti-calendar" style="font-size:11px"></i>${fmtDate(n.receivedAt)}</span>
+          <span style="font-size:11px;color:${b.textFaint};font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:4px"><i class="ti ti-clock" style="font-size:11px"></i>${fmtTime(n.receivedAt)}</span>
+        </div>
+      </div>
+      <div style="font-weight:700;font-size:${f.base-1}px;margin-bottom:2px;color:${b.text}">${esc(n.subject)}</div>
+      <div style="font-size:${f.base-2}px;color:${b.textMuted}">De: <strong>${esc(n.from)}</strong></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px">
         <i class="ti ti-brand-slack" style="color:#1D9E75;font-size:13px"></i>
-        <span style="color:#0F6E56">Enviado · ${escHtml(n.slackChannel)}</span>
-        <span style="margin-left:auto"><span class="pill pill-sent"><i class="ti ti-check"></i>entregue</span></span>
+        <span style="color:#0F6E56">Enviado · ${esc(n.slackChannel)}</span>
+        <span style="margin-left:auto" class="pill pill-sent"><i class="ti ti-check"></i> entregue</span>
+      </div>
+    </div>`;
+  }).join("");
+  const badge=document.getElementById("notifBadge");
+  badge.textContent=S.notifications.length; badge.style.display=S.notifications.length>0?"":"none";
+}
+
+// ── Render Notes ───────────────────────────────────────────────────────────
+function renderNotes(){
+  const b=bgm(),t=theme(),f=fsz();
+  const q=(document.getElementById("noteSearch")||{}).value||"";
+  const df=(document.getElementById("noteDateFrom")||{}).value||"";
+  const dt=(document.getElementById("noteDateTo")||{}).value||"";
+  const filtered=[...S.notes]
+    .sort((a,z)=>z.pinned-a.pinned||new Date(z.createdAt)-new Date(a.createdAt))
+    .filter(n=>{
+      const mt=!q||n.text.toLowerCase().includes(q.toLowerCase());
+      const d=isoToInput(n.createdAt);
+      return mt&&(!df||d>=df)&&(!dt||d<=dt);
+    });
+  const hasFilter=q||df||dt;
+  document.getElementById("clearFilterBtn").style.display=hasFilter?"flex":"none";
+  const fr=document.getElementById("noteFilterResult");
+  if(hasFilter){
+    fr.style.display="block"; fr.style.color=b.textFaint;
+    fr.innerHTML=`<i class="ti ti-list-search" style="font-size:12px;margin-right:4px"></i>${filtered.length} anotação(ões) encontrada(s)${df?" · a partir de "+new Date(df+"T00:00:00").toLocaleDateString("pt-BR"):""}${dt?" · até "+new Date(dt+"T00:00:00").toLocaleDateString("pt-BR"):""}`;
+  } else { fr.style.display="none"; }
+
+  // style note inputs
+  document.getElementById("newNoteCard").style.background=b.surface;
+  document.getElementById("newNoteCard").style.border="1px solid "+b.border;
+  document.getElementById("noteFilterCard").style.background=b.surface;
+  document.getElementById("noteFilterCard").style.border="1px solid "+b.border;
+  document.getElementById("newNoteText").style.background=b.surfaceAlt;
+  document.getElementById("newNoteText").style.color=b.text;
+  document.getElementById("newNoteText").style.border="1px solid "+b.border;
+  document.getElementById("noteSearchWrap").style.background=b.surfaceAlt;
+  document.getElementById("noteSearchWrap").style.border="1px solid "+b.border;
+  document.getElementById("noteSearch").style.color=b.text;
+  ["noteDateFrom","noteDateTo"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;}
+  });
+  document.getElementById("addNoteBtn").style.background=t.primary;
+  // labels
+  ["newNoteLabel","noteSaveHint","noteFilterLabel","dateFromLabel","dateToLabel","notesSubtitle"].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.color=b.textMuted;
+  });
+
+  const notesBadge=document.getElementById("notesBadge");
+  const pinned=S.notes.filter(n=>n.pinned).length;
+  notesBadge.textContent=pinned; notesBadge.style.display=pinned>0?"":"none";
+
+  if(!filtered.length){
+    document.getElementById("noteList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-notes-off"></i><p>${S.notes.length===0?"Nenhuma anotação ainda.":"Nenhuma anotação encontrada para esse filtro."}</p></div>`;
+    return;
+  }
+
+  document.getElementById("noteList").innerHTML=filtered.map(note=>{
+    if(S.editingNote===note.id){
+      return `<div class="note-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${t.primary}">
+        <textarea id="edit-${note.id}" style="width:100%;min-height:70px;padding:8px 12px;border-radius:8px;border:1px solid ${t.primary};background:${b.surfaceAlt};color:${b.text};font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box">${esc(note.text)}</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="saveNote(${note.id})" style="padding:6px 16px;background:${t.primary};color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700;display:flex;align-items:center;gap:4px"><i class="ti ti-device-floppy" style="font-size:13px"></i> Salvar</button>
+          <button onclick="S.editingNote=null;renderNotes()" style="padding:6px 16px;background:transparent;color:${b.textMuted};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif">Cancelar</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="note-card" style="background:${b.surface};border:1px solid ${note.pinned?t.primary+"66":b.border};border-left-color:${note.pinned?t.primary:b.border}">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+        ${note.pinned?`<i class="ti ti-pin" style="font-size:14px;color:${t.primary};flex-shrink:0;margin-top:2px"></i>`:""}
+        <p style="flex:1;margin:0;font-size:${f.base-1}px;color:${b.text};line-height:1.6;cursor:pointer" onclick="S.editingNote=${note.id};renderNotes()">${esc(note.text)}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid ${b.border}">
+        <span style="font-size:11px;color:${b.textFaint};display:flex;align-items:center;gap:4px"><i class="ti ti-pencil-plus" style="font-size:11px"></i> Criada em ${fmtFull(note.createdAt)}</span>
+        ${note.updatedAt?`<span style="font-size:11px;color:${b.textFaint};display:flex;align-items:center;gap:4px"><i class="ti ti-pencil" style="font-size:11px"></i> Editada em ${fmtFull(note.updatedAt)}</span>`:""}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="S.editingNote=${note.id};renderNotes()" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${b.textMuted};font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px"><i class="ti ti-edit" style="font-size:12px"></i> Editar</button>
+        <button onclick="togglePin(${note.id})" style="padding:4px 12px;background:${note.pinned?t.light:b.surfaceAlt};border:1px solid ${note.pinned?t.primary+"55":b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${note.pinned?t.primary:b.textMuted};font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px"><i class="ti ${note.pinned?"ti-pin-filled":"ti-pin"}" style="font-size:12px"></i> ${note.pinned?"Fixado":"Fixar"}</button>
+        <button onclick="deleteNote(${note.id})" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:#A32D2D;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px;margin-left:auto"><i class="ti ti-trash" style="font-size:12px"></i> Excluir</button>
       </div>
     </div>`;
   }).join("");
 }
 
-function renderConfig() {
-  const monitorAll = state.activeTeams.all;
-  document.getElementById("slackChannelInput").value = state.slackChannel;
-  document.getElementById("allEmailsToggle").checked = monitorAll;
-  document.getElementById("allEmailsCard").className = "all-emails-card" + (monitorAll?" on":"");
-
-  document.getElementById("teamConfigRows").innerHTML = TEAMS.filter(t=>t.id!=="all").map(t=>`
-    <div class="config-row" style="opacity:${monitorAll?0.4:1}">
-      <div class="team-avatar" style="background:${t.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${t.icon}" style="font-size:15px;color:${t.color}"></i></div>
-      <div style="flex:1"><div style="font-weight:500;font-size:14px">${t.label}</div></div>
-      <label class="toggle-switch"><input type="checkbox" ${state.activeTeams[t.id]?"checked":""} ${monitorAll?"disabled":""} onchange="toggleTeam('${t.id}',this.checked)" /><div class="toggle-track"></div></label>
+// ── Render Config Appearance ───────────────────────────────────────────────
+function renderConfigAppearance(){
+  const b=bgm(),t=theme(),f=fsz();
+  // theme swatches
+  document.getElementById("themeSwatches").innerHTML=THEMES.map(th=>`
+    <button onclick="S.themeId='${th.id}';applyTheme();renderAll()" title="${th.label}"
+      style="width:32px;height:32px;border-radius:50%;background:${th.primary};border:${S.themeId===th.id?"3px solid "+b.text:"3px solid transparent"};cursor:pointer;transition:all 0.15s"></button>`).join("");
+  document.getElementById("themeCurrentLabel").innerHTML=`Tema: <strong style="color:${t.primary}">${t.label}</strong>`;
+  document.getElementById("themeCurrentLabel").style.color=b.textFaint;
+  // font size
+  document.getElementById("fontSizeBtns").innerHTML=FONT_SIZES.map(fs=>`
+    <button onclick="S.fontSizeId='${fs.id}';applyTheme();renderAll()" style="padding:6px 16px;border-radius:8px;border:1px solid ${S.fontSizeId===fs.id?t.primary:b.border};background:${S.fontSizeId===fs.id?t.light:b.surfaceAlt};color:${S.fontSizeId===fs.id?t.primary:b.textMuted};cursor:pointer;font-size:${fs.base-1}px;font-family:'Sora',sans-serif;font-weight:${S.fontSizeId===fs.id?700:400}">${fs.label}</button>`).join("");
+  // bg modes
+  document.getElementById("bgModeGrid").innerHTML=BG_MODES.map(bm=>`
+    <button onclick="S.bgModeId='${bm.id}';applyTheme();updateClock();renderAll()"
+      style="padding:12px 8px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;border:${S.bgModeId===bm.id?"2px solid "+t.primary:"1px solid "+b.border};background:${bm.bg};display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:${S.bgModeId===bm.id?"0 0 0 3px "+t.primary+"33":"none"};transition:all 0.15s">
+      <i class="ti ${bm.icon}" style="font-size:20px;color:${bm.text}"></i>
+      <span style="font-size:11px;font-weight:${S.bgModeId===bm.id?700:400};color:${bm.text}">${bm.label}</span>
+      <div class="bg-swatches">
+        <div class="bg-swatch" style="background:${bm.surface};border:1px solid ${bm.border}"></div>
+        <div class="bg-swatch" style="background:${bm.surfaceAlt};border:1px solid ${bm.border}"></div>
+        <div class="bg-swatch" style="background:${bm.bg};border:1px solid ${bm.border}"></div>
+      </div>
+    </button>`).join("");
+  document.getElementById("bgCurrentLabel").innerHTML=`Atual: <strong style="color:${t.primary}">${b.label}</strong> · Clique no botão do topo para alternar rapidamente`;
+  document.getElementById("bgCurrentLabel").style.color=b.textFaint;
+  // config cards
+  ["configAppearance","configSlack","configTeams"].forEach(id=>{
+    const el=document.getElementById(id);if(el){el.style.background=b.surface;el.style.border="1px solid "+b.border;}
+  });
+  document.getElementById("slackChannelDesc").style.color=b.textMuted;
+  document.getElementById("teamsDesc").style.color=b.textFaint;
+  // slack input
+  const si=document.getElementById("slackChannelInput");
+  si.style.background=b.surfaceAlt; si.style.color=b.text; si.style.border="1px solid "+b.border;
+  // all emails toggle
+  const aec=document.getElementById("allEmailsToggleCard");
+  aec.style.background=S.activeTeams.all?"#FAEEDA":b.surfaceAlt;
+  aec.style.border=`1.5px solid ${S.activeTeams.all?"#EF9F27":b.border}`;
+  const aes=document.getElementById("allEmailsSwitch");
+  aes.innerHTML=`<div style="position:absolute;inset:0;border-radius:22px;background:${S.activeTeams.all?"#BA7517":"#ccc"};transition:background 0.2s"><div style="position:absolute;top:3px;left:${S.activeTeams.all?19:3}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s"></div></div>`;
+  document.getElementById("allEmailsSubtitle").style.color=b.textFaint;
+  // team rows
+  document.getElementById("teamConfigRows").innerHTML=TEAMS.filter(tm=>tm.id!=="all").map(tm=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid ${b.border};opacity:${S.activeTeams.all?0.4:1}">
+      <div class="team-avatar" style="background:${tm.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${tm.icon}" style="font-size:15px;color:${tm.color}"></i></div>
+      <div style="flex:1;font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div>
+      <div onclick="${S.activeTeams.all?"":"toggleTeam('"+tm.id+"')"}" style="width:38px;height:22px;border-radius:22px;background:${S.activeTeams[tm.id]?t.primary:"#ccc"};position:relative;transition:background 0.2s;flex-shrink:0;cursor:${S.activeTeams.all?"not-allowed":"pointer"}">
+        <div style="position:absolute;top:3px;left:${S.activeTeams[tm.id]?19:3}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s"></div>
+      </div>
     </div>`).join("");
+  ["themeColorLabel","fontSizeLabel","bgModeLabel","teamsSpecificLabel"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.color=b.textFaint;
+  });
 }
 
-function renderLogs() {
-  const term = document.getElementById("terminalOutput");
-  if(!state.logs.length){ term.innerHTML=`<div class="log-line log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>`; return; }
-  term.innerHTML = state.logs.map(l=>`<div class="log-line log-${l.type}"><span class="log-ts">[${new Date(l.ts).toLocaleTimeString("pt-BR")}]</span>${escHtml(l.msg)}</div>`).join("");
+// ── Config actions ─────────────────────────────────────────────────────────
+function updateChannel(){S.slackChannel=document.getElementById("slackChannelInput").value;renderDashboard();}
+function toggleAllEmails(){S.activeTeams.all=!S.activeTeams.all;renderAll();}
+function toggleTeam(id){if(!S.activeTeams.all)S.activeTeams[id]=!S.activeTeams[id];renderAll();}
+
+// ── Note actions ───────────────────────────────────────────────────────────
+function addNote(){
+  const txt=document.getElementById("newNoteText").value.trim();
+  if(!txt)return;
+  S.notes.push({id:Date.now(),text:txt,pinned:false,createdAt:new Date().toISOString(),updatedAt:null});
+  document.getElementById("newNoteText").value="";
+  renderNotes(); renderDashboard();
+}
+function deleteNote(id){S.notes=S.notes.filter(n=>n.id!==id);renderNotes();renderDashboard();}
+function togglePin(id){S.notes=S.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n);renderNotes();}
+function saveNote(id){
+  const txt=document.getElementById("edit-"+id).value.trim();
+  if(!txt)return;
+  S.notes=S.notes.map(n=>n.id===id?{...n,text:txt,updatedAt:new Date().toISOString()}:n);
+  S.editingNote=null; renderNotes();
+}
+function clearNoteFilters(){
+  document.getElementById("noteSearch").value="";
+  document.getElementById("noteDateFrom").value="";
+  document.getElementById("noteDateTo").value="";
+  renderNotes();
+}
+
+// ── Logs ───────────────────────────────────────────────────────────────────
+function addLog(msg,type="info"){
+  S.logs.unshift({msg,type,ts:new Date().toISOString()});
+  if(S.logs.length>100)S.logs.pop();
+  renderLogs();
+}
+function clearLogs(){S.logs=[];renderLogs();}
+function renderLogs(){
+  const term=document.getElementById("terminalOutput");
+  if(!S.logs.length){term.innerHTML=`<div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>`;return;}
+  term.innerHTML=S.logs.map(l=>`<div class="log-${l.type}"><span class="log-ts">[${new Date(l.ts).toLocaleTimeString("pt-BR")}]</span>${esc(l.msg)}</div>`).join("");
   term.scrollTop=0;
 }
 
-function renderAll(){ renderDashboard(); renderNotifications(); renderConfig(); renderLogs(); }
-
-function updateStatusBar() {
-  const dot=document.getElementById("statusDot"), lbl=document.getElementById("statusLabel"), btn=document.getElementById("toggleBtn");
-  if(state.monitoring){ dot.classList.add("active"); lbl.textContent="Monitorando"; lbl.classList.add("active"); btn.classList.add("running"); btn.innerHTML=`<i class="ti ti-player-pause"></i> Pausar Monitor`; }
-  else { dot.classList.remove("active"); lbl.textContent="Inativo"; lbl.classList.remove("active"); btn.classList.remove("running"); btn.innerHTML=`<i class="ti ti-player-play"></i> Iniciar Monitor`; }
+// ── Monitor ────────────────────────────────────────────────────────────────
+function toggleMonitor(){
+  S.monitoring=!S.monitoring; updateStatus();
+  if(S.monitoring){addLog("Monitor ativado — verificando a cada 5 minutos.","success");checkEmails();S.interval=setInterval(checkEmails,5*60*1000);}
+  else{addLog("Monitor pausado.","warn");clearInterval(S.interval);}
 }
 
-function updateChannel(){ state.slackChannel=document.getElementById("slackChannelInput").value; localStorage.setItem("ems_channel",state.slackChannel); document.getElementById("metricChannel").textContent=state.slackChannel; }
-function toggleTeam(id,val){ state.activeTeams[id]=val; renderDashboard(); }
-function toggleAllEmails(){
-  const cb = document.getElementById("allEmailsToggle");
-  state.activeTeams.all = cb.checked;
-  renderAll();
-}
-function clearLogs(){ state.logs=[]; renderLogs(); }
-function addLog(msg,type="info"){ state.logs.unshift({msg,type,ts:new Date().toISOString()}); if(state.logs.length>100)state.logs.pop(); renderLogs(); }
-
-function toggleMonitor() {
-  state.monitoring=!state.monitoring; updateStatusBar();
-  if(state.monitoring){ addLog("Monitor ativado — verificando a cada 5 minutos.","success"); checkEmails(); state.interval=setInterval(checkEmails,5*60*1000); }
-  else { addLog("Monitor pausado.","warn"); clearInterval(state.interval); }
-}
-
-async function checkEmails() {
-  if(state.loading||state.polling) return;
-  state.polling=true; state.loading=true;
+async function checkEmails(){
+  if(S.loading||S.polling)return;
+  S.polling=true;S.loading=true;
   const btn=document.getElementById("checkBtn");
-  btn.disabled=true; btn.innerHTML=`<i class="ti ti-loader-2 spin"></i> Verificando...`;
+  btn.disabled=true;btn.innerHTML=`<i class="ti ti-loader-2 spin"></i> Verificando...`;
   document.getElementById("checkResult").style.display="none";
   addLog("Verificando emails via Gmail...","info");
-
-  const monitorAll = state.activeTeams.all;
-  const activeTeamLabels = TEAMS.filter(t=>t.id!=="all"&&state.activeTeams[t.id]).map(t=>t.label);
-
-  const systemPrompt = monitorAll
-    ? `Você monitora emails. Acesse Gmail via MCP, liste os últimos 20 não lidos. Para cada email, tente classificar se pertence a: ${activeTeamLabels.join(", ")} — use "all" se não pertencer a nenhum. Retorne APENAS JSON sem markdown: {"emails":[{"from":"email","fromName":"Nome","subject":"Assunto","teamId":"n3|data-protection|medical|all","receivedAt":"ISO","snippet":"prévia"}],"summary":"resumo"}`
-    : `Você monitora emails. Times: ${activeTeamLabels.join(", ")}. Acesse Gmail via MCP, liste os últimos 20 não lidos, classifique. Retorne APENAS JSON sem markdown: {"emails":[{"from":"email","fromName":"Nome","subject":"Assunto","teamId":"n3|data-protection|medical|none","receivedAt":"ISO","snippet":"prévia"}],"summary":"resumo"}`;
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1500, system:systemPrompt,
-        messages:[{role:"user",content:"Verifique os emails agora."}],
-        mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]
-      })
-    });
+  const monitorAll=S.activeTeams.all;
+  const labels=TEAMS.filter(t=>t.id!=="all"&&S.activeTeams[t.id]).map(t=>t.label);
+  const sys=monitorAll
+    ?`Monitore emails. Gmail via MCP, últimos 20 não lidos. Classifique: ${labels.join(", ")} ou "all". JSON: {"emails":[{"from":"","fromName":"","subject":"","teamId":"n3|data-protection|medical|all","receivedAt":"ISO","snippet":""}],"summary":""}`
+    :`Monitore emails. Times: ${labels.join(", ")}. Gmail via MCP, últimos 20 não lidos. JSON: {"emails":[{"from":"","fromName":"","subject":"","teamId":"n3|data-protection|medical|none","receivedAt":"ISO","snippet":""}],"summary":""}`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:sys,messages:[{role:"user",content:"Verifique os emails."}],mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]})});
     const data=await res.json();
-    const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
-    let parsed; try{parsed=JSON.parse(text.replace(/```json|```/g,"").trim());}catch{throw new Error("Resposta inesperada. Tente novamente.");}
-    const relevant = monitorAll
-      ? (parsed.emails||[])
-      : (parsed.emails||[]).filter(e=>e.teamId!=="none"&&state.activeTeams[e.teamId]);
+    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
+    let parsed;try{parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{throw new Error("Resposta inesperada.");}
+    const relevant=monitorAll?(parsed.emails||[]):(parsed.emails||[]).filter(e=>e.teamId!=="none"&&S.activeTeams[e.teamId]);
     addLog(`${relevant.length} email(s) encontrado(s).`,relevant.length>0?"success":"info");
-    if(relevant.length>0) await sendToSlack(relevant);
+    if(relevant.length>0)await sendToSlack(relevant);
     showResult("success",`✓ ${relevant.length} email(s) encontrado(s). ${parsed.summary||""}`);
     renderAll();
-  } catch(err){ addLog("Erro: "+err.message,"error"); showResult("error","Erro: "+err.message); }
-  finally { state.loading=false; state.polling=false; btn.disabled=false; btn.innerHTML=`<i class="ti ti-refresh"></i> Verificar agora`; }
+  }catch(err){addLog("Erro: "+err.message,"error");showResult("error","Erro: "+err.message);}
+  finally{S.loading=false;S.polling=false;btn.disabled=false;btn.innerHTML=`<i class="ti ti-refresh"></i> Verificar agora`;btn.style.background=theme().primary;}
 }
 
-async function sendToSlack(emails) {
+async function sendToSlack(emails){
   addLog(`Enviando ${emails.length} notificação(ões)...`,"info");
   for(const email of emails){
     const team=TEAMS.find(t=>t.id===email.teamId)||TEAMS.find(t=>t.id==="all");
-    const label = team?.id==="all" ? "📬 Novo email" : `📧 Novo email do ${team?.label}`;
+    const label=team?.id==="all"?"📬 Novo email":`📧 Novo email do ${team?.label}`;
     const msg=`${label}\n*De:* ${email.fromName||email.from}\n*Assunto:* ${email.subject}${email.snippet?`\n_${email.snippet}_`:""}`;
-    try {
-      await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:200,
-          messages:[{role:"user",content:`Envie para o canal Slack "${state.slackChannel}": ${msg}`}],
-          mcp_servers:[{type:"url",url:"https://mcp.slack.com/mcp",name:"slack"}]
-        })
-      });
-      state.notifications.unshift({id:Date.now()+Math.random(),teamId:email.teamId,from:email.fromName||email.from,subject:email.subject,receivedAt:email.receivedAt||new Date().toISOString(),slackChannel:state.slackChannel,slackStatus:"sent"});
-      if(state.notifications.length>100)state.notifications.pop();
+    try{
+      await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,messages:[{role:"user",content:`Envie para "${S.slackChannel}": ${msg}`}],mcp_servers:[{type:"url",url:"https://mcp.slack.com/mcp",name:"slack"}]})});
+      S.notifications.unshift({id:Date.now()+Math.random(),teamId:email.teamId,from:email.fromName||email.from,subject:email.subject,receivedAt:email.receivedAt||new Date().toISOString(),slackChannel:S.slackChannel});
+      if(S.notifications.length>100)S.notifications.pop();
       addLog(`✓ Enviado: "${email.subject.slice(0,45)}..."`,"success");
-    } catch(err){ addLog("Erro Slack: "+err.message,"error"); }
+    }catch(err){addLog("Erro Slack: "+err.message,"error");}
   }
 }
 
-function showResult(type,msg){ const el=document.getElementById("checkResult"); el.className="result-banner "+type; el.textContent=msg; el.style.display=""; }
+function showResult(type,msg){
+  const el=document.getElementById("checkResult");
+  el.className="result-banner result-"+type;
+  el.textContent=msg; el.style.display="";
+}
 
-renderAll(); updateStatusBar();
+// ── Render All ─────────────────────────────────────────────────────────────
+function renderAll(){
+  renderDashboard(); renderNotifications(); renderNotes(); renderLogs();
+  renderConfigAppearance(); updateStatus(); applyTheme();
+  document.getElementById("clearLogsBtn").style.border="1px solid "+bgm().border;
+  document.getElementById("clearLogsBtn").style.color=bgm().textMuted;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+updateClock();
+renderAll();
 </script>
 </body>
 </html>
