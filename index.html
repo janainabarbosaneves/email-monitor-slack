@@ -283,7 +283,7 @@ function showSaveStatus() {
 const S={
   view:"dashboard", themeId:"blue", fontSizeId:"md", bgModeId:"light",
   slackChannel:"#notificacoes-email",
-  activeTeams:{n3:true,"data-protection":true,medical:true,all:false},
+  activeTeams:{n3:true,"data-protection":true,medical:true,all:true},
   monitoring:false, loading:false, polling:false, interval:null,
   notifications:[], logs:[],
   notes: loadNotesFromStorage(),
@@ -668,18 +668,14 @@ async function checkEmails(){
   const btn=document.getElementById("checkBtn");
   btn.disabled=true;btn.innerHTML=`<i class="ti ti-loader-2 spin"></i> Verificando...`;
   document.getElementById("checkResult").style.display="none";
-  addLog("Verificando emails via Gmail...","info");
-  const monitorAll=S.activeTeams.all;
-  const labels=TEAMS.filter(t=>t.id!=="all"&&S.activeTeams[t.id]).map(t=>t.label);
-  const sys=monitorAll
-    ?`Monitore emails. Gmail via MCP, últimos 20 não lidos. Classifique: ${labels.join(", ")} ou "all". JSON: {"emails":[{"from":"","fromName":"","subject":"","teamId":"n3|data-protection|medical|all","receivedAt":"ISO","snippet":""}],"summary":""}`
-    :`Monitore emails. Times: ${labels.join(", ")}. Gmail via MCP, últimos 20 não lidos. JSON: {"emails":[{"from":"","fromName":"","subject":"","teamId":"n3|data-protection|medical|none","receivedAt":"ISO","snippet":""}],"summary":""}`;
+  addLog("Verificando TODOS os emails via Gmail...","info");
+  const sys=`Você monitora emails. Acesse o Gmail via MCP e liste os últimos 20 emails NÃO LIDOS da caixa de entrada, independente do remetente ou assunto. Para cada email, tente identificar se pertence a algum dos times: Time N3 ([N3]), Gestão Médica, Proteção de Dados — use "all" para qualquer outro email. Retorne APENAS JSON sem markdown: {"emails":[{"from":"email","fromName":"Nome","subject":"Assunto","teamId":"n3|data-protection|medical|all","receivedAt":"ISO","snippet":"prévia do conteúdo"}],"summary":"resumo do que foi encontrado"}`;
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:sys,messages:[{role:"user",content:"Verifique os emails."}],mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]})});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:sys,messages:[{role:"user",content:"Liste todos os emails não lidos e envie notificação para todos eles."}],mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]})});
     const data=await res.json();
     const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
     let parsed;try{parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{throw new Error("Resposta inesperada.");}
-    const relevant=monitorAll?(parsed.emails||[]):(parsed.emails||[]).filter(e=>e.teamId!=="none"&&S.activeTeams[e.teamId]);
+    const relevant=parsed.emails||[];
     addLog(`${relevant.length} email(s) encontrado(s).`,relevant.length>0?"success":"info");
     if(relevant.length>0)await sendToSlack(relevant);
     showResult("success",`✓ ${relevant.length} email(s) encontrado(s). ${parsed.summary||""}`);
