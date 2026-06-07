@@ -141,11 +141,11 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
           </div>
           <div style="flex:1;min-width:140px">
             <div style="font-size:11px;margin-bottom:4px;display:flex;align-items:center;gap:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div>
-            <input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
+            <input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box" value=""/>
           </div>
           <div style="flex:1;min-width:140px">
             <div style="font-size:11px;margin-bottom:4px;display:flex;align-items:center;gap:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div>
-            <input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
+            <input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box" value=""/>
           </div>
           <div style="display:flex;align-items:flex-end">
             <button onclick="clearNoteFilters()" id="clearFilterBtn" style="padding:9px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px">
@@ -751,6 +751,8 @@ function renderAll(){
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
+document.getElementById("noteDateFrom").value = "";
+document.getElementById("noteDateTo").value = "";
 updateClock();
 renderAll();
 </script>
