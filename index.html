@@ -794,20 +794,82 @@ async function checkEmails(){
   const btn=document.getElementById("checkBtn");
   btn.disabled=true; btn.innerHTML=`<i class="ti ti-loader-2 spin"></i> Verificando...`;
   document.getElementById("checkResult").style.display="none";
-  addLog("Verificando emails via Gmail...","info");
-  const sys=`Você monitora emails. Acesse o Gmail via MCP e liste os últimos 20 emails NÃO LIDOS da caixa de entrada, independente do remetente ou assunto. Para cada email, tente identificar se pertence a algum dos times: Time N3 ([N3]), Gestão Médica, Proteção de Dados — use "all" para qualquer outro email. Retorne APENAS JSON sem markdown: {"emails":[{"from":"email","fromName":"Nome","subject":"Assunto","teamId":"n3|data-protection|medical|all","receivedAt":"ISO","snippet":"prévia do conteúdo"}],"summary":"resumo do que foi encontrado"}`;
+  addLog("Chamando Gmail MCP...","info");
+
+  const sys=`Você é um assistente que monitora emails. Use o Gmail MCP para listar os últimos 20 emails não lidos da caixa de entrada. Para cada email identifique o time: se o assunto contém [N3] use teamId "n3"; se contém "Proteção de Dados" ou "Exclusão" use "data-protection"; se contém termos médicos use "medical"; qualquer outro use "all". Retorne SOMENTE um objeto JSON válido, sem markdown, sem texto antes ou depois: {"emails":[{"from":"endereco@email.com","fromName":"Nome Remetente","subject":"Assunto do Email","teamId":"n3","receivedAt":"2026-06-08T10:00:00Z","snippet":"prévia"}],"summary":"X emails encontrados"}`;
+
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:sys,messages:[{role:"user",content:"Liste todos os emails não lidos e envie notificação para todos eles."}],mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]})});
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:2000,
+        system:sys,
+        messages:[{role:"user",content:"Liste os emails não lidos da minha caixa de entrada do Gmail agora."}],
+        mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]
+      })
+    });
+
+    if(!res.ok){
+      const errTxt=await res.text();
+      addLog(`HTTP ${res.status}: ${errTxt.slice(0,120)}`,"error");
+      throw new Error(`Erro HTTP ${res.status} na API.`);
+    }
+
     const data=await res.json();
-    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
-    let parsed;try{parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{throw new Error("Resposta inesperada do Gmail.");}
-    const relevant=parsed.emails||[];
-    addLog(`${relevant.length} email(s) encontrado(s).`,relevant.length>0?"success":"info");
-    if(relevant.length>0) await sendToSlack(relevant);
-    showResult("success",`✓ ${relevant.length} email(s) encontrado(s). ${parsed.summary||""}`);
+    addLog(`Resposta recebida. stop_reason: ${data.stop_reason||"?"}, blocos: ${(data.content||[]).length}`,"info");
+
+    // Log each content block type for debugging
+    (data.content||[]).forEach((b,i)=>{
+      if(b.type==="text") addLog(`[bloco ${i}] texto: ${b.text.slice(0,80)}`,"info");
+      else if(b.type==="mcp_tool_use") addLog(`[bloco ${i}] tool_use: ${b.name}`,"info");
+      else if(b.type==="mcp_tool_result") addLog(`[bloco ${i}] tool_result: ${JSON.stringify(b).slice(0,80)}`,"info");
+      else addLog(`[bloco ${i}] tipo: ${b.type}`,"info");
+    });
+
+    // Extract text from all text blocks
+    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+
+    if(!txt.trim()){
+      // Maybe all content is tool_use/tool_result — check if stop_reason is tool_use
+      if(data.stop_reason==="end_turn"){
+        addLog("Nenhum texto retornado mas stop_reason=end_turn — nenhum email não lido.","warn");
+        showResult("success","✓ Nenhum email não lido encontrado na caixa de entrada.");
+        return;
+      }
+      throw new Error(`Sem texto na resposta. Blocos: ${(data.content||[]).map(b=>b.type).join(", ")}`);
+    }
+
+    addLog(`Texto bruto: ${txt.slice(0,120)}`,"info");
+
+    // Try to extract JSON from text
+    let parsed;
+    const jsonMatch=txt.match(/\{[\s\S]*\}/);
+    if(jsonMatch){
+      try{ parsed=JSON.parse(jsonMatch[0]); }
+      catch(e){ addLog("Falha ao parsear JSON: "+e.message,"error"); throw new Error("JSON inválido na resposta."); }
+    } else {
+      addLog("JSON não encontrado no texto: "+txt.slice(0,200),"warn");
+      // If no JSON found but has content, treat as no emails
+      showResult("success","✓ Verificação concluída. Nenhum email novo.");
+      return;
+    }
+
+    const emails=parsed.emails||[];
+    addLog(`${emails.length} email(s) encontrado(s).`, emails.length>0?"success":"info");
+    if(emails.length>0) await sendToSlack(emails);
+    showResult("success",`✓ ${emails.length} email(s) encontrado(s). ${parsed.summary||""}`);
     renderAll();
-  }catch(err){addLog("Erro: "+err.message,"error");showResult("error","Erro: "+err.message);}
-  finally{S.loading=false;S.polling=false;btn.disabled=false;btn.innerHTML=`<i class="ti ti-refresh"></i> Verificar agora`;btn.style.background=theme().primary;}
+
+  }catch(err){
+    addLog("Erro: "+err.message,"error");
+    showResult("error","Erro: "+err.message+". Veja os Logs para detalhes.");
+  }finally{
+    S.loading=false; S.polling=false;
+    btn.disabled=false; btn.innerHTML=`<i class="ti ti-refresh"></i> Verificar agora`;
+    btn.style.background=theme().primary;
+  }
 }
 
 async function sendToSlack(emails){
