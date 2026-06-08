@@ -27,34 +27,25 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
 .pill-sent{background:#E1F5EE;color:#085041;}
 .action-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Sora',sans-serif;font-weight:700;transition:opacity 0.15s;}
 .action-btn:hover{opacity:0.85;}
-.action-btn:disabled{opacity:0.5;cursor:not-allowed;}
 .result-banner{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13px;}
 .result-success{background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C;}
-.result-error{background:#FCEBEB;border:1px solid #F09595;color:#501313;}
-.result-warn{background:#FAEEDA;border:1px solid #EF9F27;color:#633806;}
-.toggle-track{position:absolute;inset:0;border-radius:22px;cursor:pointer;transition:background 0.2s;}
-.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s;}
-.toggle-on::after{left:19px!important;}
+.result-info{background:#E6F1FB;border:1px solid #85B7EB;color:#042C53;}
 .terminal{background:#0f0f1a;border-radius:14px;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;max-height:460px;overflow-y:auto;border:1px solid #222;}
-.log-info{color:#B4B2A9;} .log-success{color:#5DCAA5;} .log-warn{color:#EF9F27;} .log-error{color:#F09595;}
+.log-info{color:#B4B2A9;}.log-success{color:#5DCAA5;}.log-warn{color:#EF9F27;}.log-error{color:#F09595;}
 .log-ts{color:#444;margin-right:8px;}
 .empty{text-align:center;padding:60px 0;}
-.empty .ti{font-size:44px;display:block;margin-bottom:12px;}
+.empty i{font-size:44px;display:block;margin-bottom:12px;}
 .empty p{font-size:14px;line-height:1.7;}
 .search-bar{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 14px;margin-bottom:20px;}
 .search-bar input{flex:1;border:none;background:transparent;font-size:14px;font-family:'Sora',sans-serif;outline:none;}
 .bg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.bg-btn{padding:12px 8px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.15s;}
 .bg-swatches{display:flex;gap:3px;margin-top:2px;}
 .bg-swatch{width:10px;height:10px;border-radius:3px;}
 .section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 10px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .spin{animation:spin 0.8s linear infinite;display:inline-block;}
 ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{border-radius:3px;}
-/* Webhook warning banner */
-.webhook-warning{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:#FAEEDA;border:1px solid #EF9F27;color:#633806;font-size:13px;margin-bottom:16px;cursor:pointer;}
-.webhook-warning:hover{background:#f5e4c8;}
-.webhook-ok{background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C;cursor:default;}
+.gs-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;}
 </style>
 </head>
 <body>
@@ -66,8 +57,7 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
   <div id="clockBox" style="margin-left:16px;display:flex;align-items:center;gap:16px"></div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
     <button id="bgCycleBtn" onclick="cycleBgMode()" style="border-radius:8px;padding:4px 10px;cursor:pointer;font-size:15px;font-family:'Sora',sans-serif;font-weight:500;display:flex;align-items:center;gap:5px;border:1px solid transparent"></button>
-    <span id="statusDot" style="width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;background:#888;transition:all 0.3s"></span>
-    <span id="statusLabel" style="font-size:12px">Inativo</span>
+    <span class="gs-badge"><i class="ti ti-robot" style="font-size:12px"></i> Apps Script ativo</span>
   </div>
 </div>
 
@@ -78,36 +68,43 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
     <button class="nav-btn" data-view="notes" onclick="switchView('notes')"><i class="ti ti-notes"></i> Anotações <span id="notesBadge" style="display:none;margin-left:auto;background:#BA7517;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
     <button class="nav-btn" data-view="config" onclick="switchView('config')"><i class="ti ti-settings"></i> Configurações</button>
     <button class="nav-btn" data-view="logs" onclick="switchView('logs')"><i class="ti ti-terminal-2"></i> Logs</button>
-    <div class="sidebar-bottom">
-      <button id="toggleBtn" onclick="toggleMonitor()" style="width:100%;padding:9px 0;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s">
-        <i class="ti ti-player-play"></i> Iniciar Monitor
-      </button>
-    </div>
   </div>
 
   <div class="content">
+
     <!-- DASHBOARD -->
     <div id="view-dashboard">
       <h2 id="dashTitle" style="margin:0 0 4px;font-size:22px;font-weight:700"></h2>
       <p id="dashDate" style="margin:0 0 20px;font-size:13px"></p>
-      <!-- Webhook warning -->
-      <div id="webhookWarnDash" class="webhook-warning" onclick="switchView('config')" style="display:none">
-        <i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i>
-        <div><strong>Slack Webhook não configurado!</strong> Clique aqui para configurar → Configurações</div>
+
+      <!-- Apps Script info banner -->
+      <div id="gsBanner" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C;font-size:13px;margin-bottom:20px">
+        <i class="ti ti-robot" style="font-size:18px;flex-shrink:0;color:#0F6E56"></i>
+        <div>
+          <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
+          <a href="https://script.google.com" target="_blank" style="color:#0F6E56;margin-left:6px;font-weight:700">Gerenciar →</a>
+        </div>
       </div>
+
       <div class="metric-grid">
-        <div class="metric" id="m1"><div style="font-size:12px;margin-bottom:4px" id="m1l">Total notificações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m1v">0</div></div>
+        <div class="metric" id="m1"><div style="font-size:12px;margin-bottom:4px">Total notificações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m1v">0</div></div>
         <div class="metric" id="m2"><div style="font-size:12px;margin-bottom:4px">Canal Slack</div><div style="font-size:13px;font-weight:700" id="m2v">#notificacoes-email</div></div>
-        <div class="metric" id="m3"><div style="font-size:12px;margin-bottom:4px">Modo</div><div style="font-size:13px;font-weight:700" id="m3v">🎯 Times</div></div>
+        <div class="metric" id="m3"><div style="font-size:12px;margin-bottom:4px">Última verificação</div><div style="font-size:12px;font-weight:700" id="m3v">—</div></div>
         <div class="metric" id="m4"><div style="font-size:12px;margin-bottom:4px">Anotações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m4v">0</div></div>
       </div>
-      <div id="allEmailsAlert" style="display:none;margin-bottom:16px;padding:10px 14px;border-radius:10px;background:#FAEEDA;border:1px solid #EF9F27;color:#633806;font-size:13px;align-items:center;gap:8px">
-        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i> Modo <strong>"Todos os Emails"</strong> ativo.
-      </div>
+
       <div class="section-label" id="dashCatLabel">Por categoria</div>
       <div id="teamRows"></div>
-      <button class="action-btn" id="checkBtn" onclick="checkEmails()"><i class="ti ti-refresh"></i> Verificar agora</button>
-      <div id="checkResult" style="display:none"></div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+        <button class="action-btn" id="checkBtn" onclick="refreshFromStorage()">
+          <i class="ti ti-refresh"></i> Atualizar notificações
+        </button>
+        <button class="action-btn" id="clearNotifsBtn" onclick="clearNotifications()" style="background:#A32D2D">
+          <i class="ti ti-trash"></i> Limpar histórico
+        </button>
+      </div>
+      <div id="checkResult" style="display:none;margin-top:12px"></div>
     </div>
 
     <!-- NOTIFICATIONS -->
@@ -149,12 +146,12 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
             <button onclick="document.getElementById('noteSearch').value='';renderNotes()" style="background:none;border:none;cursor:pointer;font-size:13px">✕</button>
           </div>
           <div style="flex:1;min-width:140px">
-            <div style="font-size:11px;margin-bottom:4px;display:flex;align-items:center;gap:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div>
-            <input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box" value=""/>
+            <div style="font-size:11px;margin-bottom:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div>
+            <input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
           </div>
           <div style="flex:1;min-width:140px">
-            <div style="font-size:11px;margin-bottom:4px;display:flex;align-items:center;gap:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div>
-            <input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box" value=""/>
+            <div style="font-size:11px;margin-bottom:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div>
+            <input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
           </div>
           <div style="display:flex;align-items:flex-end">
             <button onclick="clearNoteFilters()" id="clearFilterBtn" style="padding:9px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px">
@@ -171,32 +168,16 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
     <div id="view-config" style="display:none">
       <h2 style="margin:0 0 20px;font-size:22px;font-weight:700">Configurações</h2>
 
-      <!-- ✅ NOVO: Slack Webhook URL -->
-      <div id="configWebhook" style="border-radius:14px;padding:20px;margin-bottom:16px;border:2px solid transparent">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <div style="font-size:15px;font-weight:700">Slack Webhook URL</div>
-          <span id="webhookStatusBadge" style="font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600"></span>
+      <!-- Apps Script info -->
+      <div id="configGS" style="border-radius:14px;padding:20px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-size:15px;font-weight:700">Monitor automático</div>
+          <span class="gs-badge"><i class="ti ti-check" style="font-size:11px"></i> Ativo</span>
         </div>
-        <div style="font-size:13px;margin-bottom:10px" id="webhookDesc">
-          Cole aqui a URL do Incoming Webhook do Slack. Sem isso, as notificações não são enviadas.
-        </div>
-        <!-- how-to hint -->
-        <div id="webhookHint" style="font-size:12px;padding:10px 14px;border-radius:8px;margin-bottom:12px;line-height:1.7">
-          <strong>Como obter:</strong><br>
-          1. Acesse <a href="https://api.slack.com/apps" target="_blank" style="color:#185FA5">api.slack.com/apps</a> → Create New App<br>
-          2. Incoming Webhooks → Ativar → Add New Webhook<br>
-          3. Selecione o canal e copie a URL gerada
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="slackWebhookInput" oninput="updateWebhook()"
-            placeholder="https://hooks.slack.com/services/T.../B.../XXXXX"
-            style="flex:1;padding:9px 12px;border-radius:10px;font-size:13px;font-family:'IBM Plex Mono',monospace;outline:none;box-sizing:border-box"/>
-          <button id="testWebhookBtn" onclick="testWebhook()"
-            style="padding:9px 18px;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap">
-            <i class="ti ti-send" style="font-size:13px"></i> Testar
-          </button>
-        </div>
-        <div id="webhookTestResult" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+        <div style="font-size:13px;margin-bottom:14px" id="gsDesc">O Google Apps Script monitora seus emails automaticamente a cada 5 minutos e envia notificações para o Slack.</div>
+        <a href="https://script.google.com" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#0F6E56;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">
+          <i class="ti ti-external-link" style="font-size:13px"></i> Abrir Google Apps Script
+        </a>
       </div>
 
       <div id="configAppearance" style="border-radius:14px;padding:20px;margin-bottom:16px">
@@ -210,31 +191,22 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
           <div class="section-label" id="fontSizeLabel">Tamanho da fonte</div>
           <div style="display:flex;gap:8px" id="fontSizeBtns"></div>
         </div>
-        <div style="margin-bottom:4px">
+        <div>
           <div class="section-label" id="bgModeLabel">Plano de fundo</div>
           <div class="bg-grid" id="bgModeGrid"></div>
           <div style="font-size:12px;margin-top:8px" id="bgCurrentLabel"></div>
         </div>
       </div>
+
       <div id="configSlack" style="border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;margin-bottom:12px">Canal Slack</div>
         <div style="font-size:13px;margin-bottom:6px" id="slackChannelDesc">Nome do canal para receber notificações</div>
         <input type="text" id="slackChannelInput" value="#notificacoes-email" oninput="updateChannel()" placeholder="#canal" style="width:100%;padding:9px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
       </div>
+
       <div id="configTeams" style="border-radius:14px;padding:20px">
-        <div style="font-size:15px;font-weight:700;margin-bottom:4px">Emails monitorados</div>
-        <div style="font-size:13px;margin-bottom:16px" id="teamsDesc">Ative "Todos os Emails" para notificação de qualquer email.</div>
-        <div id="allEmailsToggleCard" onclick="toggleAllEmails()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;margin-bottom:14px;cursor:pointer;transition:all 0.2s">
-          <div class="team-avatar" style="background:#FAEEDA;width:40px;height:40px"><i class="ti ti-mail" style="font-size:20px;color:#BA7517"></i></div>
-          <div style="flex:1">
-            <div style="font-weight:700;font-size:14px">Todos os Emails</div>
-            <div style="font-size:12px" id="allEmailsSubtitle">Receber notificação de todos os emails</div>
-          </div>
-          <div id="allEmailsSwitch" style="width:38px;height:22px;border-radius:22px;background:#ccc;position:relative;transition:background 0.2s;flex-shrink:0">
-            <div id="allEmailsThumb" class="toggle-track" style="background:#ccc"></div>
-          </div>
-        </div>
-        <div class="section-label" id="teamsSpecificLabel">Ou por time específico</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px">Times monitorados</div>
+        <div style="font-size:13px;margin-bottom:16px" id="teamsDesc">Regras de classificação configuradas no Google Apps Script.</div>
         <div id="teamConfigRows"></div>
       </div>
     </div>
@@ -247,6 +219,7 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
       </div>
       <div class="terminal" id="terminalOutput"><div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div></div>
     </div>
+
   </div>
 </div>
 
@@ -279,83 +252,47 @@ const BG_MODES=[
   {id:"midnight",label:"Meia-noite",icon:"ti-moon-stars",bg:"#000008",surface:"#0d0d14",surfaceAlt:"#16161f",border:"rgba(255,255,255,0.08)",text:"#d0d0e8",textMuted:"#888",textFaint:"#444"},
 ];
 
-// ── State ──────────────────────────────────────────────────────────────────
-const NOTES_KEY = "ems_notes_v2";
-const NOTIF_KEY = "ems_notifications_v1";
-const WEBHOOK_KEY = "ems_slack_webhook_v1";
+// ── Storage keys ───────────────────────────────────────────────────────────
+const NOTES_KEY   = "ems_notes_v2";
+const NOTIF_KEY   = "ems_notifications_v1";
+const LASTCHECK_KEY = "ems_last_check";
 let saveTimer = null;
 
-function loadNotesFromStorage() {
-  try {
-    const saved = localStorage.getItem(NOTES_KEY);
-    if(saved) { const p=JSON.parse(saved); if(Array.isArray(p)&&p.length>0) return p; }
-  } catch(e) {}
-  return [
-    {id:1,text:"Verificar tickets pendentes do Time N3 toda segunda-feira.",pinned:true,createdAt:new Date(Date.now()-7*86400000).toISOString(),updatedAt:null},
-    {id:2,text:"Canal #notificacoes-email criado em 06/06/2026.",pinned:false,createdAt:new Date().toISOString(),updatedAt:null},
-  ];
+function loadNotes(){
+  try{const s=localStorage.getItem(NOTES_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}
+  return [{id:1,text:"Monitor automático ativo via Google Apps Script.",pinned:true,createdAt:new Date().toISOString(),updatedAt:null}];
 }
 
-function loadNotificationsFromStorage() {
-  try {
-    const saved = localStorage.getItem(NOTIF_KEY);
-    if(saved) { const p=JSON.parse(saved); if(Array.isArray(p)) return p; }
-  } catch(e) {}
-  return [
-    {id:1,teamId:"all",from:"meetings-noreply@google.com",subject:"Acontecendo agora: adriana.lima@conexasaude.com.br está convidando você para uma videochamada",receivedAt:"2026-06-07T15:04:31Z",slackChannel:"#notificacoes-email"},
-    {id:2,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2342369: [N3] - | Agendamento",receivedAt:"2026-06-05T20:58:16Z",slackChannel:"#notificacoes-email"},
-    {id:3,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2342369 marcado como RESOLVIDO!",receivedAt:"2026-06-05T20:58:16Z",slackChannel:"#notificacoes-email"},
-    {id:4,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2347411 marcado como RESOLVIDO!",receivedAt:"2026-06-05T19:50:18Z",slackChannel:"#notificacoes-email"},
-    {id:5,teamId:"data-protection",from:"support@conexasaude3465.zendesk.com",subject:"Exclusão de dados – JÉSSIKA LORRANE ALBUQUERQUE MATOS DE AMORIM",receivedAt:"2026-06-05T19:42:01Z",slackChannel:"#notificacoes-email"},
-    {id:6,teamId:"medical",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2347665 marcado como RESOLVIDO!",receivedAt:"2026-06-05T19:13:53Z",slackChannel:"#notificacoes-email"},
-    {id:7,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2349751 marcado como RESOLVIDO!",receivedAt:"2026-06-05T18:13:35Z",slackChannel:"#notificacoes-email"},
-    {id:8,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2340842: [N3] - | Liberação de consulta",receivedAt:"2026-06-05T17:55:40Z",slackChannel:"#notificacoes-email"},
-    {id:9,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"Ticket #2340842 marcado como RESOLVIDO!",receivedAt:"2026-06-05T17:55:40Z",slackChannel:"#notificacoes-email"},
-    {id:10,teamId:"n3",from:"support@conexasaude3465.zendesk.com",subject:"S3-2330083: [N3] - | Incidente na plataforma",receivedAt:"2026-06-05T17:35:53Z",slackChannel:"#notificacoes-email"},
-  ];
+function loadNotifications(){
+  try{const s=localStorage.getItem(NOTIF_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p))return p;}}catch(e){}
+  return [];
 }
 
-function loadWebhookFromStorage() {
-  try { return localStorage.getItem(WEBHOOK_KEY)||""; } catch(e) { return ""; }
-}
+function saveNotes(){try{localStorage.setItem(NOTES_KEY,JSON.stringify(S.notes));}catch(e){}}
+function saveNotifications(){try{localStorage.setItem(NOTIF_KEY,JSON.stringify(S.notifications));}catch(e){}}
+function saveLastCheck(){try{localStorage.setItem(LASTCHECK_KEY,new Date().toISOString());}catch(e){}}
+function loadLastCheck(){try{return localStorage.getItem(LASTCHECK_KEY)||"";}catch(e){return "";}}
 
-function saveWebhookToStorage(url) {
-  try { localStorage.setItem(WEBHOOK_KEY, url); } catch(e) {}
-}
-
-function saveNotificationsToStorage() {
-  try { localStorage.setItem(NOTIF_KEY, JSON.stringify(S.notifications)); } catch(e) {}
-}
-
-function saveNotesToStorage() {
-  try { localStorage.setItem(NOTES_KEY, JSON.stringify(S.notes)); } catch(e) {}
-}
-
-function scheduleSave() {
+function scheduleSave(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { saveNotesToStorage(); showSaveStatus(); }, 300);
+  saveTimer=setTimeout(()=>{saveNotes();showSaveStatus();},300);
 }
-
-function showSaveStatus() {
-  const el = document.getElementById("noteSaveStatus");
-  if(!el) return;
-  el.innerHTML = '<i class="ti ti-cloud-check" style="font-size:13px"></i> Salvo automaticamente';
-  el.style.color = "#0F6E56"; el.style.display = "flex";
-  setTimeout(() => { if(el) el.style.display = "none"; }, 2500);
+function showSaveStatus(){
+  const el=document.getElementById("noteSaveStatus");
+  if(!el)return;
+  el.innerHTML='<i class="ti ti-cloud-check" style="font-size:13px"></i> Salvo';
+  el.style.color="#0F6E56";el.style.display="flex";
+  setTimeout(()=>{if(el)el.style.display="none";},2500);
 }
 
 const S={
-  view:"dashboard", themeId:"blue", fontSizeId:"md", bgModeId:"light",
+  view:"dashboard",themeId:"blue",fontSizeId:"md",bgModeId:"light",
   slackChannel:"#notificacoes-email",
-  slackWebhookUrl: loadWebhookFromStorage(),
-  activeTeams:{n3:true,"data-protection":true,medical:true,all:true},
-  monitoring:false, loading:false, polling:false, interval:null,
-  notifications: loadNotificationsFromStorage(), logs:[],
-  notes: loadNotesFromStorage(),
-  editingNote:null,
+  notifications:loadNotifications(),
+  notes:loadNotes(),
+  logs:[],editingNote:null,
 };
 
-// ── helpers ────────────────────────────────────────────────────────────────
 function theme(){return THEMES.find(t=>t.id===S.themeId)||THEMES[0];}
 function fsz(){return FONT_SIZES.find(f=>f.id===S.fontSizeId)||FONT_SIZES[1];}
 function bgm(){return BG_MODES.find(b=>b.id===S.bgModeId)||BG_MODES[1];}
@@ -365,7 +302,34 @@ function fmtFull(iso){return fmtDate(iso)+" às "+fmtTime(iso);}
 function isoToInput(iso){return new Date(iso).toISOString().slice(0,10);}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function pillHtml(t){return`<span class="pill" style="background:${t.bg};color:${t.textColor};border:1px solid ${t.color}33"><i class="ti ${t.icon}"></i> ${t.label}</span>`;}
-function webhookOk(){return S.slackWebhookUrl.startsWith("https://hooks.slack.com/");}
+
+// ── Refresh from localStorage (called by "Atualizar" button) ──────────────
+function refreshFromStorage(){
+  const before=S.notifications.length;
+  S.notifications=loadNotifications();
+  const after=S.notifications.length;
+  const diff=after-before;
+  saveLastCheck();
+  renderAll();
+  const el=document.getElementById("checkResult");
+  if(diff>0){
+    el.className="result-banner result-success";
+    el.textContent=`✓ ${diff} nova(s) notificação(ões) carregada(s). Total: ${after}`;
+  } else {
+    el.className="result-banner result-info";
+    el.textContent=`✓ Dados atualizados — ${after} notificação(ões) no histórico.`;
+  }
+  el.style.display="";
+  addLog(`Atualizado do localStorage: ${after} notificação(ões).`,"success");
+}
+
+function clearNotifications(){
+  if(!confirm("Limpar todo o histórico de notificações?"))return;
+  S.notifications=[];
+  saveNotifications();
+  renderAll();
+  addLog("Histórico de notificações limpo.","warn");
+}
 
 // ── Apply theme ────────────────────────────────────────────────────────────
 function applyTheme(){
@@ -374,77 +338,47 @@ function applyTheme(){
   document.body.style.color=b.text;
   document.body.style.fontSize=f.base+"px";
   const tb=document.getElementById("topbar");
-  tb.style.background=b.surface; tb.style.borderBottom="1px solid "+b.border;
+  tb.style.background=b.surface;tb.style.borderBottom="1px solid "+b.border;
   document.getElementById("topbarIcon").style.color=t.primary;
   document.getElementById("topbarTitle").style.color=b.text;
   document.getElementById("topbarPill").style.background=b.surfaceAlt;
   document.getElementById("topbarPill").style.color=b.textFaint;
   document.getElementById("topbarPill").style.border="1px solid "+b.border;
   const bcb=document.getElementById("bgCycleBtn");
-  bcb.style.background=b.surfaceAlt; bcb.style.border="1px solid "+b.border;
-  bcb.style.color=b.text;
+  bcb.style.background=b.surfaceAlt;bcb.style.border="1px solid "+b.border;bcb.style.color=b.text;
   bcb.innerHTML=`<i class="ti ${b.icon}"></i><span style="font-size:11px">${b.label}</span>`;
   const sb=document.getElementById("sidebar");
-  sb.style.background=b.surface; sb.style.borderRight="1px solid "+b.border;
+  sb.style.background=b.surface;sb.style.borderRight="1px solid "+b.border;
   document.querySelectorAll(".nav-btn").forEach(btn=>{
     const active=btn.classList.contains("active");
     btn.style.background=active?t.light:"transparent";
     btn.style.borderLeftColor=active?t.primary:"transparent";
     btn.style.color=active?t.primary:b.textMuted;
   });
-  const tb2=document.getElementById("toggleBtn");
-  if(S.monitoring){tb2.style.background=b.id==="day"||b.id==="light"||b.id==="neutral"?"#E1F5EE":t.light;tb2.style.color="#0F6E56";}
-  else{tb2.style.background=t.primary;tb2.style.color="#fff";}
-  ["m1","m2","m3","m4"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=b.surfaceAlt;}});
+  ["m1","m2","m3","m4"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.background=b.surfaceAlt;});
   document.getElementById("m2v").style.color=t.primary;
-  document.getElementById("m3v").style.color=S.activeTeams.all?"#BA7517":t.primary;
-  document.querySelectorAll(".notif-card,.note-card,[id='newNoteCard'],[id='noteFilterCard'],[id='configAppearance'],[id='configSlack'],[id='configTeams']").forEach(el=>{
-    el.style.background=b.surface; el.style.border="1px solid "+b.border;
+  document.querySelectorAll(".notif-card,.note-card,[id='newNoteCard'],[id='noteFilterCard'],[id='configAppearance'],[id='configSlack'],[id='configTeams'],[id='configGS']").forEach(el=>{
+    el.style.background=b.surface;el.style.border="1px solid "+b.border;
   });
   document.querySelectorAll("input[type=text],input[type=date],textarea").forEach(el=>{
-    el.style.background=b.surfaceAlt; el.style.color=b.text; el.style.border="1px solid "+b.border;
+    el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;
   });
   document.querySelectorAll(".search-bar,[id='noteSearchWrap']").forEach(el=>{
-    el.style.background=b.surface; el.style.border="1px solid "+b.border;
+    el.style.background=b.surface;el.style.border="1px solid "+b.border;
   });
   document.querySelectorAll(".search-bar input").forEach(el=>el.style.color=b.text);
   document.querySelectorAll("#clearLogsBtn,#clearFilterBtn").forEach(el=>{
-    el.style.border="1px solid "+b.border; el.style.color=b.textMuted;
+    el.style.border="1px solid "+b.border;el.style.color=b.textMuted;
   });
   document.getElementById("addNoteBtn").style.background=t.primary;
-  document.querySelectorAll(".action-btn").forEach(el=>el.style.background=t.primary);
-  document.querySelectorAll("[id$='Label'],[id$='Subtitle'],[id$='Hint'],[id$='Desc'],[id='notesSubtitle'],[id='dashDate']").forEach(el=>el.style.color=b.textFaint);
+  document.querySelectorAll(".action-btn").forEach(el=>{if(!el.id||el.id==="checkBtn")el.style.background=t.primary;});
+  document.querySelectorAll("[id$='Label'],[id$='Subtitle'],[id$='Hint'],[id$='Desc'],[id='notesSubtitle'],[id='dashDate'],[id='gsDesc'],[id='teamsDesc'],[id='slackChannelDesc']").forEach(el=>el.style.color=b.textFaint);
   document.querySelectorAll("h2").forEach(el=>el.style.color=b.text);
   document.querySelectorAll(".section-label").forEach(el=>el.style.color=b.textFaint);
-  // Webhook card styling
-  styleWebhookCard();
+  document.getElementById("gsBanner").style.background=b.id==="day"||b.id==="light"||b.id==="neutral"?"#E1F5EE":b.surfaceAlt;
+  document.getElementById("gsBanner").style.border="1px solid "+(b.id==="day"||b.id==="light"||b.id==="neutral"?"#5DCAA5":b.border);
+  document.getElementById("gsBanner").style.color=b.id==="day"||b.id==="light"||b.id==="neutral"?"#04342C":b.text;
   renderConfigAppearance();
-}
-
-// ── Webhook card style ─────────────────────────────────────────────────────
-function styleWebhookCard(){
-  const b=bgm(),t=theme();
-  const card=document.getElementById("configWebhook");
-  const ok=webhookOk();
-  card.style.background=b.surface;
-  card.style.border=ok?"2px solid #5DCAA5":"2px solid #EF9F27";
-  // badge
-  const badge=document.getElementById("webhookStatusBadge");
-  if(ok){badge.textContent="✓ Configurado";badge.style.background="#E1F5EE";badge.style.color="#085041";}
-  else{badge.textContent="⚠ Não configurado";badge.style.background="#FAEEDA";badge.style.color="#633806";}
-  // hint box
-  const hint=document.getElementById("webhookHint");
-  hint.style.background=b.surfaceAlt; hint.style.border="1px solid "+b.border; hint.style.color=b.textMuted;
-  // input
-  const inp=document.getElementById("slackWebhookInput");
-  inp.style.background=b.surfaceAlt; inp.style.color=b.text; inp.style.border="1px solid "+(ok?"#5DCAA5":b.border);
-  // test button
-  const btn=document.getElementById("testWebhookBtn");
-  btn.style.background=t.primary;
-  btn.style.opacity=ok?"1":"0.5";
-  btn.style.cursor=ok?"pointer":"not-allowed";
-  // desc
-  document.getElementById("webhookDesc").style.color=b.textFaint;
 }
 
 // ── Clock ──────────────────────────────────────────────────────────────────
@@ -466,69 +400,43 @@ setInterval(updateClock,1000);
 function switchView(v){
   ["dashboard","notifications","notes","config","logs"].forEach(id=>{
     document.getElementById("view-"+id).style.display=id===v?"":"none";
-    const btn=document.querySelector(`[data-view="${id}"]`);
-    btn.classList.toggle("active",id===v);
+    document.querySelector(`[data-view="${id}"]`).classList.toggle("active",id===v);
   });
-  S.view=v; applyTheme();
-  if(v==="notes") renderNotes();
-  if(v==="notifications") renderNotifications();
-  if(v==="dashboard") renderDashboard();
-  if(v==="config"){
-    // sync webhook input with stored value
-    document.getElementById("slackWebhookInput").value=S.slackWebhookUrl;
-    styleWebhookCard();
-  }
+  S.view=v;applyTheme();
+  if(v==="notes")renderNotes();
+  if(v==="notifications")renderNotifications();
+  if(v==="dashboard")renderDashboard();
 }
 
 function cycleBgMode(){
   const idx=BG_MODES.findIndex(b=>b.id===S.bgModeId);
   S.bgModeId=BG_MODES[(idx+1)%BG_MODES.length].id;
-  applyTheme(); updateClock(); renderAll();
+  applyTheme();updateClock();renderAll();
 }
 
-function updateStatus(){
-  const b=bgm(),t=theme();
-  const dot=document.getElementById("statusDot"),lbl=document.getElementById("statusLabel"),btn=document.getElementById("toggleBtn");
-  if(S.monitoring){
-    dot.style.background="#1D9E75"; dot.style.boxShadow="0 0 0 3px #E1F5EE";
-    lbl.textContent="Monitorando"; lbl.style.color="#0F6E56";
-    btn.innerHTML=`<i class="ti ti-player-pause"></i> Pausar Monitor`;
-    btn.style.background="#E1F5EE"; btn.style.color="#0F6E56";
-  } else {
-    dot.style.background="#888"; dot.style.boxShadow="none";
-    lbl.textContent="Inativo"; lbl.style.color=b.textFaint;
-    btn.innerHTML=`<i class="ti ti-player-play"></i> Iniciar Monitor`;
-    btn.style.background=t.primary; btn.style.color="#fff";
-  }
-}
-
-// ── Render Dashboard ───────────────────────────────────────────────────────
+// ── Dashboard ──────────────────────────────────────────────────────────────
 function renderDashboard(){
   const b=bgm(),t=theme(),f=fsz();
   document.getElementById("dashTitle").textContent="Dashboard";
   document.getElementById("dashDate").textContent="Hoje é "+new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
   document.getElementById("m1v").textContent=S.notifications.length;
   document.getElementById("m2v").textContent=S.slackChannel;
-  document.getElementById("m3v").textContent=S.activeTeams.all?"📬 Todos":"🎯 Times";
+  const lc=loadLastCheck();
+  document.getElementById("m3v").textContent=lc?fmtFull(lc):"Nunca";
   document.getElementById("m4v").textContent=S.notes.length;
-  const alert=document.getElementById("allEmailsAlert");
-  alert.style.display=S.activeTeams.all?"flex":"none";
-  // Webhook warning on dashboard
-  const warnDash=document.getElementById("webhookWarnDash");
-  warnDash.style.display=webhookOk()?"none":"flex";
   document.getElementById("teamRows").innerHTML=TEAMS.map(tm=>{
     const count=S.notifications.filter(n=>n.teamId===tm.id).length;
-    const dim=(tm.id!=="all"&&S.activeTeams.all)||(tm.id==="all"&&!S.activeTeams.all);
-    return `<div class="team-row" style="background:${b.surface};border:1px solid ${b.border};opacity:${dim?0.4:1}">
+    return`<div class="team-row" style="background:${b.surface};border:1px solid ${b.border}">
       <div class="team-avatar" style="background:${tm.bg}"><i class="ti ${tm.icon}" style="font-size:17px;color:${tm.color}"></i></div>
       <div><div style="font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div>
-      <div style="font-size:12px;color:${b.textFaint}">${S.activeTeams[tm.id]?"Monitorado":"Inativo"}</div></div>
+      <div style="font-size:12px;color:${b.textFaint}">Monitorado</div></div>
       <span style="font-size:22px;font-weight:700;color:${count>0?tm.color:b.border};font-family:'IBM Plex Mono',monospace;margin-left:auto">${count}</span>
     </div>`;
   }).join("");
+  document.getElementById("checkBtn").style.background=t.primary;
 }
 
-// ── Render Notifications ───────────────────────────────────────────────────
+// ── Notifications ──────────────────────────────────────────────────────────
 function renderNotifications(){
   const b=bgm(),f=fsz();
   const q=(document.getElementById("notifSearch")||{}).value||"";
@@ -538,52 +446,45 @@ function renderNotifications(){
   document.querySelector("#notifSearchBar input").style.color=b.text;
   const filtered=S.notifications.filter(n=>!q||n.subject.toLowerCase().includes(q.toLowerCase())||n.from.toLowerCase().includes(q.toLowerCase()));
   if(!filtered.length){
-    document.getElementById("notifList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-bell-off"></i><p>${S.notifications.length===0?"Nenhuma notificação ainda.<br>Inicie o monitor para começar.":"Nenhum resultado encontrado."}</p></div>`;
+    document.getElementById("notifList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-bell-off"></i><p>${S.notifications.length===0?"Nenhuma notificação ainda.<br>O Google Apps Script enviará notificações automaticamente.":"Nenhum resultado encontrado."}</p></div>`;
     return;
   }
   document.getElementById("notifList").innerHTML=filtered.map(n=>{
-    const team=TEAMS.find(t=>t.id===n.teamId)||TEAMS.find(t=>t.id==="all");
-    return `<div class="notif-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${team?.color||"#888"}">
+    const team=TEAMS.find(t=>t.id===n.teamId)||TEAMS[3];
+    return`<div class="notif-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${team.color}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        ${team?pillHtml(team):""}
+        ${pillHtml(team)}
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-          <span style="font-size:11px;color:${b.textFaint};display:flex;align-items:center;gap:4px"><i class="ti ti-calendar" style="font-size:11px"></i>${fmtDate(n.receivedAt)}</span>
-          <span style="font-size:11px;color:${b.textFaint};font-family:'IBM Plex Mono',monospace;display:flex;align-items:center;gap:4px"><i class="ti ti-clock" style="font-size:11px"></i>${fmtTime(n.receivedAt)}</span>
+          <span style="font-size:11px;color:${b.textFaint}">${fmtDate(n.receivedAt)}</span>
+          <span style="font-size:11px;color:${b.textFaint};font-family:'IBM Plex Mono',monospace">${fmtTime(n.receivedAt)}</span>
         </div>
       </div>
       <div style="font-weight:700;font-size:${f.base-1}px;margin-bottom:2px;color:${b.text}">${esc(n.subject)}</div>
       <div style="font-size:${f.base-2}px;color:${b.textMuted}">De: <strong>${esc(n.from)}</strong></div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px">
         <i class="ti ti-brand-slack" style="color:#1D9E75;font-size:13px"></i>
-        <span style="color:#0F6E56">Enviado · ${esc(n.slackChannel)}</span>
+        <span style="color:#0F6E56">Enviado · ${esc(n.slackChannel||S.slackChannel)}</span>
         <span style="margin-left:auto" class="pill pill-sent"><i class="ti ti-check"></i> entregue</span>
       </div>
     </div>`;
   }).join("");
   const badge=document.getElementById("notifBadge");
-  badge.textContent=S.notifications.length; badge.style.display=S.notifications.length>0?"":"none";
+  badge.textContent=S.notifications.length;badge.style.display=S.notifications.length>0?"":"none";
 }
 
-// ── Render Notes ───────────────────────────────────────────────────────────
+// ── Notes ──────────────────────────────────────────────────────────────────
 function renderNotes(){
   const b=bgm(),t=theme(),f=fsz();
   const q=(document.getElementById("noteSearch")||{}).value||"";
   const df=(document.getElementById("noteDateFrom")||{}).value||"";
   const dt=(document.getElementById("noteDateTo")||{}).value||"";
-  const filtered=[...S.notes]
-    .sort((a,z)=>z.pinned-a.pinned||new Date(z.createdAt)-new Date(a.createdAt))
-    .filter(n=>{
-      const mt=!q||n.text.toLowerCase().includes(q.toLowerCase());
-      const d=isoToInput(n.createdAt);
-      return mt&&(!df||d>=df)&&(!dt||d<=dt);
-    });
+  const filtered=[...S.notes].sort((a,z)=>z.pinned-a.pinned||new Date(z.createdAt)-new Date(a.createdAt))
+    .filter(n=>{const mt=!q||n.text.toLowerCase().includes(q.toLowerCase());const d=isoToInput(n.createdAt);return mt&&(!df||d>=df)&&(!dt||d<=dt);});
   const hasFilter=q||df||dt;
   document.getElementById("clearFilterBtn").style.display=hasFilter?"flex":"none";
   const fr=document.getElementById("noteFilterResult");
-  if(hasFilter){
-    fr.style.display="block"; fr.style.color=b.textFaint;
-    fr.innerHTML=`<i class="ti ti-list-search" style="font-size:12px;margin-right:4px"></i>${filtered.length} anotação(ões) encontrada(s)${df?" · a partir de "+new Date(df+"T00:00:00").toLocaleDateString("pt-BR"):""}${dt?" · até "+new Date(dt+"T00:00:00").toLocaleDateString("pt-BR"):""}`;
-  } else { fr.style.display="none"; }
+  if(hasFilter){fr.style.display="block";fr.style.color=b.textFaint;fr.textContent=`${filtered.length} anotação(ões) encontrada(s)`;}
+  else fr.style.display="none";
   document.getElementById("newNoteCard").style.background=b.surface;
   document.getElementById("newNoteCard").style.border="1px solid "+b.border;
   document.getElementById("noteFilterCard").style.background=b.surface;
@@ -594,50 +495,45 @@ function renderNotes(){
   document.getElementById("noteSearchWrap").style.background=b.surfaceAlt;
   document.getElementById("noteSearchWrap").style.border="1px solid "+b.border;
   document.getElementById("noteSearch").style.color=b.text;
-  ["noteDateFrom","noteDateTo"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el){el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;}
-  });
+  ["noteDateFrom","noteDateTo"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;}});
   document.getElementById("addNoteBtn").style.background=t.primary;
-  ["newNoteLabel","noteSaveHint","noteFilterLabel","dateFromLabel","dateToLabel","notesSubtitle"].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.style.color=b.textMuted;
-  });
-  const notesBadge=document.getElementById("notesBadge");
+  ["newNoteLabel","noteSaveHint","noteFilterLabel","dateFromLabel","dateToLabel","notesSubtitle"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.color=b.textMuted;});
+  const nb=document.getElementById("notesBadge");
   const pinned=S.notes.filter(n=>n.pinned).length;
-  notesBadge.textContent=pinned; notesBadge.style.display=pinned>0?"":"none";
+  nb.textContent=pinned;nb.style.display=pinned>0?"":"none";
   if(!filtered.length){
-    document.getElementById("noteList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-notes-off"></i><p>${S.notes.length===0?"Nenhuma anotação ainda.":"Nenhuma anotação encontrada para esse filtro."}</p></div>`;
+    document.getElementById("noteList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-notes-off"></i><p>${S.notes.length===0?"Nenhuma anotação ainda.":"Nenhuma encontrada."}</p></div>`;
     return;
   }
   document.getElementById("noteList").innerHTML=filtered.map(note=>{
     if(S.editingNote===note.id){
-      return `<div class="note-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${t.primary}">
+      return`<div class="note-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${t.primary}">
         <textarea id="edit-${note.id}" style="width:100%;min-height:70px;padding:8px 12px;border-radius:8px;border:1px solid ${t.primary};background:${b.surfaceAlt};color:${b.text};font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box">${esc(note.text)}</textarea>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="saveNote(${note.id})" style="padding:6px 16px;background:${t.primary};color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700;display:flex;align-items:center;gap:4px"><i class="ti ti-device-floppy" style="font-size:13px"></i> Salvar</button>
+          <button onclick="saveNote(${note.id})" style="padding:6px 16px;background:${t.primary};color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700"><i class="ti ti-device-floppy" style="font-size:13px"></i> Salvar</button>
           <button onclick="S.editingNote=null;renderNotes()" style="padding:6px 16px;background:transparent;color:${b.textMuted};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif">Cancelar</button>
         </div>
       </div>`;
     }
-    return `<div class="note-card" style="background:${b.surface};border:1px solid ${note.pinned?t.primary+"66":b.border};border-left-color:${note.pinned?t.primary:b.border}">
+    return`<div class="note-card" style="background:${b.surface};border:1px solid ${note.pinned?t.primary+"66":b.border};border-left-color:${note.pinned?t.primary:b.border}">
       <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
         ${note.pinned?`<i class="ti ti-pin" style="font-size:14px;color:${t.primary};flex-shrink:0;margin-top:2px"></i>`:""}
         <p style="flex:1;margin:0;font-size:${f.base-1}px;color:${b.text};line-height:1.6;cursor:pointer" onclick="S.editingNote=${note.id};renderNotes()">${esc(note.text)}</p>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid ${b.border}">
-        <span style="font-size:11px;color:${b.textFaint};display:flex;align-items:center;gap:4px"><i class="ti ti-pencil-plus" style="font-size:11px"></i> Criada em ${fmtFull(note.createdAt)}</span>
-        ${note.updatedAt?`<span style="font-size:11px;color:${b.textFaint};display:flex;align-items:center;gap:4px"><i class="ti ti-pencil" style="font-size:11px"></i> Editada em ${fmtFull(note.updatedAt)}</span>`:""}
+        <span style="font-size:11px;color:${b.textFaint}"><i class="ti ti-pencil-plus" style="font-size:11px"></i> ${fmtFull(note.createdAt)}</span>
+        ${note.updatedAt?`<span style="font-size:11px;color:${b.textFaint}"><i class="ti ti-pencil" style="font-size:11px"></i> Editada ${fmtFull(note.updatedAt)}</span>`:""}
       </div>
       <div style="display:flex;gap:6px">
-        <button onclick="S.editingNote=${note.id};renderNotes()" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${b.textMuted};font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px"><i class="ti ti-edit" style="font-size:12px"></i> Editar</button>
-        <button onclick="togglePin(${note.id})" style="padding:4px 12px;background:${note.pinned?t.light:b.surfaceAlt};border:1px solid ${note.pinned?t.primary+"55":b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${note.pinned?t.primary:b.textMuted};font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px"><i class="ti ${note.pinned?"ti-pin-filled":"ti-pin"}" style="font-size:12px"></i> ${note.pinned?"Fixado":"Fixar"}</button>
-        <button onclick="deleteNote(${note.id})" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:#A32D2D;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px;margin-left:auto"><i class="ti ti-trash" style="font-size:12px"></i> Excluir</button>
+        <button onclick="S.editingNote=${note.id};renderNotes()" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${b.textMuted};font-family:'Sora',sans-serif"><i class="ti ti-edit" style="font-size:12px"></i> Editar</button>
+        <button onclick="togglePin(${note.id})" style="padding:4px 12px;background:${note.pinned?t.light:b.surfaceAlt};border:1px solid ${note.pinned?t.primary+"55":b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${note.pinned?t.primary:b.textMuted};font-family:'Sora',sans-serif"><i class="ti ${note.pinned?"ti-pin-filled":"ti-pin"}" style="font-size:12px"></i> ${note.pinned?"Fixado":"Fixar"}</button>
+        <button onclick="deleteNote(${note.id})" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:#A32D2D;font-family:'Sora',sans-serif;margin-left:auto"><i class="ti ti-trash" style="font-size:12px"></i> Excluir</button>
       </div>
     </div>`;
   }).join("");
 }
 
-// ── Render Config Appearance ───────────────────────────────────────────────
+// ── Config Appearance ──────────────────────────────────────────────────────
 function renderConfigAppearance(){
   const b=bgm(),t=theme(),f=fsz();
   document.getElementById("themeSwatches").innerHTML=THEMES.map(th=>`
@@ -658,98 +554,40 @@ function renderConfigAppearance(){
         <div class="bg-swatch" style="background:${bm.bg};border:1px solid ${bm.border}"></div>
       </div>
     </button>`).join("");
-  document.getElementById("bgCurrentLabel").innerHTML=`Atual: <strong style="color:${t.primary}">${b.label}</strong> · Clique no botão do topo para alternar rapidamente`;
+  document.getElementById("bgCurrentLabel").innerHTML=`Atual: <strong style="color:${t.primary}">${b.label}</strong> · Clique no botão do topo para alternar`;
   document.getElementById("bgCurrentLabel").style.color=b.textFaint;
-  ["configAppearance","configSlack","configTeams"].forEach(id=>{
+  ["configAppearance","configSlack","configTeams","configGS"].forEach(id=>{
     const el=document.getElementById(id);if(el){el.style.background=b.surface;el.style.border="1px solid "+b.border;}
   });
-  document.getElementById("slackChannelDesc").style.color=b.textMuted;
-  document.getElementById("teamsDesc").style.color=b.textFaint;
   const si=document.getElementById("slackChannelInput");
-  si.style.background=b.surfaceAlt; si.style.color=b.text; si.style.border="1px solid "+b.border;
-  const aec=document.getElementById("allEmailsToggleCard");
-  aec.style.background=S.activeTeams.all?"#FAEEDA":b.surfaceAlt;
-  aec.style.border=`1.5px solid ${S.activeTeams.all?"#EF9F27":b.border}`;
-  const aes=document.getElementById("allEmailsSwitch");
-  aes.innerHTML=`<div style="position:absolute;inset:0;border-radius:22px;background:${S.activeTeams.all?"#BA7517":"#ccc"};transition:background 0.2s"><div style="position:absolute;top:3px;left:${S.activeTeams.all?19:3}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s"></div></div>`;
-  document.getElementById("allEmailsSubtitle").style.color=b.textFaint;
-  document.getElementById("teamConfigRows").innerHTML=TEAMS.filter(tm=>tm.id!=="all").map(tm=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid ${b.border};opacity:${S.activeTeams.all?0.4:1}">
+  si.style.background=b.surfaceAlt;si.style.color=b.text;si.style.border="1px solid "+b.border;
+  document.getElementById("teamConfigRows").innerHTML=TEAMS.map(tm=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid ${b.border}">
       <div class="team-avatar" style="background:${tm.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${tm.icon}" style="font-size:15px;color:${tm.color}"></i></div>
       <div style="flex:1;font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div>
-      <div onclick="${S.activeTeams.all?"":"toggleTeam('"+tm.id+"')"}" style="width:38px;height:22px;border-radius:22px;background:${S.activeTeams[tm.id]?t.primary:"#ccc"};position:relative;transition:background 0.2s;flex-shrink:0;cursor:${S.activeTeams.all?"not-allowed":"pointer"}">
-        <div style="position:absolute;top:3px;left:${S.activeTeams[tm.id]?19:3}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s"></div>
-      </div>
+      <span class="pill" style="background:${tm.bg};color:${tm.textColor};border:1px solid ${tm.color}33"><i class="ti ti-check"></i> Ativo</span>
     </div>`).join("");
   ["themeColorLabel","fontSizeLabel","bgModeLabel","teamsSpecificLabel"].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.color=b.textFaint;
   });
 }
 
-// ── Webhook actions ────────────────────────────────────────────────────────
-function updateWebhook(){
-  S.slackWebhookUrl = document.getElementById("slackWebhookInput").value.trim();
-  saveWebhookToStorage(S.slackWebhookUrl);
-  styleWebhookCard();
-  renderDashboard();
-  addLog(webhookOk()?"Webhook URL salvo.":"Webhook URL removido.","info");
-}
-
-async function testWebhook(){
-  if(!webhookOk()){
-    showWebhookTestResult("error","Cole uma URL válida antes de testar. (https://hooks.slack.com/...)"); return;
-  }
-  const btn=document.getElementById("testWebhookBtn");
-  btn.disabled=true; btn.innerHTML=`<i class="ti ti-loader-2 spin"></i> Testando...`;
-  addLog("Testando webhook Slack...","info");
-  try{
-    const res = await fetch(S.slackWebhookUrl, {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({text:"✅ *Email Monitor* conectado com sucesso! Notificações serão enviadas aqui."})
-    });
-    if(res.ok){
-      showWebhookTestResult("success","✓ Mensagem enviada! Verifique o canal "+S.slackChannel+" no Slack.");
-      addLog("Webhook OK — mensagem de teste enviada.","success");
-    } else {
-      showWebhookTestResult("error",`Erro ${res.status}: verifique se a URL está correta e o app está ativo no Slack.`);
-      addLog("Erro no webhook: "+res.status,"error");
-    }
-  } catch(err){
-    // CORS block é esperado — o Slack não permite fetch direto do browser
-    // Isso significa que a URL está sendo chamada corretamente
-    showWebhookTestResult("warn","⚠ Bloqueio de CORS no navegador — isso é normal. O webhook funciona, mas só pode ser chamado via servidor backend ou via MCP. Use o botão 'Verificar agora' no Dashboard.");
-    addLog("CORS block no teste direto — comportamento esperado em GitHub Pages.","warn");
-  }
-  btn.disabled=false; btn.innerHTML=`<i class="ti ti-send" style="font-size:13px"></i> Testar`;
-}
-
-function showWebhookTestResult(type,msg){
-  const el=document.getElementById("webhookTestResult");
-  const colors={success:"background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C",error:"background:#FCEBEB;border:1px solid #F09595;color:#501313",warn:"background:#FAEEDA;border:1px solid #EF9F27;color:#633806"};
-  el.style.cssText=colors[type]||colors.warn; el.textContent=msg; el.style.display="";
-}
-
 // ── Config actions ─────────────────────────────────────────────────────────
 function updateChannel(){S.slackChannel=document.getElementById("slackChannelInput").value;renderDashboard();}
-function toggleAllEmails(){S.activeTeams.all=!S.activeTeams.all;renderAll();}
-function toggleTeam(id){if(!S.activeTeams.all)S.activeTeams[id]=!S.activeTeams[id];renderAll();}
 
 // ── Note actions ───────────────────────────────────────────────────────────
 function addNote(){
-  const txt=document.getElementById("newNoteText").value.trim();
-  if(!txt)return;
+  const txt=document.getElementById("newNoteText").value.trim();if(!txt)return;
   S.notes.push({id:Date.now(),text:txt,pinned:false,createdAt:new Date().toISOString(),updatedAt:null});
   document.getElementById("newNoteText").value="";
-  renderNotes(); renderDashboard(); scheduleSave();
+  renderNotes();renderDashboard();scheduleSave();
 }
 function deleteNote(id){S.notes=S.notes.filter(n=>n.id!==id);renderNotes();renderDashboard();scheduleSave();}
 function togglePin(id){S.notes=S.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n);renderNotes();scheduleSave();}
 function saveNote(id){
-  const txt=document.getElementById("edit-"+id)?.value.trim();
-  if(!txt)return;
+  const txt=document.getElementById("edit-"+id)?.value.trim();if(!txt)return;
   S.notes=S.notes.map(n=>n.id===id?{...n,text:txt,updatedAt:new Date().toISOString()}:n);
-  S.editingNote=null; renderNotes(); scheduleSave();
+  S.editingNote=null;renderNotes();scheduleSave();
 }
 function clearNoteFilters(){
   document.getElementById("noteSearch").value="";
@@ -772,167 +610,18 @@ function renderLogs(){
   term.scrollTop=0;
 }
 
-// ── Monitor ────────────────────────────────────────────────────────────────
-function toggleMonitor(){
-  if(!S.monitoring && !webhookOk()){
-    addLog("Webhook não configurado — configure em Configurações antes de iniciar.","error");
-    showResult("error","⚠ Configure o Slack Webhook URL em Configurações antes de iniciar o monitor.");
-    switchView("config"); return;
-  }
-  S.monitoring=!S.monitoring; updateStatus();
-  if(S.monitoring){addLog("Monitor ativado — verificando a cada 5 minutos.","success");checkEmails();S.interval=setInterval(checkEmails,5*60*1000);}
-  else{addLog("Monitor pausado.","warn");clearInterval(S.interval);}
-}
-
-async function checkEmails(){
-  if(!webhookOk()){
-    showResult("error","⚠ Configure o Slack Webhook URL em Configurações antes de verificar.");
-    addLog("Webhook não configurado — ação cancelada.","error"); return;
-  }
-  if(S.loading||S.polling)return;
-  S.polling=true; S.loading=true;
-  const btn=document.getElementById("checkBtn");
-  btn.disabled=true; btn.innerHTML=`<i class="ti ti-loader-2 spin"></i> Verificando...`;
-  document.getElementById("checkResult").style.display="none";
-  addLog("Chamando Gmail MCP...","info");
-
-  const sys=`Você é um assistente que monitora emails. Use o Gmail MCP para listar os últimos 20 emails não lidos da caixa de entrada. Para cada email identifique o time: se o assunto contém [N3] use teamId "n3"; se contém "Proteção de Dados" ou "Exclusão" use "data-protection"; se contém termos médicos use "medical"; qualquer outro use "all". Retorne SOMENTE um objeto JSON válido, sem markdown, sem texto antes ou depois: {"emails":[{"from":"endereco@email.com","fromName":"Nome Remetente","subject":"Assunto do Email","teamId":"n3","receivedAt":"2026-06-08T10:00:00Z","snippet":"prévia"}],"summary":"X emails encontrados"}`;
-
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
-        max_tokens:2000,
-        system:sys,
-        messages:[{role:"user",content:"Liste os emails não lidos da minha caixa de entrada do Gmail agora."}],
-        mcp_servers:[{type:"url",url:"https://gmailmcp.googleapis.com/mcp/v1",name:"gmail"}]
-      })
-    });
-
-    if(!res.ok){
-      const errTxt=await res.text();
-      addLog(`HTTP ${res.status}: ${errTxt.slice(0,120)}`,"error");
-      throw new Error(`Erro HTTP ${res.status} na API.`);
-    }
-
-    const data=await res.json();
-    addLog(`Resposta recebida. stop_reason: ${data.stop_reason||"?"}, blocos: ${(data.content||[]).length}`,"info");
-
-    // Log each content block type for debugging
-    (data.content||[]).forEach((b,i)=>{
-      if(b.type==="text") addLog(`[bloco ${i}] texto: ${b.text.slice(0,80)}`,"info");
-      else if(b.type==="mcp_tool_use") addLog(`[bloco ${i}] tool_use: ${b.name}`,"info");
-      else if(b.type==="mcp_tool_result") addLog(`[bloco ${i}] tool_result: ${JSON.stringify(b).slice(0,80)}`,"info");
-      else addLog(`[bloco ${i}] tipo: ${b.type}`,"info");
-    });
-
-    // Extract text from all text blocks
-    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
-
-    if(!txt.trim()){
-      // Maybe all content is tool_use/tool_result — check if stop_reason is tool_use
-      if(data.stop_reason==="end_turn"){
-        addLog("Nenhum texto retornado mas stop_reason=end_turn — nenhum email não lido.","warn");
-        showResult("success","✓ Nenhum email não lido encontrado na caixa de entrada.");
-        return;
-      }
-      throw new Error(`Sem texto na resposta. Blocos: ${(data.content||[]).map(b=>b.type).join(", ")}`);
-    }
-
-    addLog(`Texto bruto: ${txt.slice(0,120)}`,"info");
-
-    // Try to extract JSON from text
-    let parsed;
-    const jsonMatch=txt.match(/\{[\s\S]*\}/);
-    if(jsonMatch){
-      try{ parsed=JSON.parse(jsonMatch[0]); }
-      catch(e){ addLog("Falha ao parsear JSON: "+e.message,"error"); throw new Error("JSON inválido na resposta."); }
-    } else {
-      addLog("JSON não encontrado no texto: "+txt.slice(0,200),"warn");
-      // If no JSON found but has content, treat as no emails
-      showResult("success","✓ Verificação concluída. Nenhum email novo.");
-      return;
-    }
-
-    const emails=parsed.emails||[];
-    addLog(`${emails.length} email(s) encontrado(s).`, emails.length>0?"success":"info");
-    if(emails.length>0) await sendToSlack(emails);
-    showResult("success",`✓ ${emails.length} email(s) encontrado(s). ${parsed.summary||""}`);
-    renderAll();
-
-  }catch(err){
-    addLog("Erro: "+err.message,"error");
-    showResult("error","Erro: "+err.message+". Veja os Logs para detalhes.");
-  }finally{
-    S.loading=false; S.polling=false;
-    btn.disabled=false; btn.innerHTML=`<i class="ti ti-refresh"></i> Verificar agora`;
-    btn.style.background=theme().primary;
-  }
-}
-
-async function sendToSlack(emails){
-  addLog(`Enviando ${emails.length} notificação(ões) via Webhook...`,"info");
-  for(const email of emails){
-    const team=TEAMS.find(t=>t.id===email.teamId)||TEAMS.find(t=>t.id==="all");
-    const label=team?.id==="all"?"📬 Novo email":`📧 Novo email — ${team?.label}`;
-    // Slack Block Kit message
-    const payload={
-      channel: S.slackChannel,
-      text: `${label}: ${email.subject}`,
-      blocks:[
-        {type:"section",text:{type:"mrkdwn",text:`${label}\n*De:* ${email.fromName||email.from}\n*Assunto:* ${email.subject}${email.snippet?`\n_${email.snippet.slice(0,120)}_`:""}`}},
-        {type:"context",elements:[{type:"mrkdwn",text:`<${S.slackChannel}> · ${new Date(email.receivedAt||Date.now()).toLocaleString("pt-BR")}`}]}
-      ]
-    };
-    try{
-      // Envio via webhook direto
-      const r=await fetch(S.slackWebhookUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-      // Webhook retorna "ok" como texto plano
-      const txt=await r.text();
-      if(r.ok||txt==="ok"){
-        S.notifications.unshift({id:Date.now()+Math.random(),teamId:email.teamId,from:email.fromName||email.from,subject:email.subject,receivedAt:email.receivedAt||new Date().toISOString(),slackChannel:S.slackChannel});
-        if(S.notifications.length>100)S.notifications.pop();
-        saveNotificationsToStorage();
-        addLog(`✓ Enviado: "${email.subject.slice(0,50)}"...`,"success");
-      } else {
-        addLog(`Erro Slack ${r.status}: ${txt}`,"error");
-      }
-    }catch(err){
-      // CORS: em GitHub Pages, o fetch para o webhook é bloqueado pelo browser.
-      // A mensagem de fato chega ao Slack mas o browser não consegue ler a resposta.
-      // Registramos como enviado mesmo assim.
-      S.notifications.unshift({id:Date.now()+Math.random(),teamId:email.teamId,from:email.fromName||email.from,subject:email.subject,receivedAt:email.receivedAt||new Date().toISOString(),slackChannel:S.slackChannel});
-      if(S.notifications.length>100)S.notifications.pop();
-      saveNotificationsToStorage();
-      addLog(`Enviado (CORS): "${email.subject.slice(0,50)}"...`,"warn");
-    }
-  }
-}
-
-function showResult(type,msg){
-  const el=document.getElementById("checkResult");
-  el.className="result-banner result-"+type;
-  el.textContent=msg; el.style.display="";
-}
-
+// ── Render All ─────────────────────────────────────────────────────────────
 function renderAll(){
-  renderDashboard(); renderNotifications(); renderNotes(); renderLogs();
-  renderConfigAppearance(); updateStatus(); applyTheme();
+  renderDashboard();renderNotifications();renderNotes();renderLogs();
+  renderConfigAppearance();applyTheme();
   document.getElementById("clearLogsBtn").style.border="1px solid "+bgm().border;
   document.getElementById("clearLogsBtn").style.color=bgm().textMuted;
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
-document.getElementById("noteDateFrom").value="";
-document.getElementById("noteDateTo").value="";
-// Restore saved webhook
-document.getElementById("slackWebhookInput").value=S.slackWebhookUrl;
 updateClock();
 renderAll();
-if(!webhookOk()) addLog("⚠ Slack Webhook não configurado. Acesse Configurações para adicionar.","warn");
-else addLog("Webhook Slack carregado.","success");
+addLog("Painel carregado. Monitor automático via Google Apps Script.","success");
 </script>
 </body>
 </html>
