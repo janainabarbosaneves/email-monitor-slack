@@ -12,13 +12,14 @@
 body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,color 0.3s;}
 .topbar{display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;position:sticky;top:0;z-index:10;transition:background 0.3s,border-color 0.3s;}
 .main-wrap{display:flex;min-height:calc(100vh - 56px);}
-.sidebar{width:210px;display:flex;flex-direction:column;padding:12px 0;flex-shrink:0;transition:background 0.3s;}
-.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 20px;background:transparent;border:none;border-left:3px solid transparent;cursor:pointer;font-size:14px;font-family:'Sora',sans-serif;font-weight:400;text-align:left;transition:all 0.15s;}
+.sidebar{width:220px;display:flex;flex-direction:column;padding:12px 0;flex-shrink:0;transition:background 0.3s;overflow-y:auto;}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 20px;background:transparent;border:none;border-left:3px solid transparent;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:400;text-align:left;transition:all 0.15s;}
+.nav-section{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:14px 20px 4px;opacity:0.45;}
 .sidebar-bottom{margin-top:auto;padding:16px 20px;}
-.content{flex:1;padding:28px 32px;overflow:auto;max-width:960px;}
+.content{flex:1;padding:28px 32px;overflow:auto;max-width:980px;}
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
 .metric{border-radius:10px;padding:14px 16px;}
-.team-row{border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;transition:opacity 0.2s;}
+.team-row{border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;}
 .team-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .notif-card{border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left-width:3px;animation:slideIn 0.2s ease;}
 @keyframes slideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
@@ -46,6 +47,53 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
 .spin{animation:spin 0.8s linear infinite;display:inline-block;}
 ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{border-radius:3px;}
 .gs-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;}
+
+/* ── Links Rápidos ── */
+.links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px;}
+.link-card{border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.15s;position:relative;border-width:1px;border-style:solid;}
+.link-card:hover .lcard-actions{display:flex;}
+.lcard-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;}
+.add-dashed{border-style:dashed!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:13px;min-height:110px;}
+.sugg-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.sugg-chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;border-radius:999px;border-width:1px;border-style:solid;cursor:pointer;}
+
+/* ── Workspace ── */
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;}
+.ws-card{border-radius:14px;padding:14px;position:relative;cursor:pointer;transition:border-color 0.15s;border-width:1px;border-style:solid;}
+.ws-card:hover .wcard-actions{display:flex;}
+.wcard-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;}
+.ws-thumb{height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:10px;}
+.view-toggle{display:flex;border-radius:8px;overflow:hidden;border-width:1px;border-style:solid;}
+.vt-btn{background:none;border:none;padding:6px 9px;cursor:pointer;font-size:16px;display:flex;align-items:center;}
+
+/* ── Contatos ── */
+.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+.contact-card{border-radius:14px;padding:16px 14px 12px;position:relative;cursor:pointer;transition:border-color 0.15s;border-width:1px;border-style:solid;}
+.contact-card:hover .ccard-actions{display:flex;}
+.ccard-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;}
+.c-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin-bottom:10px;}
+
+/* ── Shared small controls ── */
+.mini-btn{padding:4px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px;border-width:1px;border-style:solid;background:transparent;}
+.icon-sq{width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;border-radius:7px;border-width:1px;border-style:solid;}
+.inline-form{border-radius:14px;padding:20px;margin-top:14px;border-width:1px;border-style:solid;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+.field label{font-size:12px;display:block;margin-bottom:4px;}
+.field input,.field select,.field textarea{width:100%;font-size:13px;padding:8px 11px;border-radius:10px;border-width:1px;border-style:solid;font-family:'Sora',sans-serif;outline:none;}
+.field textarea{resize:vertical;min-height:56px;}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+.btn-cancel{font-size:13px;padding:7px 16px;border-radius:9px;background:none;border-width:1px;border-style:solid;cursor:pointer;font-family:'Sora',sans-serif;}
+.btn-save{font-size:13px;padding:7px 16px;border-radius:9px;border:none;cursor:pointer;font-weight:700;font-family:'Sora',sans-serif;color:#fff;}
+.fp{font-size:12px;padding:4px 11px;border-radius:999px;border-width:1px;border-style:solid;cursor:pointer;background:none;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+
+/* Preview overlay */
+.prev-overlay{min-height:320px;background:rgba(0,0,0,0.42);display:flex;align-items:center;justify-content:center;border-radius:14px;margin-top:14px;}
+.prev-modal{background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:430px;border-width:1px;border-style:solid;}
+.pm-fields{border-radius:10px;overflow:hidden;border-width:1px;border-style:solid;margin-bottom:1rem;}
+.pm-row{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;border-bottom-width:1px;border-bottom-style:solid;}
+.pm-row:last-child{border-bottom:none;}
 </style>
 </head>
 <body>
@@ -63,62 +111,59 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
 
 <div class="main-wrap">
   <div id="sidebar" class="sidebar">
+    <div class="nav-section">Monitor</div>
     <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
-    <button class="nav-btn" data-view="notifications" onclick="switchView('notifications')"><i class="ti ti-bell"></i> Notificações <span id="notifBadge" style="display:none;margin-left:auto;background:#185FA5;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
-    <button class="nav-btn" data-view="notes" onclick="switchView('notes')"><i class="ti ti-notes"></i> Anotações <span id="notesBadge" style="display:none;margin-left:auto;background:#BA7517;color:#fff;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
+    <button class="nav-btn" data-view="notifications" onclick="switchView('notifications')"><i class="ti ti-bell"></i> Notificações <span id="notifBadge" style="display:none;margin-left:auto;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
+    <button class="nav-btn" data-view="notes" onclick="switchView('notes')"><i class="ti ti-notes"></i> Anotações <span id="notesBadge" style="display:none;margin-left:auto;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
+
+    <div class="nav-section">Meu espaço</div>
+    <button class="nav-btn" data-view="links" onclick="switchView('links')"><i class="ti ti-link"></i> Links rápidos</button>
+    <button class="nav-btn" data-view="workspace" onclick="switchView('workspace')"><i class="ti ti-folders"></i> Workspace</button>
+    <button class="nav-btn" data-view="contacts" onclick="switchView('contacts')"><i class="ti ti-address-book"></i> Contatos</button>
+
+    <div class="nav-section">Sistema</div>
     <button class="nav-btn" data-view="config" onclick="switchView('config')"><i class="ti ti-settings"></i> Configurações</button>
     <button class="nav-btn" data-view="logs" onclick="switchView('logs')"><i class="ti ti-terminal-2"></i> Logs</button>
   </div>
 
   <div class="content">
 
-    <!-- DASHBOARD -->
+    <!-- ══ DASHBOARD ══ -->
     <div id="view-dashboard">
       <h2 id="dashTitle" style="margin:0 0 4px;font-size:22px;font-weight:700"></h2>
       <p id="dashDate" style="margin:0 0 20px;font-size:13px"></p>
-
-      <!-- Apps Script info banner -->
-      <div id="gsBanner" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C;font-size:13px;margin-bottom:20px">
+      <div id="gsBanner" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px">
         <i class="ti ti-robot" style="font-size:18px;flex-shrink:0;color:#0F6E56"></i>
-        <div>
-          <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
-          <a href="https://script.google.com" target="_blank" style="color:#0F6E56;margin-left:6px;font-weight:700">Gerenciar →</a>
-        </div>
+        <div><strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
+        <a href="https://script.google.com" target="_blank" style="color:#0F6E56;margin-left:6px;font-weight:700">Gerenciar →</a></div>
       </div>
-
       <div class="metric-grid">
         <div class="metric" id="m1"><div style="font-size:12px;margin-bottom:4px">Total notificações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m1v">0</div></div>
         <div class="metric" id="m2"><div style="font-size:12px;margin-bottom:4px">Canal Slack</div><div style="font-size:13px;font-weight:700" id="m2v">#notificacoes-email</div></div>
         <div class="metric" id="m3"><div style="font-size:12px;margin-bottom:4px">Última verificação</div><div style="font-size:12px;font-weight:700" id="m3v">—</div></div>
         <div class="metric" id="m4"><div style="font-size:12px;margin-bottom:4px">Anotações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m4v">0</div></div>
       </div>
-
       <div class="section-label" id="dashCatLabel">Por categoria</div>
       <div id="teamRows"></div>
-
       <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
-        <button class="action-btn" id="checkBtn" onclick="refreshFromStorage()">
-          <i class="ti ti-refresh"></i> Atualizar notificações
-        </button>
-        <button class="action-btn" id="clearNotifsBtn" onclick="clearNotifications()" style="background:#A32D2D">
-          <i class="ti ti-trash"></i> Limpar histórico
-        </button>
+        <button class="action-btn" id="checkBtn" onclick="refreshFromStorage()"><i class="ti ti-refresh"></i> Atualizar notificações</button>
+        <button class="action-btn" onclick="clearNotifications()" style="background:#A32D2D"><i class="ti ti-trash"></i> Limpar histórico</button>
       </div>
       <div id="checkResult" style="display:none;margin-top:12px"></div>
     </div>
 
-    <!-- NOTIFICATIONS -->
+    <!-- ══ NOTIFICATIONS ══ -->
     <div id="view-notifications" style="display:none">
       <h2 style="margin:0 0 16px;font-size:22px;font-weight:700">Notificações enviadas</h2>
       <div class="search-bar" id="notifSearchBar">
         <i class="ti ti-search" style="font-size:16px;flex-shrink:0"></i>
         <input type="text" id="notifSearch" oninput="renderNotifications()" placeholder="Pesquisar por assunto ou remetente..."/>
-        <button id="notifSearchClear" onclick="document.getElementById('notifSearch').value='';renderNotifications()" style="background:none;border:none;cursor:pointer;font-size:14px;display:none">✕</button>
+        <button onclick="document.getElementById('notifSearch').value='';renderNotifications()" style="background:none;border:none;cursor:pointer;font-size:14px">✕</button>
       </div>
       <div id="notifList"></div>
     </div>
 
-    <!-- NOTES -->
+    <!-- ══ NOTES ══ -->
     <div id="view-notes" style="display:none">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
         <h2 style="margin:0;font-size:22px;font-weight:700">Anotações</h2>
@@ -130,80 +175,180 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
         <textarea id="newNoteText" placeholder="Digite sua anotação aqui..." onkeydown="if(event.ctrlKey&&event.key==='Enter')addNote()" style="width:100%;min-height:80px;padding:10px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
           <span style="font-size:11px" id="noteSaveHint"><i class="ti ti-keyboard" style="font-size:11px;margin-right:4px"></i>Ctrl+Enter para salvar</span>
-          <button onclick="addNote()" id="addNoteBtn" style="padding:7px 18px;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:6px">
-            <i class="ti ti-plus" style="font-size:13px"></i> Salvar anotação
-          </button>
+          <button onclick="addNote()" id="addNoteBtn" style="padding:7px 18px;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:6px"><i class="ti ti-plus" style="font-size:13px"></i> Salvar anotação</button>
         </div>
       </div>
       <div id="noteFilterCard" style="border-radius:14px;padding:16px;margin-bottom:20px">
-        <div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px" id="noteFilterLabel">
-          <i class="ti ti-filter" style="font-size:14px"></i> Pesquisar anotações
-        </div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px" id="noteFilterLabel"><i class="ti ti-filter" style="font-size:14px"></i> Pesquisar anotações</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <div id="noteSearchWrap" style="flex:2;min-width:180px;display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 12px">
             <i class="ti ti-search" style="font-size:15px;flex-shrink:0"></i>
             <input type="text" id="noteSearch" oninput="renderNotes()" placeholder="Pesquisar por texto..." style="flex:1;border:none;background:transparent;font-size:14px;font-family:'Sora',sans-serif;outline:none"/>
             <button onclick="document.getElementById('noteSearch').value='';renderNotes()" style="background:none;border:none;cursor:pointer;font-size:13px">✕</button>
           </div>
-          <div style="flex:1;min-width:140px">
-            <div style="font-size:11px;margin-bottom:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div>
-            <input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
-          </div>
-          <div style="flex:1;min-width:140px">
-            <div style="font-size:11px;margin-bottom:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div>
-            <input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button onclick="clearNoteFilters()" id="clearFilterBtn" style="padding:9px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px">
-              <i class="ti ti-x" style="font-size:12px"></i> Limpar
-            </button>
-          </div>
+          <div style="flex:1;min-width:140px"><div style="font-size:11px;margin-bottom:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div><input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/></div>
+          <div style="flex:1;min-width:140px"><div style="font-size:11px;margin-bottom:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div><input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/></div>
+          <div style="display:flex;align-items:flex-end"><button onclick="clearNoteFilters()" id="clearFilterBtn" style="padding:9px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px"><i class="ti ti-x" style="font-size:12px"></i> Limpar</button></div>
         </div>
         <div id="noteFilterResult" style="margin-top:10px;font-size:12px;display:none"></div>
       </div>
       <div id="noteList"></div>
     </div>
 
-    <!-- CONFIG -->
+    <!-- ══ LINKS RÁPIDOS ══ -->
+    <div id="view-links" style="display:none">
+      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Links rápidos</h2>
+      <p style="margin:0 0 20px;font-size:13px;opacity:.6">Acesse suas plataformas favoritas com um clique.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="link-filters"></div>
+        <button class="action-btn" id="link-new-btn" onclick="showLinkForm()"><i class="ti ti-plus"></i> Novo link</button>
+      </div>
+      <div id="links-grid" class="links-grid"></div>
+      <div id="link-form" class="inline-form" style="display:none">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px" id="link-form-title">Adicionar link</div>
+        <div class="fg2">
+          <div class="field"><label>Nome *</label><input id="lf-name" placeholder="Ex: Slack, Notion…"></div>
+          <div class="field"><label>URL *</label><input id="lf-url" type="url" placeholder="https://…"></div>
+        </div>
+        <div class="fg2">
+          <div class="field"><label>Emoji</label><input id="lf-icon" placeholder="🔗" maxlength="4"></div>
+          <div class="field"><label>Categoria</label>
+            <select id="lf-cat">
+              <option value="comunicação">Comunicação</option>
+              <option value="produtividade">Produtividade</option>
+              <option value="dados">Dados & análises</option>
+              <option value="dev">Dev & infra</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" id="link-cancel-btn" onclick="hideLinkForm()">Cancelar</button>
+          <button class="btn-save" id="link-save-btn" onclick="saveLink()">Salvar link</button>
+        </div>
+      </div>
+      <div id="link-suggestions"></div>
+    </div>
+
+    <!-- ══ WORKSPACE ══ -->
+    <div id="view-workspace" style="display:none">
+      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Workspace</h2>
+      <p style="margin:0 0 20px;font-size:13px;opacity:.6">Arquivos, planos, formulários, projetos e templates.</p>
+      <div class="stats-row" id="ws-stats"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div style="position:relative;"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.5;pointer-events:none"></i><input id="ws-search" placeholder="Buscar…" oninput="renderWs()" style="padding-left:30px;font-size:13px;border-radius:10px;border-width:1px;border-style:solid;padding-top:8px;padding-bottom:8px;padding-right:10px;font-family:'Sora',sans-serif;outline:none;width:180px"></div>
+          <div id="ws-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="view-toggle" id="ws-view-toggle">
+            <button class="vt-btn" id="ws-vt-grid" onclick="setWsView('grid')" aria-label="Grade"><i class="ti ti-layout-grid"></i></button>
+            <button class="vt-btn" id="ws-vt-list" onclick="setWsView('list')" aria-label="Lista"><i class="ti ti-list"></i></button>
+          </div>
+          <button class="action-btn" id="ws-new-btn" onclick="showWsForm()"><i class="ti ti-plus"></i> Novo item</button>
+        </div>
+      </div>
+      <div id="ws-container"></div>
+      <div id="ws-form" class="inline-form" style="display:none">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px" id="ws-form-title">Adicionar item</div>
+        <div class="fg2">
+          <div class="field"><label>Título *</label><input id="wf-title" placeholder="Nome do item"></div>
+          <div class="field"><label>Tipo</label>
+            <select id="wf-type">
+              <option value="arquivo">📄 Arquivo</option>
+              <option value="plano">📅 Plano de trabalho</option>
+              <option value="formulário">📋 Formulário</option>
+              <option value="projeto">🗂️ Projeto</option>
+              <option value="relatório">📊 Relatório</option>
+              <option value="template">🔖 Template</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg2">
+          <div class="field"><label>Status</label>
+            <select id="wf-status">
+              <option value="em andamento">Em andamento</option>
+              <option value="concluído">Concluído</option>
+              <option value="aguardando">Aguardando</option>
+              <option value="arquivado">Arquivado</option>
+            </select>
+          </div>
+          <div class="field"><label>Link externo</label><input id="wf-link" type="url" placeholder="https://…"></div>
+        </div>
+        <div class="field"><label>Descrição</label><textarea id="wf-desc" placeholder="Descrição breve…"></textarea></div>
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="hideWsForm()">Cancelar</button>
+          <button class="btn-save" id="ws-save-btn" onclick="saveWsItem()">Salvar</button>
+        </div>
+      </div>
+      <div id="ws-preview"></div>
+    </div>
+
+    <!-- ══ CONTACTS ══ -->
+    <div id="view-contacts" style="display:none">
+      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Contatos</h2>
+      <p style="margin:0 0 20px;font-size:13px;opacity:.6">Times, áreas e pessoas que você mais utiliza.</p>
+      <div class="stats-row" id="ct-stats"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:1">
+          <div style="position:relative;"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.5;pointer-events:none"></i><input id="ct-search" placeholder="Buscar nome, e-mail, grupo…" oninput="renderContacts()" style="padding-left:30px;font-size:13px;border-radius:10px;border-width:1px;border-style:solid;padding-top:8px;padding-bottom:8px;padding-right:10px;font-family:'Sora',sans-serif;outline:none;width:220px"></div>
+          <div id="ct-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        </div>
+        <button class="action-btn" id="ct-new-btn" onclick="showCtForm()"><i class="ti ti-user-plus"></i> Novo contato</button>
+      </div>
+      <div id="ct-container"></div>
+      <div id="ct-form" class="inline-form" style="display:none">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px" id="ct-form-title">Adicionar contato</div>
+        <div class="fg2">
+          <div class="field"><label>Nome completo *</label><input id="cf-name" placeholder="Ex: Ana Lima"></div>
+          <div class="field"><label>Cargo / função</label><input id="cf-role" placeholder="Ex: Gerente de Projetos"></div>
+        </div>
+        <div class="fg3">
+          <div class="field"><label>E-mail</label><input id="cf-email" type="email" placeholder="ana@empresa.com"></div>
+          <div class="field"><label>Telefone / WhatsApp</label><input id="cf-phone" placeholder="+55 11 9…"></div>
+          <div class="field"><label>Slack / usuário</label><input id="cf-slack" placeholder="@ana.lima"></div>
+        </div>
+        <div class="fg2">
+          <div class="field"><label>Categoria</label>
+            <select id="cf-cat">
+              <option value="time">Time</option>
+              <option value="área">Área</option>
+              <option value="cliente">Cliente</option>
+              <option value="parceiro">Parceiro</option>
+              <option value="fornecedor">Fornecedor</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div class="field"><label>Grupo personalizado</label><input id="cf-group" placeholder="Ex: Marketing, TI, CS…"></div>
+        </div>
+        <div class="field"><label>Observações</label><textarea id="cf-obs" placeholder="Anotações sobre este contato…"></textarea></div>
+        <div class="form-actions">
+          <button class="btn-cancel" onclick="hideCtForm()">Cancelar</button>
+          <button class="btn-save" id="ct-save-btn" onclick="saveContact()">Salvar contato</button>
+        </div>
+      </div>
+      <div id="ct-preview"></div>
+    </div>
+
+    <!-- ══ CONFIG ══ -->
     <div id="view-config" style="display:none">
       <h2 style="margin:0 0 20px;font-size:22px;font-weight:700">Configurações</h2>
-
-      <!-- Apps Script info -->
       <div id="configGS" style="border-radius:14px;padding:20px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-size:15px;font-weight:700">Monitor automático</div>
-          <span class="gs-badge"><i class="ti ti-check" style="font-size:11px"></i> Ativo</span>
-        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:15px;font-weight:700">Monitor automático</div><span class="gs-badge"><i class="ti ti-check" style="font-size:11px"></i> Ativo</span></div>
         <div style="font-size:13px;margin-bottom:14px" id="gsDesc">O Google Apps Script monitora seus emails automaticamente a cada 5 minutos e envia notificações para o Slack.</div>
-        <a href="https://script.google.com" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#0F6E56;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none">
-          <i class="ti ti-external-link" style="font-size:13px"></i> Abrir Google Apps Script
-        </a>
+        <a href="https://script.google.com" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#0F6E56;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none"><i class="ti ti-external-link" style="font-size:13px"></i> Abrir Google Apps Script</a>
       </div>
-
       <div id="configAppearance" style="border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;margin-bottom:16px">Aparência</div>
-        <div style="margin-bottom:16px">
-          <div class="section-label" style="margin-top:0" id="themeColorLabel">Cor do tema</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap" id="themeSwatches"></div>
-          <div style="font-size:12px;margin-top:6px" id="themeCurrentLabel"></div>
-        </div>
-        <div style="margin-bottom:16px">
-          <div class="section-label" id="fontSizeLabel">Tamanho da fonte</div>
-          <div style="display:flex;gap:8px" id="fontSizeBtns"></div>
-        </div>
-        <div>
-          <div class="section-label" id="bgModeLabel">Plano de fundo</div>
-          <div class="bg-grid" id="bgModeGrid"></div>
-          <div style="font-size:12px;margin-top:8px" id="bgCurrentLabel"></div>
-        </div>
+        <div style="margin-bottom:16px"><div class="section-label" style="margin-top:0" id="themeColorLabel">Cor do tema</div><div style="display:flex;gap:8px;flex-wrap:wrap" id="themeSwatches"></div><div style="font-size:12px;margin-top:6px" id="themeCurrentLabel"></div></div>
+        <div style="margin-bottom:16px"><div class="section-label" id="fontSizeLabel">Tamanho da fonte</div><div style="display:flex;gap:8px" id="fontSizeBtns"></div></div>
+        <div><div class="section-label" id="bgModeLabel">Plano de fundo</div><div class="bg-grid" id="bgModeGrid"></div><div style="font-size:12px;margin-top:8px" id="bgCurrentLabel"></div></div>
       </div>
-
       <div id="configSlack" style="border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;margin-bottom:12px">Canal Slack</div>
         <div style="font-size:13px;margin-bottom:6px" id="slackChannelDesc">Nome do canal para receber notificações</div>
         <input type="text" id="slackChannelInput" value="#notificacoes-email" oninput="updateChannel()" placeholder="#canal" style="width:100%;padding:9px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
       </div>
-
       <div id="configTeams" style="border-radius:14px;padding:20px">
         <div style="font-size:15px;font-weight:700;margin-bottom:4px">Times monitorados</div>
         <div style="font-size:13px;margin-bottom:16px" id="teamsDesc">Regras de classificação configuradas no Google Apps Script.</div>
@@ -211,7 +356,7 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
       </div>
     </div>
 
-    <!-- LOGS -->
+    <!-- ══ LOGS ══ -->
     <div id="view-logs" style="display:none">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
         <h2 style="margin:0;font-size:22px;font-weight:700">Logs do sistema</h2>
@@ -220,10 +365,13 @@ body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,c
       <div class="terminal" id="terminalOutput"><div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div></div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /content -->
+</div><!-- /main-wrap -->
 
 <script>
+// ══════════════════════════════════════════
+// THEME / BG CONFIG
+// ══════════════════════════════════════════
 const TEAMS=[
   {id:"n3",label:"Time N3",color:"#185FA5",bg:"#E6F1FB",textColor:"#0C447C",icon:"ti-users"},
   {id:"data-protection",label:"Proteção de Dados",color:"#533AB7",bg:"#EEEDFE",textColor:"#3C3489",icon:"ti-shield-lock"},
@@ -238,11 +386,7 @@ const THEMES=[
   {id:"rose",label:"Rosa",primary:"#9D3060",light:"#FBEAF0"},
   {id:"slate",label:"Grafite",primary:"#3D3D3D",light:"#F1EFE8"},
 ];
-const FONT_SIZES=[
-  {id:"sm",label:"Pequena",base:13},
-  {id:"md",label:"Média",base:15},
-  {id:"lg",label:"Grande",base:17},
-];
+const FONT_SIZES=[{id:"sm",label:"Pequena",base:13},{id:"md",label:"Média",base:15},{id:"lg",label:"Grande",base:17}];
 const BG_MODES=[
   {id:"day",label:"Dia",icon:"ti-sun-high",bg:"#ffffff",surface:"#ffffff",surfaceAlt:"#f5f4f0",border:"rgba(0,0,0,0.1)",text:"#1a1a1a",textMuted:"#555",textFaint:"#999"},
   {id:"light",label:"Claro",icon:"ti-sun",bg:"#f5f4f0",surface:"#ffffff",surfaceAlt:"#eeece6",border:"rgba(0,0,0,0.1)",text:"#1a1a1a",textMuted:"#555",textFaint:"#999"},
@@ -252,86 +396,54 @@ const BG_MODES=[
   {id:"midnight",label:"Meia-noite",icon:"ti-moon-stars",bg:"#000008",surface:"#0d0d14",surfaceAlt:"#16161f",border:"rgba(255,255,255,0.08)",text:"#d0d0e8",textMuted:"#888",textFaint:"#444"},
 ];
 
-// ── Storage keys ───────────────────────────────────────────────────────────
-const NOTES_KEY   = "ems_notes_v2";
-const NOTIF_KEY   = "ems_notifications_v1";
-const LASTCHECK_KEY = "ems_last_check";
-let saveTimer = null;
-
-function loadNotes(){
-  try{const s=localStorage.getItem(NOTES_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}
-  return [{id:1,text:"Monitor automático ativo via Google Apps Script.",pinned:true,createdAt:new Date().toISOString(),updatedAt:null}];
-}
-
-function loadNotifications(){
-  try{const s=localStorage.getItem(NOTIF_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p))return p;}}catch(e){}
-  return [];
-}
-
-function saveNotes(){try{localStorage.setItem(NOTES_KEY,JSON.stringify(S.notes));}catch(e){}}
-function saveNotifications(){try{localStorage.setItem(NOTIF_KEY,JSON.stringify(S.notifications));}catch(e){}}
-function saveLastCheck(){try{localStorage.setItem(LASTCHECK_KEY,new Date().toISOString());}catch(e){}}
-function loadLastCheck(){try{return localStorage.getItem(LASTCHECK_KEY)||"";}catch(e){return "";}}
-
-function scheduleSave(){
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>{saveNotes();showSaveStatus();},300);
-}
-function showSaveStatus(){
-  const el=document.getElementById("noteSaveStatus");
-  if(!el)return;
-  el.innerHTML='<i class="ti ti-cloud-check" style="font-size:13px"></i> Salvo';
-  el.style.color="#0F6E56";el.style.display="flex";
-  setTimeout(()=>{if(el)el.style.display="none";},2500);
-}
-
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
 const S={
   view:"dashboard",themeId:"blue",fontSizeId:"md",bgModeId:"light",
   slackChannel:"#notificacoes-email",
-  notifications:loadNotifications(),
-  notes:loadNotes(),
+  notifications:loadJSON("ems_notifications_v1",[]),
+  notes:loadJSON("ems_notes_v2",[{id:1,text:"Monitor automático ativo via Google Apps Script.",pinned:true,createdAt:new Date().toISOString(),updatedAt:null}]),
   logs:[],editingNote:null,
+  links:loadJSON("ql_v2",[
+    {id:1,name:"Slack",url:"https://slack.com",icon:"💬",cat:"comunicação"},
+    {id:2,name:"Gmail",url:"https://mail.google.com",icon:"📧",cat:"comunicação"},
+    {id:3,name:"Google Drive",url:"https://drive.google.com",icon:"📁",cat:"produtividade"},
+    {id:4,name:"Apps Script",url:"https://script.google.com",icon:"⚙️",cat:"dev"},
+  ]),
+  linkEditId:null, linkActiveCat:"todos",
+  wsItems:loadJSON("ws_v1",[
+    {id:1,title:"Plano de onboarding Q3",type:"plano",status:"em andamento",desc:"Plano de trabalho para integração de novos colaboradores.",link:"",date:today()},
+    {id:2,title:"Formulário de feedback",type:"formulário",status:"concluído",desc:"Pesquisa trimestral de satisfação.",link:"",date:today()},
+    {id:3,title:"Projeto redesign email",type:"projeto",status:"em andamento",desc:"Revisão dos templates de e-mail monitorados.",link:"",date:today()},
+  ]),
+  wsEditId:null, wsActiveType:"todos", wsView:"grid",
+  contacts:loadJSON("ct_v1",[
+    {id:1,name:"Carlos Mendes",role:"Dev Backend",email:"carlos@empresa.com",phone:"+55 11 98000-0001",slack:"@carlos.m",cat:"time",group:"Engenharia",obs:"Responsável pelo Apps Script"},
+    {id:2,name:"Fernanda Rocha",role:"Designer",email:"fernanda@empresa.com",phone:"+55 11 98000-0002",slack:"@fe.rocha",cat:"área",group:"Design",obs:""},
+    {id:3,name:"Bruno Alves",role:"Gerente de CS",email:"bruno@cliente.com",phone:"+55 21 97000-0003",slack:"",cat:"cliente",group:"Suporte",obs:"Contato principal do cliente X"},
+  ]),
+  ctEditId:null, ctActiveCat:"todos",
 };
 
+function loadJSON(key,def){try{const s=localStorage.getItem(key);return s?JSON.parse(s):def;}catch{return def;}}
+function persist(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
+function today(){return new Date().toISOString().slice(0,10);}
 function theme(){return THEMES.find(t=>t.id===S.themeId)||THEMES[0];}
 function fsz(){return FONT_SIZES.find(f=>f.id===S.fontSizeId)||FONT_SIZES[1];}
 function bgm(){return BG_MODES.find(b=>b.id===S.bgModeId)||BG_MODES[1];}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function fmtDate(iso){return new Date(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});}
 function fmtTime(iso){return new Date(iso).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});}
 function fmtFull(iso){return fmtDate(iso)+" às "+fmtTime(iso);}
 function isoToInput(iso){return new Date(iso).toISOString().slice(0,10);}
-function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function pillHtml(t){return`<span class="pill" style="background:${t.bg};color:${t.textColor};border:1px solid ${t.color}33"><i class="ti ${t.icon}"></i> ${t.label}</span>`;}
+let saveTimer=null;
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{persist("ems_notes_v2",S.notes);showSaveStatus();},300);}
+function showSaveStatus(){const el=document.getElementById("noteSaveStatus");if(!el)return;el.innerHTML='<i class="ti ti-cloud-check" style="font-size:13px"></i> Salvo';el.style.display="flex";setTimeout(()=>{el.style.display="none";},2500);}
 
-// ── Refresh from localStorage (called by "Atualizar" button) ──────────────
-function refreshFromStorage(){
-  const before=S.notifications.length;
-  S.notifications=loadNotifications();
-  const after=S.notifications.length;
-  const diff=after-before;
-  saveLastCheck();
-  renderAll();
-  const el=document.getElementById("checkResult");
-  if(diff>0){
-    el.className="result-banner result-success";
-    el.textContent=`✓ ${diff} nova(s) notificação(ões) carregada(s). Total: ${after}`;
-  } else {
-    el.className="result-banner result-info";
-    el.textContent=`✓ Dados atualizados — ${after} notificação(ões) no histórico.`;
-  }
-  el.style.display="";
-  addLog(`Atualizado do localStorage: ${after} notificação(ões).`,"success");
-}
-
-function clearNotifications(){
-  if(!confirm("Limpar todo o histórico de notificações?"))return;
-  S.notifications=[];
-  saveNotifications();
-  renderAll();
-  addLog("Histórico de notificações limpo.","warn");
-}
-
-// ── Apply theme ────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// THEME APPLICATION
+// ══════════════════════════════════════════
 function applyTheme(){
   const b=bgm(),t=theme(),f=fsz();
   document.body.style.background=b.bg;
@@ -349,39 +461,46 @@ function applyTheme(){
   bcb.innerHTML=`<i class="ti ${b.icon}"></i><span style="font-size:11px">${b.label}</span>`;
   const sb=document.getElementById("sidebar");
   sb.style.background=b.surface;sb.style.borderRight="1px solid "+b.border;
+  document.querySelectorAll(".nav-section").forEach(el=>el.style.color=b.textFaint);
   document.querySelectorAll(".nav-btn").forEach(btn=>{
     const active=btn.classList.contains("active");
     btn.style.background=active?t.light:"transparent";
     btn.style.borderLeftColor=active?t.primary:"transparent";
     btn.style.color=active?t.primary:b.textMuted;
   });
-  ["m1","m2","m3","m4"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.background=b.surfaceAlt;});
-  document.getElementById("m2v").style.color=t.primary;
-  document.querySelectorAll(".notif-card,.note-card,[id='newNoteCard'],[id='noteFilterCard'],[id='configAppearance'],[id='configSlack'],[id='configTeams'],[id='configGS']").forEach(el=>{
-    el.style.background=b.surface;el.style.border="1px solid "+b.border;
-  });
-  document.querySelectorAll("input[type=text],input[type=date],textarea").forEach(el=>{
-    el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;
-  });
-  document.querySelectorAll(".search-bar,[id='noteSearchWrap']").forEach(el=>{
-    el.style.background=b.surface;el.style.border="1px solid "+b.border;
-  });
+  ["m1","m2","m3","m4"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=b.surfaceAlt;}});
+  const m2v=document.getElementById("m2v");if(m2v)m2v.style.color=t.primary;
+  document.querySelectorAll(".notif-card,.note-card").forEach(el=>{el.style.background=b.surface;el.style.border="1px solid "+b.border;});
+  document.querySelectorAll("#newNoteCard,#noteFilterCard,#configAppearance,#configSlack,#configTeams,#configGS").forEach(el=>{if(el){el.style.background=b.surface;el.style.border="1px solid "+b.border;}});
+  document.querySelectorAll("input[type=text],input[type=date],input[type=url],input[type=email],textarea,select").forEach(el=>{el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;});
+  document.querySelectorAll(".search-bar,#noteSearchWrap").forEach(el=>{el.style.background=b.surface;el.style.border="1px solid "+b.border;});
   document.querySelectorAll(".search-bar input").forEach(el=>el.style.color=b.text);
-  document.querySelectorAll("#clearLogsBtn,#clearFilterBtn").forEach(el=>{
-    el.style.border="1px solid "+b.border;el.style.color=b.textMuted;
-  });
-  document.getElementById("addNoteBtn").style.background=t.primary;
-  document.querySelectorAll(".action-btn").forEach(el=>{if(!el.id||el.id==="checkBtn")el.style.background=t.primary;});
-  document.querySelectorAll("[id$='Label'],[id$='Subtitle'],[id$='Hint'],[id$='Desc'],[id='notesSubtitle'],[id='dashDate'],[id='gsDesc'],[id='teamsDesc'],[id='slackChannelDesc']").forEach(el=>el.style.color=b.textFaint);
-  document.querySelectorAll("h2").forEach(el=>el.style.color=b.text);
-  document.querySelectorAll(".section-label").forEach(el=>el.style.color=b.textFaint);
-  document.getElementById("gsBanner").style.background=b.id==="day"||b.id==="light"||b.id==="neutral"?"#E1F5EE":b.surfaceAlt;
-  document.getElementById("gsBanner").style.border="1px solid "+(b.id==="day"||b.id==="light"||b.id==="neutral"?"#5DCAA5":b.border);
-  document.getElementById("gsBanner").style.color=b.id==="day"||b.id==="light"||b.id==="neutral"?"#04342C":b.text;
+  document.querySelectorAll("#clearLogsBtn,#clearFilterBtn").forEach(el=>{if(el){el.style.border="1px solid "+b.border;el.style.color=b.textMuted;}});
+  const anb=document.getElementById("addNoteBtn");if(anb)anb.style.background=t.primary;
+  document.querySelectorAll(".action-btn").forEach(el=>{el.style.background=t.primary;});
+  document.querySelectorAll(".inline-form").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;});
+  document.querySelectorAll(".btn-cancel").forEach(el=>{el.style.borderColor=b.border;el.style.color=b.textMuted;});
+  document.querySelectorAll(".btn-save").forEach(el=>{el.style.background=t.primary;});
+  document.querySelectorAll(".icon-sq").forEach(el=>{el.style.background=b.surfaceAlt;el.style.borderColor=b.border;el.style.color=b.textMuted;});
+  document.querySelectorAll(".mini-btn").forEach(el=>{el.style.borderColor=b.border;el.style.color=b.textMuted;});
+  document.querySelectorAll(".view-toggle").forEach(el=>el.style.borderColor=b.border);
+  document.querySelectorAll(".vt-btn").forEach(el=>{el.style.color=b.textMuted;el.style.background="transparent";});
+  document.querySelectorAll(".vt-btn.on").forEach(el=>{el.style.background=b.surfaceAlt;el.style.color=b.text;});
+  document.querySelectorAll(".link-card,.ws-card,.contact-card,.ws-list-row").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;});
+  document.querySelectorAll(".add-dashed").forEach(el=>{el.style.borderColor=b.textFaint;el.style.color=b.textFaint;});
+  document.querySelectorAll(".sugg-chip").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;el.style.color=b.text;});
+  document.querySelectorAll(".ws-thumb").forEach(el=>{/* keep inline bg */});
+  document.querySelectorAll(".pm-fields").forEach(el=>{el.style.borderColor=b.border;});
+  document.querySelectorAll(".pm-row").forEach(el=>{el.style.borderBottomColor=b.border;});
+  document.querySelectorAll(".prev-modal").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;});
+  const gsbanner=document.getElementById("gsBanner");
+  if(gsbanner){const light=(b.id==="day"||b.id==="light"||b.id==="neutral");gsbanner.style.background=light?"#E1F5EE":b.surfaceAlt;gsbanner.style.border="1px solid "+(light?"#5DCAA5":b.border);gsbanner.style.color=light?"#04342C":b.text;}
   renderConfigAppearance();
 }
 
-// ── Clock ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════
 function updateClock(){
   const b=bgm(),f=fsz(),now=new Date();
   document.getElementById("clockBox").innerHTML=`
@@ -396,68 +515,76 @@ function updateClock(){
 }
 setInterval(updateClock,1000);
 
-// ── Navigation ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+const ALL_VIEWS=["dashboard","notifications","notes","links","workspace","contacts","config","logs"];
 function switchView(v){
-  ["dashboard","notifications","notes","config","logs"].forEach(id=>{
-    document.getElementById("view-"+id).style.display=id===v?"":"none";
-    document.querySelector(`[data-view="${id}"]`).classList.toggle("active",id===v);
+  ALL_VIEWS.forEach(id=>{
+    const el=document.getElementById("view-"+id);
+    if(el)el.style.display=id===v?"":"none";
+    const btn=document.querySelector(`[data-view="${id}"]`);
+    if(btn)btn.classList.toggle("active",id===v);
   });
   S.view=v;applyTheme();
   if(v==="notes")renderNotes();
   if(v==="notifications")renderNotifications();
   if(v==="dashboard")renderDashboard();
+  if(v==="links"){renderLinkFilters();renderLinksGrid();}
+  if(v==="workspace"){renderWsStats();renderWsFilters();renderWs();}
+  if(v==="contacts"){renderCtStats();renderCtFilters();renderContacts();}
 }
+function cycleBgMode(){const idx=BG_MODES.findIndex(b=>b.id===S.bgModeId);S.bgModeId=BG_MODES[(idx+1)%BG_MODES.length].id;applyTheme();updateClock();renderAll();}
 
-function cycleBgMode(){
-  const idx=BG_MODES.findIndex(b=>b.id===S.bgModeId);
-  S.bgModeId=BG_MODES[(idx+1)%BG_MODES.length].id;
-  applyTheme();updateClock();renderAll();
-}
-
-// ── Dashboard ──────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
 function renderDashboard(){
   const b=bgm(),t=theme(),f=fsz();
   document.getElementById("dashTitle").textContent="Dashboard";
   document.getElementById("dashDate").textContent="Hoje é "+new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
   document.getElementById("m1v").textContent=S.notifications.length;
   document.getElementById("m2v").textContent=S.slackChannel;
-  const lc=loadLastCheck();
+  const lc=localStorage.getItem("ems_last_check")||"";
   document.getElementById("m3v").textContent=lc?fmtFull(lc):"Nunca";
   document.getElementById("m4v").textContent=S.notes.length;
   document.getElementById("teamRows").innerHTML=TEAMS.map(tm=>{
     const count=S.notifications.filter(n=>n.teamId===tm.id).length;
     return`<div class="team-row" style="background:${b.surface};border:1px solid ${b.border}">
       <div class="team-avatar" style="background:${tm.bg}"><i class="ti ${tm.icon}" style="font-size:17px;color:${tm.color}"></i></div>
-      <div><div style="font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div>
-      <div style="font-size:12px;color:${b.textFaint}">Monitorado</div></div>
+      <div><div style="font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div><div style="font-size:12px;color:${b.textFaint}">Monitorado</div></div>
       <span style="font-size:22px;font-weight:700;color:${count>0?tm.color:b.border};font-family:'IBM Plex Mono',monospace;margin-left:auto">${count}</span>
     </div>`;
   }).join("");
-  document.getElementById("checkBtn").style.background=t.primary;
 }
+function refreshFromStorage(){
+  const before=S.notifications.length;S.notifications=loadJSON("ems_notifications_v1",[]);
+  const diff=S.notifications.length-before;try{localStorage.setItem("ems_last_check",new Date().toISOString());}catch{}
+  renderAll();
+  const el=document.getElementById("checkResult");
+  el.className="result-banner "+(diff>0?"result-success":"result-info");
+  el.textContent=diff>0?`✓ ${diff} nova(s) notificação(ões). Total: ${S.notifications.length}`:`✓ Dados atualizados — ${S.notifications.length} notificação(ões).`;
+  el.style.display="";addLog(`Atualizado: ${S.notifications.length} notificação(ões).`,"success");
+}
+function clearNotifications(){if(!confirm("Limpar todo o histórico?"))return;S.notifications=[];persist("ems_notifications_v1",S.notifications);renderAll();addLog("Histórico limpo.","warn");}
 
-// ── Notifications ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════
 function renderNotifications(){
   const b=bgm(),f=fsz();
   const q=(document.getElementById("notifSearch")||{}).value||"";
-  document.getElementById("notifSearchClear").style.display=q?"":"none";
-  document.getElementById("notifSearchBar").style.background=b.surface;
-  document.getElementById("notifSearchBar").style.border="1px solid "+b.border;
-  document.querySelector("#notifSearchBar input").style.color=b.text;
   const filtered=S.notifications.filter(n=>!q||n.subject.toLowerCase().includes(q.toLowerCase())||n.from.toLowerCase().includes(q.toLowerCase()));
   if(!filtered.length){
-    document.getElementById("notifList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-bell-off"></i><p>${S.notifications.length===0?"Nenhuma notificação ainda.<br>O Google Apps Script enviará notificações automaticamente.":"Nenhum resultado encontrado."}</p></div>`;
+    document.getElementById("notifList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-bell-off"></i><p>${S.notifications.length===0?"Nenhuma notificação ainda.":"Nenhum resultado."}</p></div>`;
     return;
   }
   document.getElementById("notifList").innerHTML=filtered.map(n=>{
     const team=TEAMS.find(t=>t.id===n.teamId)||TEAMS[3];
     return`<div class="notif-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${team.color}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        ${pillHtml(team)}
-        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-          <span style="font-size:11px;color:${b.textFaint}">${fmtDate(n.receivedAt)}</span>
-          <span style="font-size:11px;color:${b.textFaint};font-family:'IBM Plex Mono',monospace">${fmtTime(n.receivedAt)}</span>
-        </div>
+        <span class="pill" style="background:${team.bg};color:${team.textColor};border:1px solid ${team.color}33"><i class="ti ${team.icon}"></i> ${team.label}</span>
+        <span style="font-size:11px;color:${b.textFaint};margin-left:auto">${fmtDate(n.receivedAt)} ${fmtTime(n.receivedAt)}</span>
       </div>
       <div style="font-weight:700;font-size:${f.base-1}px;margin-bottom:2px;color:${b.text}">${esc(n.subject)}</div>
       <div style="font-size:${f.base-2}px;color:${b.textMuted}">De: <strong>${esc(n.from)}</strong></div>
@@ -470,47 +597,34 @@ function renderNotifications(){
   }).join("");
   const badge=document.getElementById("notifBadge");
   badge.textContent=S.notifications.length;badge.style.display=S.notifications.length>0?"":"none";
+  const bge=document.getElementById("notifBadge");if(bge){bge.style.background=theme().primary;bge.style.color="#fff";}
 }
 
-// ── Notes ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// NOTES
+// ══════════════════════════════════════════
 function renderNotes(){
   const b=bgm(),t=theme(),f=fsz();
   const q=(document.getElementById("noteSearch")||{}).value||"";
   const df=(document.getElementById("noteDateFrom")||{}).value||"";
   const dt=(document.getElementById("noteDateTo")||{}).value||"";
   const filtered=[...S.notes].sort((a,z)=>z.pinned-a.pinned||new Date(z.createdAt)-new Date(a.createdAt))
-    .filter(n=>{const mt=!q||n.text.toLowerCase().includes(q.toLowerCase());const d=isoToInput(n.createdAt);return mt&&(!df||d>=df)&&(!dt||d<=dt);});
+    .filter(n=>{const d=isoToInput(n.createdAt);return(!q||n.text.toLowerCase().includes(q.toLowerCase()))&&(!df||d>=df)&&(!dt||d<=dt);});
   const hasFilter=q||df||dt;
-  document.getElementById("clearFilterBtn").style.display=hasFilter?"flex":"none";
+  const cfb=document.getElementById("clearFilterBtn");if(cfb)cfb.style.display=hasFilter?"flex":"none";
   const fr=document.getElementById("noteFilterResult");
-  if(hasFilter){fr.style.display="block";fr.style.color=b.textFaint;fr.textContent=`${filtered.length} anotação(ões) encontrada(s)`;}
-  else fr.style.display="none";
-  document.getElementById("newNoteCard").style.background=b.surface;
-  document.getElementById("newNoteCard").style.border="1px solid "+b.border;
-  document.getElementById("noteFilterCard").style.background=b.surface;
-  document.getElementById("noteFilterCard").style.border="1px solid "+b.border;
-  document.getElementById("newNoteText").style.background=b.surfaceAlt;
-  document.getElementById("newNoteText").style.color=b.text;
-  document.getElementById("newNoteText").style.border="1px solid "+b.border;
-  document.getElementById("noteSearchWrap").style.background=b.surfaceAlt;
-  document.getElementById("noteSearchWrap").style.border="1px solid "+b.border;
-  document.getElementById("noteSearch").style.color=b.text;
-  ["noteDateFrom","noteDateTo"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;}});
-  document.getElementById("addNoteBtn").style.background=t.primary;
-  ["newNoteLabel","noteSaveHint","noteFilterLabel","dateFromLabel","dateToLabel","notesSubtitle"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.color=b.textMuted;});
+  if(fr){fr.style.display=hasFilter?"block":"none";if(hasFilter){fr.style.color=b.textFaint;fr.textContent=`${filtered.length} anotação(ões) encontrada(s)`;}}
+  const anb=document.getElementById("addNoteBtn");if(anb)anb.style.background=t.primary;
   const nb=document.getElementById("notesBadge");
   const pinned=S.notes.filter(n=>n.pinned).length;
-  nb.textContent=pinned;nb.style.display=pinned>0?"":"none";
-  if(!filtered.length){
-    document.getElementById("noteList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-notes-off"></i><p>${S.notes.length===0?"Nenhuma anotação ainda.":"Nenhuma encontrada."}</p></div>`;
-    return;
-  }
+  if(nb){nb.textContent=pinned;nb.style.display=pinned>0?"":"none";nb.style.background=t.primary;nb.style.color="#fff";}
+  if(!filtered.length){document.getElementById("noteList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-notes-off"></i><p>${S.notes.length===0?"Nenhuma anotação ainda.":"Nenhuma encontrada."}</p></div>`;return;}
   document.getElementById("noteList").innerHTML=filtered.map(note=>{
     if(S.editingNote===note.id){
       return`<div class="note-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${t.primary}">
         <textarea id="edit-${note.id}" style="width:100%;min-height:70px;padding:8px 12px;border-radius:8px;border:1px solid ${t.primary};background:${b.surfaceAlt};color:${b.text};font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box">${esc(note.text)}</textarea>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="saveNote(${note.id})" style="padding:6px 16px;background:${t.primary};color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700"><i class="ti ti-device-floppy" style="font-size:13px"></i> Salvar</button>
+          <button onclick="saveNote(${note.id})" style="padding:6px 16px;background:${t.primary};color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700"><i class="ti ti-device-floppy"></i> Salvar</button>
           <button onclick="S.editingNote=null;renderNotes()" style="padding:6px 16px;background:transparent;color:${b.textMuted};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif">Cancelar</button>
         </div>
       </div>`;
@@ -520,105 +634,390 @@ function renderNotes(){
         ${note.pinned?`<i class="ti ti-pin" style="font-size:14px;color:${t.primary};flex-shrink:0;margin-top:2px"></i>`:""}
         <p style="flex:1;margin:0;font-size:${f.base-1}px;color:${b.text};line-height:1.6;cursor:pointer" onclick="S.editingNote=${note.id};renderNotes()">${esc(note.text)}</p>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid ${b.border}">
-        <span style="font-size:11px;color:${b.textFaint}"><i class="ti ti-pencil-plus" style="font-size:11px"></i> ${fmtFull(note.createdAt)}</span>
-        ${note.updatedAt?`<span style="font-size:11px;color:${b.textFaint}"><i class="ti ti-pencil" style="font-size:11px"></i> Editada ${fmtFull(note.updatedAt)}</span>`:""}
+      <div style="font-size:11px;color:${b.textFaint};margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid ${b.border}">
+        <i class="ti ti-pencil-plus" style="font-size:11px"></i> ${fmtFull(note.createdAt)}
+        ${note.updatedAt?`&nbsp;·&nbsp;<i class="ti ti-pencil" style="font-size:11px"></i> Editada ${fmtFull(note.updatedAt)}`:""}
       </div>
       <div style="display:flex;gap:6px">
-        <button onclick="S.editingNote=${note.id};renderNotes()" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${b.textMuted};font-family:'Sora',sans-serif"><i class="ti ti-edit" style="font-size:12px"></i> Editar</button>
-        <button onclick="togglePin(${note.id})" style="padding:4px 12px;background:${note.pinned?t.light:b.surfaceAlt};border:1px solid ${note.pinned?t.primary+"55":b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${note.pinned?t.primary:b.textMuted};font-family:'Sora',sans-serif"><i class="ti ${note.pinned?"ti-pin-filled":"ti-pin"}" style="font-size:12px"></i> ${note.pinned?"Fixado":"Fixar"}</button>
-        <button onclick="deleteNote(${note.id})" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:#A32D2D;font-family:'Sora',sans-serif;margin-left:auto"><i class="ti ti-trash" style="font-size:12px"></i> Excluir</button>
+        <button onclick="S.editingNote=${note.id};renderNotes()" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${b.textMuted};font-family:'Sora',sans-serif"><i class="ti ti-edit"></i> Editar</button>
+        <button onclick="togglePin(${note.id})" style="padding:4px 12px;background:${note.pinned?t.light:b.surfaceAlt};border:1px solid ${note.pinned?t.primary+"55":b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${note.pinned?t.primary:b.textMuted};font-family:'Sora',sans-serif"><i class="ti ${note.pinned?"ti-pin":"ti-pin"}"></i> ${note.pinned?"Fixado":"Fixar"}</button>
+        <button onclick="deleteNote(${note.id})" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:#A32D2D;font-family:'Sora',sans-serif;margin-left:auto"><i class="ti ti-trash"></i> Excluir</button>
       </div>
     </div>`;
   }).join("");
 }
-
-// ── Config Appearance ──────────────────────────────────────────────────────
-function renderConfigAppearance(){
-  const b=bgm(),t=theme(),f=fsz();
-  document.getElementById("themeSwatches").innerHTML=THEMES.map(th=>`
-    <button onclick="S.themeId='${th.id}';applyTheme();renderAll()" title="${th.label}"
-      style="width:32px;height:32px;border-radius:50%;background:${th.primary};border:${S.themeId===th.id?"3px solid "+b.text:"3px solid transparent"};cursor:pointer;transition:all 0.15s"></button>`).join("");
-  document.getElementById("themeCurrentLabel").innerHTML=`Tema: <strong style="color:${t.primary}">${t.label}</strong>`;
-  document.getElementById("themeCurrentLabel").style.color=b.textFaint;
-  document.getElementById("fontSizeBtns").innerHTML=FONT_SIZES.map(fs=>`
-    <button onclick="S.fontSizeId='${fs.id}';applyTheme();renderAll()" style="padding:6px 16px;border-radius:8px;border:1px solid ${S.fontSizeId===fs.id?t.primary:b.border};background:${S.fontSizeId===fs.id?t.light:b.surfaceAlt};color:${S.fontSizeId===fs.id?t.primary:b.textMuted};cursor:pointer;font-size:${fs.base-1}px;font-family:'Sora',sans-serif;font-weight:${S.fontSizeId===fs.id?700:400}">${fs.label}</button>`).join("");
-  document.getElementById("bgModeGrid").innerHTML=BG_MODES.map(bm=>`
-    <button onclick="S.bgModeId='${bm.id}';applyTheme();updateClock();renderAll()"
-      style="padding:12px 8px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;border:${S.bgModeId===bm.id?"2px solid "+t.primary:"1px solid "+b.border};background:${bm.bg};display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:${S.bgModeId===bm.id?"0 0 0 3px "+t.primary+"33":"none"};transition:all 0.15s">
-      <i class="ti ${bm.icon}" style="font-size:20px;color:${bm.text}"></i>
-      <span style="font-size:11px;font-weight:${S.bgModeId===bm.id?700:400};color:${bm.text}">${bm.label}</span>
-      <div class="bg-swatches">
-        <div class="bg-swatch" style="background:${bm.surface};border:1px solid ${bm.border}"></div>
-        <div class="bg-swatch" style="background:${bm.surfaceAlt};border:1px solid ${bm.border}"></div>
-        <div class="bg-swatch" style="background:${bm.bg};border:1px solid ${bm.border}"></div>
-      </div>
-    </button>`).join("");
-  document.getElementById("bgCurrentLabel").innerHTML=`Atual: <strong style="color:${t.primary}">${b.label}</strong> · Clique no botão do topo para alternar`;
-  document.getElementById("bgCurrentLabel").style.color=b.textFaint;
-  ["configAppearance","configSlack","configTeams","configGS"].forEach(id=>{
-    const el=document.getElementById(id);if(el){el.style.background=b.surface;el.style.border="1px solid "+b.border;}
-  });
-  const si=document.getElementById("slackChannelInput");
-  si.style.background=b.surfaceAlt;si.style.color=b.text;si.style.border="1px solid "+b.border;
-  document.getElementById("teamConfigRows").innerHTML=TEAMS.map(tm=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid ${b.border}">
-      <div class="team-avatar" style="background:${tm.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${tm.icon}" style="font-size:15px;color:${tm.color}"></i></div>
-      <div style="flex:1;font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div>
-      <span class="pill" style="background:${tm.bg};color:${tm.textColor};border:1px solid ${tm.color}33"><i class="ti ti-check"></i> Ativo</span>
-    </div>`).join("");
-  ["themeColorLabel","fontSizeLabel","bgModeLabel","teamsSpecificLabel"].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.style.color=b.textFaint;
-  });
-}
-
-// ── Config actions ─────────────────────────────────────────────────────────
-function updateChannel(){S.slackChannel=document.getElementById("slackChannelInput").value;renderDashboard();}
-
-// ── Note actions ───────────────────────────────────────────────────────────
-function addNote(){
-  const txt=document.getElementById("newNoteText").value.trim();if(!txt)return;
-  S.notes.push({id:Date.now(),text:txt,pinned:false,createdAt:new Date().toISOString(),updatedAt:null});
-  document.getElementById("newNoteText").value="";
-  renderNotes();renderDashboard();scheduleSave();
-}
+function addNote(){const txt=document.getElementById("newNoteText").value.trim();if(!txt)return;S.notes.push({id:Date.now(),text:txt,pinned:false,createdAt:new Date().toISOString(),updatedAt:null});document.getElementById("newNoteText").value="";renderNotes();renderDashboard();scheduleSave();}
 function deleteNote(id){S.notes=S.notes.filter(n=>n.id!==id);renderNotes();renderDashboard();scheduleSave();}
 function togglePin(id){S.notes=S.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n);renderNotes();scheduleSave();}
-function saveNote(id){
-  const txt=document.getElementById("edit-"+id)?.value.trim();if(!txt)return;
-  S.notes=S.notes.map(n=>n.id===id?{...n,text:txt,updatedAt:new Date().toISOString()}:n);
-  S.editingNote=null;renderNotes();scheduleSave();
+function saveNote(id){const txt=document.getElementById("edit-"+id)?.value.trim();if(!txt)return;S.notes=S.notes.map(n=>n.id===id?{...n,text:txt,updatedAt:new Date().toISOString()}:n);S.editingNote=null;renderNotes();scheduleSave();}
+function clearNoteFilters(){["noteSearch","noteDateFrom","noteDateTo"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});renderNotes();}
+
+// ══════════════════════════════════════════
+// LINKS RÁPIDOS
+// ══════════════════════════════════════════
+const LINK_SUGGESTIONS=[
+  {name:"Trello",url:"https://trello.com",icon:"📌",cat:"produtividade"},
+  {name:"Asana",url:"https://asana.com",icon:"📋",cat:"produtividade"},
+  {name:"Jira",url:"https://atlassian.com/software/jira",icon:"🔵",cat:"dev"},
+  {name:"GitHub",url:"https://github.com",icon:"🐱",cat:"dev"},
+  {name:"Figma",url:"https://figma.com",icon:"🎨",cat:"produtividade"},
+  {name:"Sheets",url:"https://sheets.google.com",icon:"📊",cat:"dados"},
+  {name:"Looker",url:"https://lookerstudio.google.com",icon:"📈",cat:"dados"},
+  {name:"HubSpot",url:"https://hubspot.com",icon:"🟠",cat:"dados"},
+  {name:"Zoom",url:"https://zoom.us",icon:"📹",cat:"comunicação"},
+  {name:"Notion",url:"https://notion.so",icon:"📝",cat:"produtividade"},
+  {name:"Linear",url:"https://linear.app",icon:"🔷",cat:"dev"},
+  {name:"Vercel",url:"https://vercel.com",icon:"▲",cat:"dev"},
+  {name:"Canva",url:"https://canva.com",icon:"✏️",cat:"produtividade"},
+  {name:"Meet",url:"https://meet.google.com",icon:"🎥",cat:"comunicação"},
+];
+const LINK_CAT_COLORS={"comunicação":{bg:"#E6F1FB",color:"#185FA5"},"produtividade":{bg:"#E1F5EE",color:"#0F6E56"},"dados":{bg:"#FAEEDA",color:"#854F0B"},"dev":{bg:"#EEEDFE",color:"#534AB7"},"outros":{bg:"#F1EFE8",color:"#5F5E5A"}};
+
+function renderLinkFilters(){
+  const b=bgm(),t=theme();
+  const cats=["todos",...new Set(S.links.map(l=>l.cat))];
+  document.getElementById("link-filters").innerHTML=cats.map(c=>`<button class="fp" onclick="S.linkActiveCat='${c}';renderLinkFilters();renderLinksGrid()" style="background:${S.linkActiveCat===c?t.primary:"none"};color:${S.linkActiveCat===c?"#fff":b.textMuted};border-color:${S.linkActiveCat===c?t.primary:b.border}">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join("");
 }
-function clearNoteFilters(){
-  document.getElementById("noteSearch").value="";
-  document.getElementById("noteDateFrom").value="";
-  document.getElementById("noteDateTo").value="";
-  renderNotes();
+function renderLinksGrid(){
+  const b=bgm(),t=theme(),f=fsz();
+  const filtered=S.linkActiveCat==="todos"?S.links:S.links.filter(l=>l.cat===S.linkActiveCat);
+  const savedUrls=new Set(S.links.map(l=>l.url));
+  let html=filtered.map(l=>{
+    const cm=LINK_CAT_COLORS[l.cat]||LINK_CAT_COLORS["outros"];
+    return`<div class="link-card" onclick="window.open('${l.url}','_blank')" style="background:${b.surface};border-color:${b.border}">
+      <div class="lcard-actions">
+        <button class="icon-sq" onclick="event.stopPropagation();editLink(${l.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
+        <button class="icon-sq" onclick="event.stopPropagation();delLink(${l.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
+      </div>
+      <div style="font-size:26px;width:38px;height:38px;border-radius:9px;background:${b.surfaceAlt};display:flex;align-items:center;justify-content:center">${l.icon||"🔗"}</div>
+      <div style="font-size:${f.base-1}px;font-weight:700;color:${b.text}">${l.name}</div>
+      <div style="font-size:11px;color:${b.textFaint};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.url.replace(/^https?:\/\//,"")}</div>
+      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${cm.bg};color:${cm.color};display:inline-block">${l.cat}</span>
+    </div>`;
+  }).join("");
+  html+=`<div class="link-card add-dashed" onclick="showLinkForm()" style="background:none;border-color:${b.border}" aria-label="Adicionar link"><i class="ti ti-plus" style="font-size:22px;opacity:.4"></i><span style="color:${b.textFaint}">Novo link</span></div>`;
+  document.getElementById("links-grid").innerHTML=html;
+  // Suggestions
+  const avail=LINK_SUGGESTIONS.filter(s=>!savedUrls.has(s.url));
+  const sec=document.getElementById("link-suggestions");
+  if(!avail.length){sec.innerHTML="";return;}
+  sec.innerHTML=`<div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid ${b.border}">
+    <div style="font-size:12px;font-weight:700;color:${b.textFaint};margin-bottom:10px"><i class="ti ti-sparkles" style="font-size:13px"></i> Sugestões para adicionar</div>
+    <div class="sugg-chips">${avail.map(s=>`<button class="sugg-chip" onclick="addLinkSuggestion('${s.name}','${s.url}','${s.icon}','${s.cat}')" style="background:${b.surface};border-color:${b.border};color:${b.text}"><span>${s.icon}</span>${s.name}</button>`).join("")}</div>
+  </div>`;
+}
+function addLinkSuggestion(name,url,icon,cat){S.links.push({id:Date.now(),name,url,icon,cat});persist("ql_v2",S.links);renderLinkFilters();renderLinksGrid();}
+function showLinkForm(link){
+  S.linkEditId=link?link.id:null;
+  document.getElementById("link-form-title").textContent=link?"Editar link":"Adicionar link";
+  document.getElementById("lf-name").value=link?link.name:"";
+  document.getElementById("lf-url").value=link?link.url:"";
+  document.getElementById("lf-icon").value=link?link.icon:"";
+  document.getElementById("lf-cat").value=link?link.cat:"comunicação";
+  document.getElementById("link-form").style.display="block";
+  document.getElementById("lf-name").focus();
+  applyTheme();
+}
+function hideLinkForm(){document.getElementById("link-form").style.display="none";S.linkEditId=null;}
+function saveLink(){
+  const name=document.getElementById("lf-name").value.trim();
+  const url=document.getElementById("lf-url").value.trim();
+  if(!name||!url){alert("Preencha nome e URL.");return;}
+  const obj={id:S.linkEditId||Date.now(),name,url,icon:document.getElementById("lf-icon").value.trim()||"🔗",cat:document.getElementById("lf-cat").value};
+  if(S.linkEditId){const i=S.links.findIndex(l=>l.id===S.linkEditId);if(i>-1)S.links[i]=obj;}else S.links.push(obj);
+  persist("ql_v2",S.links);hideLinkForm();renderLinkFilters();renderLinksGrid();addLog(`Link "${name}" salvo.`,"success");
+}
+function editLink(id){showLinkForm(S.links.find(l=>l.id===id));}
+function delLink(id){if(!confirm("Remover este link?"))return;S.links=S.links.filter(l=>l.id!==id);persist("ql_v2",S.links);renderLinkFilters();renderLinksGrid();}
+
+// ══════════════════════════════════════════
+// WORKSPACE
+// ══════════════════════════════════════════
+const WS_TYPE_META={"arquivo":{icon:"📄",bg:"#E6F1FB",color:"#185FA5"},"plano":{icon:"📅",bg:"#E1F5EE",color:"#0F6E56"},"formulário":{icon:"📋",bg:"#FAEEDA",color:"#854F0B"},"projeto":{icon:"🗂️",bg:"#EEEDFE",color:"#534AB7"},"relatório":{icon:"📊",bg:"#FAECE7",color:"#993C1D"},"template":{icon:"🔖",bg:"#F1EFE8",color:"#5F5E5A"}};
+const WS_STATUS_META={"em andamento":{bg:"#E6F1FB",color:"#185FA5"},"concluído":{bg:"#EAF3DE",color:"#3B6D11"},"aguardando":{bg:"#FAEEDA",color:"#854F0B"},"arquivado":{bg:"#F1EFE8",color:"#5F5E5A"}};
+
+function renderWsStats(){
+  const b=bgm();
+  const total=S.wsItems.length,andamento=S.wsItems.filter(i=>i.status==="em andamento").length,concluido=S.wsItems.filter(i=>i.status==="concluído").length,tipos=new Set(S.wsItems.map(i=>i.type)).size;
+  document.getElementById("ws-stats").innerHTML=`
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Total</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${total}</div></div>
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Em andamento</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${andamento}</div></div>
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Concluídos</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${concluido}</div></div>
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Tipos</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${tipos}</div></div>`;
+}
+function renderWsFilters(){
+  const b=bgm(),t=theme();
+  const types=["todos",...new Set(S.wsItems.map(i=>i.type))];
+  document.getElementById("ws-filters").innerHTML=types.map(tp=>`<button class="fp" onclick="S.wsActiveType='${tp}';renderWsFilters();renderWs()" style="background:${S.wsActiveType===tp?t.primary:"none"};color:${S.wsActiveType===tp?"#fff":b.textMuted};border-color:${S.wsActiveType===tp?t.primary:b.border}">${tp.charAt(0).toUpperCase()+tp.slice(1)}</button>`).join("");
+  ["ws-vt-grid","ws-vt-list"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=id.endsWith(S.wsView)?b.surfaceAlt:"transparent";el.style.color=id.endsWith(S.wsView)?b.text:b.textMuted;}});
+  document.getElementById("ws-view-toggle").style.borderColor=b.border;
+}
+function setWsView(v){S.wsView=v;renderWsFilters();renderWs();}
+function renderWs(){
+  const b=bgm(),t=theme(),f=fsz();
+  const q=(document.getElementById("ws-search")||{}).value||"";
+  const list=S.wsItems.filter(i=>{
+    const mType=S.wsActiveType==="todos"||i.type===S.wsActiveType;
+    const mQ=!q||i.title.toLowerCase().includes(q.toLowerCase())||i.type.toLowerCase().includes(q.toLowerCase());
+    return mType&&mQ;
+  });
+  const c=document.getElementById("ws-container");
+  if(!list.length){c.innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-folder-open"></i><p>Nenhum item encontrado.</p></div>`;return;}
+  if(S.wsView==="grid"){
+    c.innerHTML=`<div class="ws-grid">${list.map(i=>{const tm=WS_TYPE_META[i.type]||WS_TYPE_META["arquivo"];const sm=WS_STATUS_META[i.status]||WS_STATUS_META["arquivado"];return`<div class="ws-card" onclick="showWsPreview(${i.id})" style="background:${b.surface};border-color:${b.border}">
+      <div class="wcard-actions">
+        <button class="icon-sq" onclick="event.stopPropagation();editWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
+        <button class="icon-sq" onclick="event.stopPropagation();delWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
+      </div>
+      <div class="ws-thumb" style="background:${tm.bg}">${tm.icon}</div>
+      <div style="font-size:${f.base-1}px;font-weight:700;color:${b.text};margin-bottom:4px;line-height:1.35">${esc(i.title)}</div>
+      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${tm.bg};color:${tm.color}">${i.type}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:${sm.bg};color:${sm.color}">${i.status}</span>
+        <span style="font-size:11px;color:${b.textFaint}">${i.date||""}</span>
+      </div>
+    </div>`}).join("")}
+    <div class="ws-card add-dashed" onclick="showWsForm()" style="background:none;border-style:dashed;border-color:${b.border};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:130px"><i class="ti ti-plus" style="font-size:22px;opacity:.4;color:${b.textFaint}"></i><span style="font-size:13px;color:${b.textFaint}">Novo item</span></div></div>`;
+  } else {
+    c.innerHTML=`<div style="border:1px solid ${b.border};border-radius:14px;overflow:hidden">${list.map(i=>{const tm=WS_TYPE_META[i.type]||WS_TYPE_META["arquivo"];const sm=WS_STATUS_META[i.status]||WS_STATUS_META["arquivado"];return`<div class="ws-list-row" onclick="showWsPreview(${i.id})" style="display:grid;grid-template-columns:32px 1fr auto auto 72px;gap:10px;align-items:center;padding:10px 14px;background:${b.surface};border-bottom:1px solid ${b.border};cursor:pointer;position:relative" onmouseover="this.style.background='${b.surfaceAlt}'" onmouseout="this.style.background='${b.surface}'">
+      <div style="font-size:20px;text-align:center">${tm.icon}</div>
+      <div style="font-size:13px;font-weight:700;color:${b.text};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.title)}</div>
+      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${tm.bg};color:${tm.color};white-space:nowrap">${i.type}</span>
+      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${sm.bg};color:${sm.color};white-space:nowrap">${i.status}</span>
+      <div style="display:flex;gap:4px;justify-content:flex-end">
+        <button class="icon-sq" onclick="event.stopPropagation();editWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
+        <button class="icon-sq" onclick="event.stopPropagation();delWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`}).join("")}</div>`;
+  }
+}
+function showWsPreview(id){
+  const i=S.wsItems.find(x=>x.id===id);if(!i)return;
+  const b=bgm(),t=theme(),tm=WS_TYPE_META[i.type]||WS_TYPE_META["arquivo"],sm=WS_STATUS_META[i.status]||WS_STATUS_META["arquivado"];
+  document.getElementById("ws-preview").innerHTML=`<div class="prev-overlay" onclick="if(event.target===this)document.getElementById('ws-preview').innerHTML=''">
+    <div class="prev-modal" style="background:${b.surface};border-color:${b.border}">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <span style="font-size:30px">${tm.icon}</span>
+        <div><div style="font-size:16px;font-weight:700;color:${b.text}">${esc(i.title)}</div>
+        <div style="display:flex;gap:6px;margin-top:5px">
+          <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${tm.bg};color:${tm.color}">${i.type}</span>
+          <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${sm.bg};color:${sm.color}">${i.status}</span>
+        </div></div>
+      </div>
+      ${i.desc?`<p style="font-size:13px;color:${b.textMuted};line-height:1.7;margin-bottom:14px">${esc(i.desc)}</p>`:""}
+      <div class="pm-fields" style="border-color:${b.border}">
+        <div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-calendar" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Data</span><span style="color:${b.text}">${i.date||"—"}</span></div>
+        <div class="pm-row" style="border-bottom:none"><i class="ti ti-link" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Link</span><span>${i.link?`<a href="${esc(i.link)}" target="_blank" style="color:${t.primary}">Abrir</a>`:"—"}</span></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-cancel" onclick="document.getElementById('ws-preview').innerHTML=''" style="border-color:${b.border};color:${b.textMuted}">Fechar</button>
+        <button class="btn-save" onclick="editWsItem(${i.id});document.getElementById('ws-preview').innerHTML=''" style="background:${t.primary}">Editar</button>
+      </div>
+    </div>
+  </div>`;
+}
+function showWsForm(item){
+  S.wsEditId=item?item.id:null;
+  document.getElementById("ws-form-title").textContent=item?"Editar item":"Adicionar novo item";
+  document.getElementById("wf-title").value=item?item.title:"";
+  document.getElementById("wf-type").value=item?item.type:"arquivo";
+  document.getElementById("wf-status").value=item?item.status:"em andamento";
+  document.getElementById("wf-link").value=item?item.link:"";
+  document.getElementById("wf-desc").value=item?item.desc:"";
+  document.getElementById("ws-form").style.display="block";
+  document.getElementById("wf-title").focus();
+  applyTheme();
+}
+function hideWsForm(){document.getElementById("ws-form").style.display="none";S.wsEditId=null;}
+function saveWsItem(){
+  const title=document.getElementById("wf-title").value.trim();if(!title){alert("Informe um título.");return;}
+  const obj={id:S.wsEditId||Date.now(),title,type:document.getElementById("wf-type").value,status:document.getElementById("wf-status").value,link:document.getElementById("wf-link").value.trim(),desc:document.getElementById("wf-desc").value.trim(),date:today()};
+  if(S.wsEditId){const idx=S.wsItems.findIndex(i=>i.id===S.wsEditId);if(idx>-1)S.wsItems[idx]=obj;}else S.wsItems.push(obj);
+  persist("ws_v1",S.wsItems);hideWsForm();renderWsStats();renderWsFilters();renderWs();addLog(`Workspace: "${title}" salvo.`,"success");
+}
+function editWsItem(id){showWsForm(S.wsItems.find(i=>i.id===id));}
+function delWsItem(id){if(!confirm("Remover este item?"))return;S.wsItems=S.wsItems.filter(i=>i.id!==id);persist("ws_v1",S.wsItems);renderWsStats();renderWsFilters();renderWs();}
+
+// ══════════════════════════════════════════
+// CONTACTS
+// ══════════════════════════════════════════
+const CT_CAT_COLORS={"time":{bg:"#E6F1FB",color:"#185FA5"},"área":{bg:"#EEEDFE",color:"#534AB7"},"cliente":{bg:"#E1F5EE",color:"#0F6E56"},"parceiro":{bg:"#FAEEDA",color:"#854F0B"},"fornecedor":{bg:"#FAECE7",color:"#993C1D"},"outro":{bg:"#F1EFE8",color:"#5F5E5A"}};
+const AV_COLORS=[{bg:"#E6F1FB",color:"#185FA5"},{bg:"#EEEDFE",color:"#534AB7"},{bg:"#E1F5EE",color:"#0F6E56"},{bg:"#FAEEDA",color:"#854F0B"},{bg:"#FAECE7",color:"#993C1D"},{bg:"#FBEAF0",color:"#993556"}];
+function initials(name){return name.split(" ").filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");}
+function avColor(id){return AV_COLORS[id%AV_COLORS.length];}
+function renderCtStats(){
+  const b=bgm();
+  const total=S.contacts.length,grupos=new Set(S.contacts.map(c=>c.group).filter(Boolean)).size,cats=new Set(S.contacts.map(c=>c.cat)).size,comEmail=S.contacts.filter(c=>c.email).length;
+  document.getElementById("ct-stats").innerHTML=`
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Total</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${total}</div></div>
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Grupos</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${grupos}</div></div>
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Categorias</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${cats}</div></div>
+    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Com e-mail</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${comEmail}</div></div>`;
+}
+function renderCtFilters(){
+  const b=bgm(),t=theme();
+  const cats=["todos",...new Set(S.contacts.map(c=>c.cat))];
+  document.getElementById("ct-filters").innerHTML=cats.map(c=>`<button class="fp" onclick="S.ctActiveCat='${c}';renderCtFilters();renderContacts()" style="background:${S.ctActiveCat===c?t.primary:"none"};color:${S.ctActiveCat===c?"#fff":b.textMuted};border-color:${S.ctActiveCat===c?t.primary:b.border}">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join("");
+}
+function renderContacts(){
+  const b=bgm(),t=theme(),f=fsz();
+  const q=(document.getElementById("ct-search")||{}).value||"";
+  const filtered=S.contacts.filter(c=>{
+    const mCat=S.ctActiveCat==="todos"||c.cat===S.ctActiveCat;
+    const mQ=!q||[c.name,c.role,c.email,c.group,c.slack,c.phone].some(v=>v&&v.toLowerCase().includes(q.toLowerCase()));
+    return mCat&&mQ;
+  });
+  const container=document.getElementById("ct-container");
+  if(!filtered.length){container.innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-users"></i><p>Nenhum contato encontrado.</p></div>`;return;}
+  const grouped={};
+  filtered.forEach(c=>{const g=c.group||c.cat||"Sem grupo";if(!grouped[g])grouped[g]=[];grouped[g].push(c);});
+  let html="";
+  Object.entries(grouped).sort(([a],[bb])=>a.localeCompare(bb)).forEach(([grp,members])=>{
+    html+=`<div style="margin-bottom:1.5rem">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${b.textFaint};margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-users" style="font-size:14px"></i>${grp} <span style="font-weight:400;opacity:.6">(${members.length})</span>
+      </div>
+      <div class="contacts-grid">${members.map(c=>{
+        const ac=avColor(c.id);const cm=CT_CAT_COLORS[c.cat]||CT_CAT_COLORS["outro"];
+        return`<div class="contact-card" onclick="showCtPreview(${c.id})" style="background:${b.surface};border-color:${b.border}">
+          <div class="ccard-actions">
+            <button class="icon-sq" onclick="event.stopPropagation();editContact(${c.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
+            <button class="icon-sq" onclick="event.stopPropagation();delContact(${c.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
+          </div>
+          <div class="c-avatar" style="background:${ac.bg};color:${ac.color}">${initials(c.name)}</div>
+          <div style="font-size:${f.base-1}px;font-weight:700;color:${b.text};margin-bottom:3px">${esc(c.name)}</div>
+          ${c.role?`<div style="font-size:12px;color:${b.textFaint};margin-bottom:8px">${esc(c.role)}</div>`:"<div style='margin-bottom:8px'></div>"}
+          <div style="display:flex;flex-direction:column;gap:5px">
+            ${c.email?`<div style="display:flex;align-items:center;gap:6px;font-size:12px"><i class="ti ti-mail" style="font-size:14px;color:${b.textFaint}"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${b.text}">${esc(c.email)}</span></div>`:""}
+            ${c.phone?`<div style="display:flex;align-items:center;gap:6px;font-size:12px"><i class="ti ti-phone" style="font-size:14px;color:${b.textFaint}"></i><span style="color:${b.text}">${esc(c.phone)}</span></div>`:""}
+            ${c.slack?`<div style="display:flex;align-items:center;gap:6px;font-size:12px"><i class="ti ti-brand-slack" style="font-size:14px;color:${b.textFaint}"></i><span style="color:${b.text}">${esc(c.slack)}</span></div>`:""}
+          </div>
+          <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${cm.bg};color:${cm.color};display:inline-block;margin-top:8px">${c.cat}</span>
+        </div>`;
+      }).join("")}</div>
+    </div>`;
+  });
+  container.innerHTML=html;
+}
+function showCtPreview(id){
+  const c=S.contacts.find(x=>x.id===id);if(!c)return;
+  const b=bgm(),t=theme(),ac=avColor(c.id),cm=CT_CAT_COLORS[c.cat]||CT_CAT_COLORS["outro"];
+  const rows=[
+    c.email?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-mail" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">E-mail</span><a href="mailto:${esc(c.email)}" style="color:${t.primary}">${esc(c.email)}</a></div>`:"",
+    c.phone?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-phone" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Telefone</span><span style="color:${b.text}">${esc(c.phone)}</span></div>`:"",
+    c.slack?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-brand-slack" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Slack</span><span style="color:${b.text}">${esc(c.slack)}</span></div>`:"",
+    c.group?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-users" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Grupo</span><span style="color:${b.text}">${esc(c.group)}</span></div>`:"",
+    c.obs?`<div class="pm-row" style="border-bottom:none"><i class="ti ti-notes" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Obs.</span><span style="color:${b.text}">${esc(c.obs)}</span></div>`:"",
+  ].filter(Boolean).join("");
+  document.getElementById("ct-preview").innerHTML=`<div class="prev-overlay" onclick="if(event.target===this)document.getElementById('ct-preview').innerHTML=''">
+    <div class="prev-modal" style="background:${b.surface};border-color:${b.border}">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem">
+        <div style="width:52px;height:52px;border-radius:50%;background:${ac.bg};color:${ac.color};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0">${initials(c.name)}</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:${b.text}">${esc(c.name)}</div>
+          <div style="font-size:13px;color:${b.textMuted}">${c.role||""} ${c.role&&c.group?" · ":""} ${c.group||""}</div>
+          <span style="font-size:11px;padding:2px 9px;border-radius:999px;background:${cm.bg};color:${cm.color};display:inline-block;margin-top:5px">${c.cat}</span>
+        </div>
+      </div>
+      ${rows?`<div class="pm-fields" style="border-color:${b.border}">${rows}</div>`:""}
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-cancel" onclick="document.getElementById('ct-preview').innerHTML=''" style="border-color:${b.border};color:${b.textMuted}">Fechar</button>
+        <button class="btn-save" onclick="editContact(${c.id});document.getElementById('ct-preview').innerHTML=''" style="background:${t.primary}">Editar</button>
+      </div>
+    </div>
+  </div>`;
+}
+function showCtForm(c){
+  S.ctEditId=c?c.id:null;
+  document.getElementById("ct-form-title").textContent=c?"Editar contato":"Adicionar contato";
+  ["cf-name","cf-role","cf-email","cf-phone","cf-slack","cf-group","cf-obs"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c?c[id.replace("cf-","").replace("-","")]||"":"";});
+  document.getElementById("cf-name").value=c?c.name:"";
+  document.getElementById("cf-role").value=c?c.role:"";
+  document.getElementById("cf-email").value=c?c.email:"";
+  document.getElementById("cf-phone").value=c?c.phone:"";
+  document.getElementById("cf-slack").value=c?c.slack:"";
+  document.getElementById("cf-cat").value=c?c.cat:"time";
+  document.getElementById("cf-group").value=c?c.group:"";
+  document.getElementById("cf-obs").value=c?c.obs:"";
+  document.getElementById("ct-form").style.display="block";
+  document.getElementById("cf-name").focus();
+  applyTheme();
+}
+function hideCtForm(){document.getElementById("ct-form").style.display="none";S.ctEditId=null;}
+function saveContact(){
+  const name=document.getElementById("cf-name").value.trim();if(!name){alert("Informe o nome.");return;}
+  const obj={id:S.ctEditId||Date.now(),name,role:document.getElementById("cf-role").value.trim(),email:document.getElementById("cf-email").value.trim(),phone:document.getElementById("cf-phone").value.trim(),slack:document.getElementById("cf-slack").value.trim(),cat:document.getElementById("cf-cat").value,group:document.getElementById("cf-group").value.trim(),obs:document.getElementById("cf-obs").value.trim()};
+  if(S.ctEditId){const i=S.contacts.findIndex(c=>c.id===S.ctEditId);if(i>-1)S.contacts[i]=obj;}else S.contacts.push(obj);
+  persist("ct_v1",S.contacts);hideCtForm();renderCtStats();renderCtFilters();renderContacts();addLog(`Contato "${name}" salvo.`,"success");
+}
+function editContact(id){showCtForm(S.contacts.find(c=>c.id===id));}
+function delContact(id){if(!confirm("Remover este contato?"))return;S.contacts=S.contacts.filter(c=>c.id!==id);persist("ct_v1",S.contacts);renderCtStats();renderCtFilters();renderContacts();}
+function showCtForm(c){
+  S.ctEditId=c?c.id:null;
+  document.getElementById("ct-form-title").textContent=c?"Editar contato":"Adicionar contato";
+  document.getElementById("cf-name").value=c?c.name:"";
+  document.getElementById("cf-role").value=c?c.role:"";
+  document.getElementById("cf-email").value=c?c.email:"";
+  document.getElementById("cf-phone").value=c?c.phone:"";
+  document.getElementById("cf-slack").value=c?c.slack:"";
+  document.getElementById("cf-cat").value=c?c.cat:"time";
+  document.getElementById("cf-group").value=c?c.group:"";
+  document.getElementById("cf-obs").value=c?c.obs:"";
+  document.getElementById("ct-form").style.display="block";
+  document.getElementById("cf-name").focus();
+  applyTheme();
 }
 
-// ── Logs ───────────────────────────────────────────────────────────────────
-function addLog(msg,type="info"){
-  S.logs.unshift({msg,type,ts:new Date().toISOString()});
-  if(S.logs.length>100)S.logs.pop();
-  renderLogs();
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+function renderConfigAppearance(){
+  const b=bgm(),t=theme(),f=fsz();
+  const tsw=document.getElementById("themeSwatches");
+  if(tsw)tsw.innerHTML=THEMES.map(th=>`<button onclick="S.themeId='${th.id}';applyTheme();renderAll()" title="${th.label}" style="width:32px;height:32px;border-radius:50%;background:${th.primary};border:${S.themeId===th.id?"3px solid "+b.text:"3px solid transparent"};cursor:pointer;transition:all 0.15s"></button>`).join("");
+  const tcl=document.getElementById("themeCurrentLabel");if(tcl){tcl.innerHTML=`Tema: <strong style="color:${t.primary}">${t.label}</strong>`;tcl.style.color=b.textFaint;}
+  const fsb=document.getElementById("fontSizeBtns");
+  if(fsb)fsb.innerHTML=FONT_SIZES.map(fs=>`<button onclick="S.fontSizeId='${fs.id}';applyTheme();renderAll()" style="padding:6px 16px;border-radius:8px;border:1px solid ${S.fontSizeId===fs.id?t.primary:b.border};background:${S.fontSizeId===fs.id?t.light:b.surfaceAlt};color:${S.fontSizeId===fs.id?t.primary:b.textMuted};cursor:pointer;font-size:${fs.base-1}px;font-family:'Sora',sans-serif;font-weight:${S.fontSizeId===fs.id?700:400}">${fs.label}</button>`).join("");
+  const bmg=document.getElementById("bgModeGrid");
+  if(bmg)bmg.innerHTML=BG_MODES.map(bm=>`<button onclick="S.bgModeId='${bm.id}';applyTheme();updateClock();renderAll()" style="padding:12px 8px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;border:${S.bgModeId===bm.id?"2px solid "+t.primary:"1px solid "+b.border};background:${bm.bg};display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.15s">
+    <i class="ti ${bm.icon}" style="font-size:20px;color:${bm.text}"></i>
+    <span style="font-size:11px;font-weight:${S.bgModeId===bm.id?700:400};color:${bm.text}">${bm.label}</span>
+    <div class="bg-swatches"><div class="bg-swatch" style="background:${bm.surface};border:1px solid ${bm.border}"></div><div class="bg-swatch" style="background:${bm.surfaceAlt};border:1px solid ${bm.border}"></div><div class="bg-swatch" style="background:${bm.bg};border:1px solid ${bm.border}"></div></div>
+  </button>`).join("");
+  const bcl=document.getElementById("bgCurrentLabel");if(bcl){bcl.innerHTML=`Atual: <strong style="color:${t.primary}">${b.label}</strong> · Clique no botão do topo para alternar`;bcl.style.color=b.textFaint;}
+  const tcr=document.getElementById("teamConfigRows");
+  if(tcr)tcr.innerHTML=TEAMS.map(tm=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid ${b.border}">
+    <div class="team-avatar" style="background:${tm.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${tm.icon}" style="font-size:15px;color:${tm.color}"></i></div>
+    <div style="flex:1;font-weight:700;font-size:13px;color:${b.text}">${tm.label}</div>
+    <span class="pill" style="background:${tm.bg};color:${tm.textColor};border:1px solid ${tm.color}33"><i class="ti ti-check"></i> Ativo</span>
+  </div>`).join("");
 }
+function updateChannel(){S.slackChannel=document.getElementById("slackChannelInput").value;renderDashboard();}
+
+// ══════════════════════════════════════════
+// LOGS
+// ══════════════════════════════════════════
+function addLog(msg,type="info"){S.logs.unshift({msg,type,ts:new Date().toISOString()});if(S.logs.length>100)S.logs.pop();renderLogs();}
 function clearLogs(){S.logs=[];renderLogs();}
 function renderLogs(){
   const term=document.getElementById("terminalOutput");
   if(!S.logs.length){term.innerHTML=`<div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>`;return;}
   term.innerHTML=S.logs.map(l=>`<div class="log-${l.type}"><span class="log-ts">[${new Date(l.ts).toLocaleTimeString("pt-BR")}]</span>${esc(l.msg)}</div>`).join("");
-  term.scrollTop=0;
 }
 
-// ── Render All ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════
 function renderAll(){
-  renderDashboard();renderNotifications();renderNotes();renderLogs();
-  renderConfigAppearance();applyTheme();
-  document.getElementById("clearLogsBtn").style.border="1px solid "+bgm().border;
-  document.getElementById("clearLogsBtn").style.color=bgm().textMuted;
+  renderDashboard();renderNotifications();renderNotes();renderLogs();renderConfigAppearance();applyTheme();
+  if(S.view==="links"){renderLinkFilters();renderLinksGrid();}
+  if(S.view==="workspace"){renderWsStats();renderWsFilters();renderWs();}
+  if(S.view==="contacts"){renderCtStats();renderCtFilters();renderContacts();}
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
 updateClock();
 renderAll();
 addLog("Painel carregado. Monitor automático via Google Apps Script.","success");
