@@ -1,1026 +1,1279 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Email Monitor · Slack</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Sora',sans-serif;min-height:100vh;transition:background 0.3s,color 0.3s;}
-.topbar{display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;position:sticky;top:0;z-index:10;transition:background 0.3s,border-color 0.3s;}
-.main-wrap{display:flex;min-height:calc(100vh - 56px);}
-.sidebar{width:220px;display:flex;flex-direction:column;padding:12px 0;flex-shrink:0;transition:background 0.3s;overflow-y:auto;}
-.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 20px;background:transparent;border:none;border-left:3px solid transparent;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:400;text-align:left;transition:all 0.15s;}
-.nav-section{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:14px 20px 4px;opacity:0.45;}
-.sidebar-bottom{margin-top:auto;padding:16px 20px;}
-.content{flex:1;padding:28px 32px;overflow:auto;max-width:980px;}
-.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
-.metric{border-radius:10px;padding:14px 16px;}
-.team-row{border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.team-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.notif-card{border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left-width:3px;animation:slideIn 0.2s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
-.note-card{border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left-width:3px;}
-.pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
-.pill-sent{background:#E1F5EE;color:#085041;}
-.action-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Sora',sans-serif;font-weight:700;transition:opacity 0.15s;}
-.action-btn:hover{opacity:0.85;}
-.result-banner{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13px;}
-.result-success{background:#E1F5EE;border:1px solid #5DCAA5;color:#04342C;}
-.result-info{background:#E6F1FB;border:1px solid #85B7EB;color:#042C53;}
-.terminal{background:#0f0f1a;border-radius:14px;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;max-height:460px;overflow-y:auto;border:1px solid #222;}
-.log-info{color:#B4B2A9;}.log-success{color:#5DCAA5;}.log-warn{color:#EF9F27;}.log-error{color:#F09595;}
-.log-ts{color:#444;margin-right:8px;}
-.empty{text-align:center;padding:60px 0;}
-.empty i{font-size:44px;display:block;margin-bottom:12px;}
-.empty p{font-size:14px;line-height:1.7;}
-.search-bar{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 14px;margin-bottom:20px;}
-.search-bar input{flex:1;border:none;background:transparent;font-size:14px;font-family:'Sora',sans-serif;outline:none;}
-.bg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.bg-swatches{display:flex;gap:3px;margin-top:2px;}
-.bg-swatch{width:10px;height:10px;border-radius:3px;}
-.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 10px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.spin{animation:spin 0.8s linear infinite;display:inline-block;}
-::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{border-radius:3px;}
-.gs-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Monitor · Slack</title>
 
-/* ── Links Rápidos ── */
-.links-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px;}
-.link-card{border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.15s;position:relative;border-width:1px;border-style:solid;}
-.link-card:hover .lcard-actions{display:flex;}
-.lcard-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;}
-.add-dashed{border-style:dashed!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:13px;min-height:110px;}
-.sugg-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
-.sugg-chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;border-radius:999px;border-width:1px;border-style:solid;cursor:pointer;}
+  <!-- html2pdf: exportação do dashboard para PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-/* ── Workspace ── */
-.ws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;}
-.ws-card{border-radius:14px;padding:14px;position:relative;cursor:pointer;transition:border-color 0.15s;border-width:1px;border-style:solid;}
-.ws-card:hover .wcard-actions{display:flex;}
-.wcard-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;}
-.ws-thumb{height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:10px;}
-.view-toggle{display:flex;border-radius:8px;overflow:hidden;border-width:1px;border-style:solid;}
-.vt-btn{background:none;border:none;padding:6px 9px;cursor:pointer;font-size:16px;display:flex;align-items:center;}
+  <style>
+    /* ───────── Reset & Base ───────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #0f172a;
+      --border: #334155;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --sidebar-w: 220px;
+      --radius: 10px;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
 
-/* ── Contatos ── */
-.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
-.contact-card{border-radius:14px;padding:16px 14px 12px;position:relative;cursor:pointer;transition:border-color 0.15s;border-width:1px;border-style:solid;}
-.contact-card:hover .ccard-actions{display:flex;}
-.ccard-actions{position:absolute;top:8px;right:8px;display:none;gap:4px;}
-.c-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin-bottom:10px;}
+    /* ───────── Sidebar ───────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .sidebar-logo span.badge {
+      font-size: 0.65rem;
+      background: var(--green);
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .sidebar-nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: .08em; margin: 1rem 0 0.4rem 0.5rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      transition: background .15s, color .15s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
+    .nav-item.active { background: rgba(99,102,241,.15); color: var(--accent-hover); }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 20px;
+    }
 
-/* ── Shared small controls ── */
-.mini-btn{padding:4px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px;border-width:1px;border-style:solid;background:transparent;}
-.icon-sq{width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;border-radius:7px;border-width:1px;border-style:solid;}
-.inline-form{border-radius:14px;padding:20px;margin-top:14px;border-width:1px;border-style:solid;}
-.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
-.field label{font-size:12px;display:block;margin-bottom:4px;}
-.field input,.field select,.field textarea{width:100%;font-size:13px;padding:8px 11px;border-radius:10px;border-width:1px;border-style:solid;font-family:'Sora',sans-serif;outline:none;}
-.field textarea{resize:vertical;min-height:56px;}
-.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
-.btn-cancel{font-size:13px;padding:7px 16px;border-radius:9px;background:none;border-width:1px;border-style:solid;cursor:pointer;font-family:'Sora',sans-serif;}
-.btn-save{font-size:13px;padding:7px 16px;border-radius:9px;border:none;cursor:pointer;font-weight:700;font-family:'Sora',sans-serif;color:#fff;}
-.fp{font-size:12px;padding:4px 11px;border-radius:999px;border-width:1px;border-style:solid;cursor:pointer;background:none;}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+    /* ───────── Main ───────── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-/* Preview overlay */
-.prev-overlay{min-height:320px;background:rgba(0,0,0,0.42);display:flex;align-items:center;justify-content:center;border-radius:14px;margin-top:14px;}
-.prev-modal{background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:430px;border-width:1px;border-style:solid;}
-.pm-fields{border-radius:10px;overflow:hidden;border-width:1px;border-style:solid;margin-bottom:1rem;}
-.pm-row{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;border-bottom-width:1px;border-bottom-style:solid;}
-.pm-row:last-child{border-bottom:none;}
-</style>
+    /* ───────── Top bar ───────── */
+    #topbar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-info {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .topbar-info strong { color: var(--green); }
+    .topbar-info a { color: var(--accent-hover); text-decoration: none; }
+    .topbar-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background .15s;
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.12); }
+    .btn-danger { background: rgba(239,68,68,.15); color: var(--red); }
+    .btn-danger:hover { background: rgba(239,68,68,.25); }
+
+    /* ── PDF button ── */
+    #btn-export-pdf {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.9rem;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #btn-export-pdf:hover { background: #4338ca; }
+    #btn-export-pdf:active { background: #3730a3; }
+    #btn-export-pdf:disabled { opacity: 0.7; cursor: wait; }
+
+    /* ───────── Content area ───────── */
+    #content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ───────── Panels (sections) ───────── */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .panel-header h2 { font-size: 0.95rem; font-weight: 600; }
+    .panel-body { padding: 1.2rem; }
+
+    /* ───────── Stats row ───────── */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text); }
+    .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    /* ───────── Category chips ───────── */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .chip {
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: var(--bg);
+    }
+
+    /* ───────── Empty state ───────── */
+    .empty {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    /* ───────── Notification list ───────── */
+    #notif-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .notif-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .notif-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .tag-info { background: rgba(99,102,241,.2); color: var(--accent-hover); }
+    .tag-alerta { background: rgba(239,68,68,.15); color: var(--red); }
+    .tag-ok { background: rgba(34,197,94,.15); color: var(--green); }
+    .notif-body { flex: 1; }
+    .notif-title { font-size: 0.85rem; font-weight: 600; }
+    .notif-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .notif-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 0 0.2rem; }
+    .notif-close:hover { color: var(--red); }
+
+    /* ───────── Anotações ───────── */
+    .note-form { display: flex; flex-direction: column; gap: 0.6rem; }
+    .note-form textarea {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.6rem 0.8rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+    .note-form textarea:focus { outline: none; border-color: var(--accent); }
+    .note-hint { font-size: 0.72rem; color: var(--text-muted); }
+    .note-actions { display: flex; justify-content: flex-end; }
+
+    .search-bar {
+      display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .search-bar input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.4rem 0.75rem;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-family: inherit;
+      min-width: 140px;
+    }
+    .search-bar input:focus { outline: none; border-color: var(--accent); }
+    .filter-dates { display: flex; gap: 0.5rem; align-items: center; }
+    .filter-dates label { font-size: 0.75rem; color: var(--text-muted); }
+    .filter-dates input[type="date"] {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.5rem;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-family: inherit;
+    }
+
+    #notes-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+    .note-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.75rem 1rem;
+      position: relative;
+    }
+    .note-card p { font-size: 0.85rem; white-space: pre-wrap; }
+    .note-card .note-date { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+    .note-del {
+      position: absolute; top: 0.6rem; right: 0.75rem;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 0.9rem;
+    }
+    .note-del:hover { color: var(--red); }
+
+    /* ───────── Links rápidos ───────── */
+    .quick-links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; }
+    .qlink-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 0.8rem;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.82rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      transition: border-color .15s, background .15s;
+    }
+    .qlink-card:hover { border-color: var(--accent); background: rgba(99,102,241,.08); }
+    .qlink-emoji { font-size: 1.3rem; }
+    .qlink-name { font-weight: 600; }
+    .qlink-cat { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* ── Add link form ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      width: min(480px, 95vw);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .modal h3 { font-size: 1rem; font-weight: 700; }
+    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field-group label { font-size: 0.78rem; color: var(--text-muted); }
+    .field-group input, .field-group select, .field-group textarea {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.45rem 0.75rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+      width: 100%;
+    }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .field-group .required::after { content: ' *'; color: var(--red); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 0.6rem; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* ───────── Workspace ───────── */
+    .ws-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .ws-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .ws-icon { font-size: 1.3rem; }
+    .ws-info { flex: 1; }
+    .ws-title { font-size: 0.88rem; font-weight: 600; }
+    .ws-meta { font-size: 0.73rem; color: var(--text-muted); }
+    .status-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .status-progress { background: rgba(99,102,241,.2); color: var(--accent-hover); }
+    .status-done { background: rgba(34,197,94,.15); color: var(--green); }
+    .status-wait { background: rgba(234,179,8,.15); color: var(--yellow); }
+    .status-archived { background: rgba(148,163,184,.1); color: var(--text-muted); }
+
+    /* ───────── Contatos ───────── */
+    .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; }
+    .contact-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+    }
+    .contact-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; color: #fff;
+      margin-bottom: 0.6rem;
+    }
+    .contact-name { font-size: 0.88rem; font-weight: 600; }
+    .contact-role { font-size: 0.75rem; color: var(--text-muted); }
+    .contact-cat {
+      font-size: 0.68rem; font-weight: 600;
+      padding: 2px 6px; border-radius: 20px;
+      background: rgba(99,102,241,.15); color: var(--accent-hover);
+      display: inline-block; margin-top: 0.4rem;
+    }
+
+    /* ───────── Configurações ───────── */
+    .config-section { display: flex; flex-direction: column; gap: 1rem; }
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .config-row:last-child { border-bottom: none; }
+    .config-label { font-size: 0.85rem; font-weight: 600; }
+    .config-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .toggle {
+      width: 42px; height: 24px;
+      background: var(--green);
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .2s;
+    }
+    .toggle.off { background: var(--border); }
+    .toggle.off::after { transform: none; }
+    .toggle.on::after { transform: translateX(18px); }
+
+    .config-input {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.4rem 0.75rem;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-family: inherit;
+      min-width: 180px;
+    }
+    .config-input:focus { outline: none; border-color: var(--accent); }
+
+    .select-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .config-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.35rem 0.6rem;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-family: inherit;
+    }
+    .color-swatch {
+      width: 24px; height: 24px;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+    }
+    .color-swatch.selected { border-color: var(--text); }
+
+    /* ───────── Logs ───────── */
+    #log-area {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0.75rem 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      min-height: 140px;
+      max-height: 280px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .log-line { display: flex; gap: 0.5rem; }
+    .log-time { color: var(--accent-hover); white-space: nowrap; }
+    .log-tag-sys { color: var(--text-muted); }
+    .log-tag-ok { color: var(--green); }
+    .log-tag-err { color: var(--red); }
+
+    /* ───────── Section visibility ───────── */
+    .section { display: none; }
+    .section.active { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    /* ───────── Print / PDF ───────── */
+    @media print {
+      #btn-export-pdf { display: none !important; }
+      #sidebar { display: none !important; }
+      #main { margin-left: 0 !important; }
+      #topbar { position: static !important; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="topbar" class="topbar">
-  <i class="ti ti-brand-slack" id="topbarIcon" style="font-size:22px"></i>
-  <span id="topbarTitle" style="font-weight:700;font-size:16px">Email Monitor</span>
-  <span id="topbarPill" style="font-size:11px;padding:2px 10px;border-radius:20px">para Slack</span>
-  <div id="clockBox" style="margin-left:16px;display:flex;align-items:center;gap:16px"></div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-    <button id="bgCycleBtn" onclick="cycleBgMode()" style="border-radius:8px;padding:4px 10px;cursor:pointer;font-size:15px;font-family:'Sora',sans-serif;font-weight:500;display:flex;align-items:center;gap:5px;border:1px solid transparent"></button>
-    <span class="gs-badge"><i class="ti ti-robot" style="font-size:12px"></i> Apps Script ativo</span>
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      📧 Email Monitor
+      <span class="badge">Apps Script ativo</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-label">Principal</span>
+      <button class="nav-item active" data-section="dashboard">📊 Dashboard</button>
+      <button class="nav-item" data-section="notificacoes">
+        🔔 Notificações <span class="nav-badge" id="badge-notif">0</span>
+      </button>
+      <button class="nav-item" data-section="anotacoes">
+        📝 Anotações <span class="nav-badge" id="badge-notes">0</span>
+      </button>
+
+      <span class="nav-label">Meu espaço</span>
+      <button class="nav-item" data-section="links">🔗 Links rápidos</button>
+      <button class="nav-item" data-section="workspace">🗂️ Workspace</button>
+      <button class="nav-item" data-section="contatos">👥 Contatos</button>
+
+      <span class="nav-label">Sistema</span>
+      <button class="nav-item" data-section="config">⚙️ Configurações</button>
+      <button class="nav-item" data-section="logs">🖥️ Logs</button>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div id="main">
+
+    <!-- Top bar -->
+    <div id="topbar">
+      <div class="topbar-info">
+        <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
+        <a href="https://script.google.com" target="_blank">Gerenciar →</a>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" id="btn-refresh">🔄 Atualizar notificações</button>
+        <button class="btn btn-danger" id="btn-clear">🗑️ Limpar histórico</button>
+        <button id="btn-export-pdf">📄 Salvar PDF</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="sec-dashboard">
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Total notificações</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Canal Slack</div>
+            <div class="stat-value" style="font-size:1rem;padding-top:.5rem;" id="stat-canal">#notificacoes-email</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Última verificação</div>
+            <div class="stat-value" style="font-size:1.1rem;padding-top:.4rem;" id="stat-ultima">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Anotações</div>
+            <div class="stat-value" id="stat-notes">0</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><h2>Por categoria</h2></div>
+          <div class="panel-body">
+            <div class="chip-row" id="cat-chips">
+              <span class="chip">Sem dados ainda</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICAÇÕES ── -->
+      <div class="section" id="sec-notificacoes">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Notificações enviadas</h2>
+            <button class="btn btn-danger btn-sm" onclick="clearNotifications()">✕ Limpar</button>
+          </div>
+          <div class="panel-body">
+            <div id="notif-list">
+              <div class="empty">
+                <div class="empty-icon">🔔</div>
+                Nenhuma notificação ainda.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANOTAÇÕES ── -->
+      <div class="section" id="sec-anotacoes">
+        <div class="panel">
+          <div class="panel-header"><h2>Anotações</h2></div>
+          <div class="panel-body">
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
+              Suas anotações são salvas automaticamente no navegador.
+            </p>
+
+            <div class="note-form">
+              <button class="btn btn-ghost" style="align-self:flex-start" id="btn-new-note">+ Nova anotação</button>
+              <div id="note-editor" style="display:none;flex-direction:column;gap:.6rem;">
+                <textarea id="note-text" placeholder="Digite sua anotação…"></textarea>
+                <div class="note-hint">Ctrl+Enter para salvar</div>
+                <div class="note-actions">
+                  <button class="btn btn-primary" onclick="saveNote()">Salvar anotação</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="search-bar" style="margin-top:1rem;">
+              <input type="text" id="note-search" placeholder="Pesquisar anotações" oninput="renderNotes()" />
+              <div class="filter-dates">
+                <label>Data inicial</label>
+                <input type="date" id="note-from" onchange="renderNotes()" />
+                <label>Data final</label>
+                <input type="date" id="note-to" onchange="renderNotes()" />
+                <button class="btn btn-ghost" onclick="clearNoteFilter()">Limpar</button>
+              </div>
+            </div>
+
+            <div id="notes-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LINKS RÁPIDOS ── -->
+      <div class="section" id="sec-links">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Links rápidos</h2>
+            <button class="btn btn-ghost" onclick="openModal('modal-link')">+ Novo link</button>
+          </div>
+          <div class="panel-body">
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
+              Acesse suas plataformas favoritas com um clique.
+            </p>
+            <div class="quick-links-grid" id="links-grid">
+              <div class="empty" style="grid-column:1/-1;">
+                <div class="empty-icon">🔗</div>
+                Nenhum link ainda.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WORKSPACE ── -->
+      <div class="section" id="sec-workspace">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Workspace</h2>
+            <button class="btn btn-ghost" onclick="openModal('modal-ws')">+ Novo item</button>
+          </div>
+          <div class="panel-body">
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
+              Arquivos, planos, formulários, projetos e templates.
+            </p>
+            <div class="ws-list" id="ws-list">
+              <div class="empty">
+                <div class="empty-icon">🗂️</div>
+                Nenhum item ainda.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CONTATOS ── -->
+      <div class="section" id="sec-contatos">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Contatos</h2>
+            <button class="btn btn-ghost" onclick="openModal('modal-contact')">+ Novo contato</button>
+          </div>
+          <div class="panel-body">
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
+              Times, áreas e pessoas que você mais utiliza.
+            </p>
+            <div class="contacts-grid" id="contacts-grid">
+              <div class="empty" style="grid-column:1/-1;">
+                <div class="empty-icon">👥</div>
+                Nenhum contato ainda.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CONFIGURAÇÕES ── -->
+      <div class="section" id="sec-config">
+        <div class="panel">
+          <div class="panel-header"><h2>Configurações</h2></div>
+          <div class="panel-body config-section">
+
+            <div class="config-row">
+              <div>
+                <div class="config-label">Monitor automático</div>
+                <div class="config-desc">O Google Apps Script monitora seus emails automaticamente a cada 5 minutos e envia notificações para o Slack.</div>
+                <a href="https://script.google.com" target="_blank" style="font-size:.78rem;color:var(--accent-hover);text-decoration:none;margin-top:.3rem;display:inline-block;">
+                  Abrir Google Apps Script ↗
+                </a>
+              </div>
+              <div>
+                <div style="font-size:.75rem;color:var(--green);font-weight:600;margin-bottom:.4rem;">Ativo</div>
+                <div class="toggle on" id="toggle-monitor" onclick="this.classList.toggle('on');this.classList.toggle('off');"></div>
+              </div>
+            </div>
+
+            <div class="config-row">
+              <div>
+                <div class="config-label">Aparência</div>
+                <div class="config-desc">Cor do tema</div>
+              </div>
+              <div class="select-row">
+                <div class="color-swatch selected" style="background:#6366f1;" title="Índigo"></div>
+                <div class="color-swatch" style="background:#22c55e;" title="Verde"></div>
+                <div class="color-swatch" style="background:#ef4444;" title="Vermelho"></div>
+                <div class="color-swatch" style="background:#eab308;" title="Amarelo"></div>
+                <div class="color-swatch" style="background:#06b6d4;" title="Ciano"></div>
+              </div>
+            </div>
+
+            <div class="config-row">
+              <div>
+                <div class="config-label">Tamanho da fonte</div>
+              </div>
+              <select class="config-select">
+                <option>Pequeno</option>
+                <option selected>Médio</option>
+                <option>Grande</option>
+              </select>
+            </div>
+
+            <div class="config-row">
+              <div>
+                <div class="config-label">Plano de fundo</div>
+              </div>
+              <select class="config-select">
+                <option selected>Escuro</option>
+                <option>Claro</option>
+                <option>Auto</option>
+              </select>
+            </div>
+
+            <div class="config-row">
+              <div>
+                <div class="config-label">Canal Slack</div>
+                <div class="config-desc">Nome do canal para receber notificações</div>
+              </div>
+              <input class="config-input" type="text" id="cfg-canal" value="#notificacoes-email"
+                     onchange="document.getElementById('stat-canal').textContent=this.value" />
+            </div>
+
+            <div class="config-row">
+              <div>
+                <div class="config-label">Times monitorados</div>
+                <div class="config-desc">Regras de classificação configuradas no Google Apps Script.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LOGS ── -->
+      <div class="section" id="sec-logs">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Logs do sistema</h2>
+            <button class="btn btn-danger" onclick="clearLogs()">Limpar</button>
+          </div>
+          <div class="panel-body">
+            <div id="log-area">
+              <div class="log-line">
+                <span class="log-time">--:--:--</span>
+                <span class="log-tag-sys">[sistema]</span>
+                <span>Aguardando eventos...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+
+  <!-- ═══════════ MODAIS ═══════════ -->
+
+  <!-- Modal: Adicionar link -->
+  <div class="modal-overlay" id="modal-link">
+    <div class="modal">
+      <h3>Adicionar link</h3>
+      <div class="field-group">
+        <label class="required">Nome</label>
+        <input type="text" id="lnk-nome" placeholder="Ex.: Slack" />
+      </div>
+      <div class="field-group">
+        <label class="required">URL</label>
+        <input type="url" id="lnk-url" placeholder="https://" />
+      </div>
+      <div class="field-group">
+        <label>Emoji</label>
+        <input type="text" id="lnk-emoji" placeholder="🔗" maxlength="4" />
+      </div>
+      <div class="field-group">
+        <label>Categoria</label>
+        <select id="lnk-cat">
+          <option>Comunicação</option>
+          <option>Produtividade</option>
+          <option>Dados & análises</option>
+          <option>Dev & infra</option>
+          <option>Outros</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-link')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveLink()">Salvar link</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<div class="main-wrap">
-  <div id="sidebar" class="sidebar">
-    <div class="nav-section">Monitor</div>
-    <button class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
-    <button class="nav-btn" data-view="notifications" onclick="switchView('notifications')"><i class="ti ti-bell"></i> Notificações <span id="notifBadge" style="display:none;margin-left:auto;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
-    <button class="nav-btn" data-view="notes" onclick="switchView('notes')"><i class="ti ti-notes"></i> Anotações <span id="notesBadge" style="display:none;margin-left:auto;font-size:10px;padding:1px 7px;border-radius:20px">0</span></button>
-
-    <div class="nav-section">Meu espaço</div>
-    <button class="nav-btn" data-view="links" onclick="switchView('links')"><i class="ti ti-link"></i> Links rápidos</button>
-    <button class="nav-btn" data-view="workspace" onclick="switchView('workspace')"><i class="ti ti-folders"></i> Workspace</button>
-    <button class="nav-btn" data-view="contacts" onclick="switchView('contacts')"><i class="ti ti-address-book"></i> Contatos</button>
-
-    <div class="nav-section">Sistema</div>
-    <button class="nav-btn" data-view="config" onclick="switchView('config')"><i class="ti ti-settings"></i> Configurações</button>
-    <button class="nav-btn" data-view="logs" onclick="switchView('logs')"><i class="ti ti-terminal-2"></i> Logs</button>
+  <!-- Modal: Workspace -->
+  <div class="modal-overlay" id="modal-ws">
+    <div class="modal">
+      <h3>Adicionar item</h3>
+      <div class="field-group">
+        <label class="required">Título</label>
+        <input type="text" id="ws-titulo" placeholder="Título do item" />
+      </div>
+      <div class="field-group">
+        <label>Tipo</label>
+        <select id="ws-tipo">
+          <option value="📄">📄 Arquivo</option>
+          <option value="📅">📅 Plano de trabalho</option>
+          <option value="📋">📋 Formulário</option>
+          <option value="🗂️">🗂️ Projeto</option>
+          <option value="📊">📊 Relatório</option>
+          <option value="🔖">🔖 Template</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Status</label>
+        <select id="ws-status">
+          <option value="progress">Em andamento</option>
+          <option value="done">Concluído</option>
+          <option value="wait">Aguardando</option>
+          <option value="archived">Arquivado</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Link externo</label>
+        <input type="url" id="ws-link" placeholder="https://" />
+      </div>
+      <div class="field-group">
+        <label>Descrição</label>
+        <textarea id="ws-desc" rows="2" placeholder="Descrição opcional"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-ws')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveWsItem()">Salvar</button>
+      </div>
+    </div>
   </div>
 
-  <div class="content">
-
-    <!-- ══ DASHBOARD ══ -->
-    <div id="view-dashboard">
-      <h2 id="dashTitle" style="margin:0 0 4px;font-size:22px;font-weight:700"></h2>
-      <p id="dashDate" style="margin:0 0 20px;font-size:13px"></p>
-      <div id="gsBanner" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px">
-        <i class="ti ti-robot" style="font-size:18px;flex-shrink:0;color:#0F6E56"></i>
-        <div><strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
-        <a href="https://script.google.com" target="_blank" style="color:#0F6E56;margin-left:6px;font-weight:700">Gerenciar →</a></div>
+  <!-- Modal: Contato -->
+  <div class="modal-overlay" id="modal-contact">
+    <div class="modal">
+      <h3>Adicionar contato</h3>
+      <div class="field-group">
+        <label class="required">Nome completo</label>
+        <input type="text" id="ct-nome" placeholder="Nome" />
       </div>
-      <div class="metric-grid">
-        <div class="metric" id="m1"><div style="font-size:12px;margin-bottom:4px">Total notificações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m1v">0</div></div>
-        <div class="metric" id="m2"><div style="font-size:12px;margin-bottom:4px">Canal Slack</div><div style="font-size:13px;font-weight:700" id="m2v">#notificacoes-email</div></div>
-        <div class="metric" id="m3"><div style="font-size:12px;margin-bottom:4px">Última verificação</div><div style="font-size:12px;font-weight:700" id="m3v">—</div></div>
-        <div class="metric" id="m4"><div style="font-size:12px;margin-bottom:4px">Anotações</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace" id="m4v">0</div></div>
+      <div class="field-group">
+        <label>Cargo / função</label>
+        <input type="text" id="ct-cargo" placeholder="Ex.: Analista de Dados" />
       </div>
-      <div class="section-label" id="dashCatLabel">Por categoria</div>
-      <div id="teamRows"></div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
-        <button class="action-btn" id="checkBtn" onclick="refreshFromStorage()"><i class="ti ti-refresh"></i> Atualizar notificações</button>
-        <button class="action-btn" onclick="clearNotifications()" style="background:#A32D2D"><i class="ti ti-trash"></i> Limpar histórico</button>
+      <div class="field-group">
+        <label>E-mail</label>
+        <input type="email" id="ct-email" placeholder="email@exemplo.com" />
       </div>
-      <div id="checkResult" style="display:none;margin-top:12px"></div>
-    </div>
-
-    <!-- ══ NOTIFICATIONS ══ -->
-    <div id="view-notifications" style="display:none">
-      <h2 style="margin:0 0 16px;font-size:22px;font-weight:700">Notificações enviadas</h2>
-      <div class="search-bar" id="notifSearchBar">
-        <i class="ti ti-search" style="font-size:16px;flex-shrink:0"></i>
-        <input type="text" id="notifSearch" oninput="renderNotifications()" placeholder="Pesquisar por assunto ou remetente..."/>
-        <button onclick="document.getElementById('notifSearch').value='';renderNotifications()" style="background:none;border:none;cursor:pointer;font-size:14px">✕</button>
+      <div class="field-group">
+        <label>Telefone / WhatsApp</label>
+        <input type="tel" id="ct-tel" placeholder="+55 11 9..." />
       </div>
-      <div id="notifList"></div>
-    </div>
-
-    <!-- ══ NOTES ══ -->
-    <div id="view-notes" style="display:none">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
-        <h2 style="margin:0;font-size:22px;font-weight:700">Anotações</h2>
-        <div id="noteSaveStatus" style="display:none;align-items:center;gap:4px;font-size:12px;color:#0F6E56"></div>
+      <div class="field-group">
+        <label>Slack / usuário</label>
+        <input type="text" id="ct-slack" placeholder="@usuario" />
       </div>
-      <p style="margin:0 0 20px;font-size:13px" id="notesSubtitle">Suas anotações são salvas automaticamente no navegador.</p>
-      <div id="newNoteCard" style="border-radius:14px;padding:16px;margin-bottom:20px">
-        <div style="font-size:13px;font-weight:700;margin-bottom:8px" id="newNoteLabel">Nova anotação</div>
-        <textarea id="newNoteText" placeholder="Digite sua anotação aqui..." onkeydown="if(event.ctrlKey&&event.key==='Enter')addNote()" style="width:100%;min-height:80px;padding:10px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box"></textarea>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-          <span style="font-size:11px" id="noteSaveHint"><i class="ti ti-keyboard" style="font-size:11px;margin-right:4px"></i>Ctrl+Enter para salvar</span>
-          <button onclick="addNote()" id="addNoteBtn" style="padding:7px 18px;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:6px"><i class="ti ti-plus" style="font-size:13px"></i> Salvar anotação</button>
-        </div>
+      <div class="field-group">
+        <label>Categoria</label>
+        <select id="ct-cat">
+          <option>Time</option>
+          <option>Área</option>
+          <option>Cliente</option>
+          <option>Parceiro</option>
+          <option>Fornecedor</option>
+          <option>Outro</option>
+        </select>
       </div>
-      <div id="noteFilterCard" style="border-radius:14px;padding:16px;margin-bottom:20px">
-        <div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px" id="noteFilterLabel"><i class="ti ti-filter" style="font-size:14px"></i> Pesquisar anotações</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <div id="noteSearchWrap" style="flex:2;min-width:180px;display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 12px">
-            <i class="ti ti-search" style="font-size:15px;flex-shrink:0"></i>
-            <input type="text" id="noteSearch" oninput="renderNotes()" placeholder="Pesquisar por texto..." style="flex:1;border:none;background:transparent;font-size:14px;font-family:'Sora',sans-serif;outline:none"/>
-            <button onclick="document.getElementById('noteSearch').value='';renderNotes()" style="background:none;border:none;cursor:pointer;font-size:13px">✕</button>
-          </div>
-          <div style="flex:1;min-width:140px"><div style="font-size:11px;margin-bottom:4px" id="dateFromLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data inicial</div><input type="date" id="noteDateFrom" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/></div>
-          <div style="flex:1;min-width:140px"><div style="font-size:11px;margin-bottom:4px" id="dateToLabel"><i class="ti ti-calendar" style="font-size:11px"></i> Data final</div><input type="date" id="noteDateTo" oninput="renderNotes()" style="width:100%;padding:9px 12px;border-radius:10px;font-size:12px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/></div>
-          <div style="display:flex;align-items:flex-end"><button onclick="clearNoteFilters()" id="clearFilterBtn" style="padding:9px 14px;border-radius:10px;cursor:pointer;font-size:12px;font-family:'Sora',sans-serif;display:flex;align-items:center;gap:4px"><i class="ti ti-x" style="font-size:12px"></i> Limpar</button></div>
-        </div>
-        <div id="noteFilterResult" style="margin-top:10px;font-size:12px;display:none"></div>
+      <div class="field-group">
+        <label>Grupo personalizado</label>
+        <input type="text" id="ct-grupo" placeholder="Ex.: Dados Brasil" />
       </div>
-      <div id="noteList"></div>
-    </div>
-
-    <!-- ══ LINKS RÁPIDOS ══ -->
-    <div id="view-links" style="display:none">
-      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Links rápidos</h2>
-      <p style="margin:0 0 20px;font-size:13px;opacity:.6">Acesse suas plataformas favoritas com um clique.</p>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="link-filters"></div>
-        <button class="action-btn" id="link-new-btn" onclick="showLinkForm()"><i class="ti ti-plus"></i> Novo link</button>
+      <div class="field-group">
+        <label>Observações</label>
+        <textarea id="ct-obs" rows="2" placeholder="Notas opcionais"></textarea>
       </div>
-      <div id="links-grid" class="links-grid"></div>
-      <div id="link-form" class="inline-form" style="display:none">
-        <div style="font-size:15px;font-weight:700;margin-bottom:14px" id="link-form-title">Adicionar link</div>
-        <div class="fg2">
-          <div class="field"><label>Nome *</label><input id="lf-name" placeholder="Ex: Slack, Notion…"></div>
-          <div class="field"><label>URL *</label><input id="lf-url" type="url" placeholder="https://…"></div>
-        </div>
-        <div class="fg2">
-          <div class="field"><label>Emoji</label><input id="lf-icon" placeholder="🔗" maxlength="4"></div>
-          <div class="field"><label>Categoria</label>
-            <select id="lf-cat">
-              <option value="comunicação">Comunicação</option>
-              <option value="produtividade">Produtividade</option>
-              <option value="dados">Dados & análises</option>
-              <option value="dev">Dev & infra</option>
-              <option value="outros">Outros</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn-cancel" id="link-cancel-btn" onclick="hideLinkForm()">Cancelar</button>
-          <button class="btn-save" id="link-save-btn" onclick="saveLink()">Salvar link</button>
-        </div>
-      </div>
-      <div id="link-suggestions"></div>
-    </div>
-
-    <!-- ══ WORKSPACE ══ -->
-    <div id="view-workspace" style="display:none">
-      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Workspace</h2>
-      <p style="margin:0 0 20px;font-size:13px;opacity:.6">Arquivos, planos, formulários, projetos e templates.</p>
-      <div class="stats-row" id="ws-stats"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <div style="position:relative;"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.5;pointer-events:none"></i><input id="ws-search" placeholder="Buscar…" oninput="renderWs()" style="padding-left:30px;font-size:13px;border-radius:10px;border-width:1px;border-style:solid;padding-top:8px;padding-bottom:8px;padding-right:10px;font-family:'Sora',sans-serif;outline:none;width:180px"></div>
-          <div id="ws-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="view-toggle" id="ws-view-toggle">
-            <button class="vt-btn" id="ws-vt-grid" onclick="setWsView('grid')" aria-label="Grade"><i class="ti ti-layout-grid"></i></button>
-            <button class="vt-btn" id="ws-vt-list" onclick="setWsView('list')" aria-label="Lista"><i class="ti ti-list"></i></button>
-          </div>
-          <button class="action-btn" id="ws-new-btn" onclick="showWsForm()"><i class="ti ti-plus"></i> Novo item</button>
-        </div>
-      </div>
-      <div id="ws-container"></div>
-      <div id="ws-form" class="inline-form" style="display:none">
-        <div style="font-size:15px;font-weight:700;margin-bottom:14px" id="ws-form-title">Adicionar item</div>
-        <div class="fg2">
-          <div class="field"><label>Título *</label><input id="wf-title" placeholder="Nome do item"></div>
-          <div class="field"><label>Tipo</label>
-            <select id="wf-type">
-              <option value="arquivo">📄 Arquivo</option>
-              <option value="plano">📅 Plano de trabalho</option>
-              <option value="formulário">📋 Formulário</option>
-              <option value="projeto">🗂️ Projeto</option>
-              <option value="relatório">📊 Relatório</option>
-              <option value="template">🔖 Template</option>
-            </select>
-          </div>
-        </div>
-        <div class="fg2">
-          <div class="field"><label>Status</label>
-            <select id="wf-status">
-              <option value="em andamento">Em andamento</option>
-              <option value="concluído">Concluído</option>
-              <option value="aguardando">Aguardando</option>
-              <option value="arquivado">Arquivado</option>
-            </select>
-          </div>
-          <div class="field"><label>Link externo</label><input id="wf-link" type="url" placeholder="https://…"></div>
-        </div>
-        <div class="field"><label>Descrição</label><textarea id="wf-desc" placeholder="Descrição breve…"></textarea></div>
-        <div class="form-actions">
-          <button class="btn-cancel" onclick="hideWsForm()">Cancelar</button>
-          <button class="btn-save" id="ws-save-btn" onclick="saveWsItem()">Salvar</button>
-        </div>
-      </div>
-      <div id="ws-preview"></div>
-    </div>
-
-    <!-- ══ CONTACTS ══ -->
-    <div id="view-contacts" style="display:none">
-      <h2 style="margin:0 0 4px;font-size:22px;font-weight:700">Contatos</h2>
-      <p style="margin:0 0 20px;font-size:13px;opacity:.6">Times, áreas e pessoas que você mais utiliza.</p>
-      <div class="stats-row" id="ct-stats"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:1">
-          <div style="position:relative;"><i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;opacity:.5;pointer-events:none"></i><input id="ct-search" placeholder="Buscar nome, e-mail, grupo…" oninput="renderContacts()" style="padding-left:30px;font-size:13px;border-radius:10px;border-width:1px;border-style:solid;padding-top:8px;padding-bottom:8px;padding-right:10px;font-family:'Sora',sans-serif;outline:none;width:220px"></div>
-          <div id="ct-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-        </div>
-        <button class="action-btn" id="ct-new-btn" onclick="showCtForm()"><i class="ti ti-user-plus"></i> Novo contato</button>
-      </div>
-      <div id="ct-container"></div>
-      <div id="ct-form" class="inline-form" style="display:none">
-        <div style="font-size:15px;font-weight:700;margin-bottom:14px" id="ct-form-title">Adicionar contato</div>
-        <div class="fg2">
-          <div class="field"><label>Nome completo *</label><input id="cf-name" placeholder="Ex: Ana Lima"></div>
-          <div class="field"><label>Cargo / função</label><input id="cf-role" placeholder="Ex: Gerente de Projetos"></div>
-        </div>
-        <div class="fg3">
-          <div class="field"><label>E-mail</label><input id="cf-email" type="email" placeholder="ana@empresa.com"></div>
-          <div class="field"><label>Telefone / WhatsApp</label><input id="cf-phone" placeholder="+55 11 9…"></div>
-          <div class="field"><label>Slack / usuário</label><input id="cf-slack" placeholder="@ana.lima"></div>
-        </div>
-        <div class="fg2">
-          <div class="field"><label>Categoria</label>
-            <select id="cf-cat">
-              <option value="time">Time</option>
-              <option value="área">Área</option>
-              <option value="cliente">Cliente</option>
-              <option value="parceiro">Parceiro</option>
-              <option value="fornecedor">Fornecedor</option>
-              <option value="outro">Outro</option>
-            </select>
-          </div>
-          <div class="field"><label>Grupo personalizado</label><input id="cf-group" placeholder="Ex: Marketing, TI, CS…"></div>
-        </div>
-        <div class="field"><label>Observações</label><textarea id="cf-obs" placeholder="Anotações sobre este contato…"></textarea></div>
-        <div class="form-actions">
-          <button class="btn-cancel" onclick="hideCtForm()">Cancelar</button>
-          <button class="btn-save" id="ct-save-btn" onclick="saveContact()">Salvar contato</button>
-        </div>
-      </div>
-      <div id="ct-preview"></div>
-    </div>
-
-    <!-- ══ CONFIG ══ -->
-    <div id="view-config" style="display:none">
-      <h2 style="margin:0 0 20px;font-size:22px;font-weight:700">Configurações</h2>
-      <div id="configGS" style="border-radius:14px;padding:20px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:15px;font-weight:700">Monitor automático</div><span class="gs-badge"><i class="ti ti-check" style="font-size:11px"></i> Ativo</span></div>
-        <div style="font-size:13px;margin-bottom:14px" id="gsDesc">O Google Apps Script monitora seus emails automaticamente a cada 5 minutos e envia notificações para o Slack.</div>
-        <a href="https://script.google.com" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#0F6E56;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none"><i class="ti ti-external-link" style="font-size:13px"></i> Abrir Google Apps Script</a>
-      </div>
-      <div id="configAppearance" style="border-radius:14px;padding:20px;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:700;margin-bottom:16px">Aparência</div>
-        <div style="margin-bottom:16px"><div class="section-label" style="margin-top:0" id="themeColorLabel">Cor do tema</div><div style="display:flex;gap:8px;flex-wrap:wrap" id="themeSwatches"></div><div style="font-size:12px;margin-top:6px" id="themeCurrentLabel"></div></div>
-        <div style="margin-bottom:16px"><div class="section-label" id="fontSizeLabel">Tamanho da fonte</div><div style="display:flex;gap:8px" id="fontSizeBtns"></div></div>
-        <div><div class="section-label" id="bgModeLabel">Plano de fundo</div><div class="bg-grid" id="bgModeGrid"></div><div style="font-size:12px;margin-top:8px" id="bgCurrentLabel"></div></div>
-      </div>
-      <div id="configSlack" style="border-radius:14px;padding:20px;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:700;margin-bottom:12px">Canal Slack</div>
-        <div style="font-size:13px;margin-bottom:6px" id="slackChannelDesc">Nome do canal para receber notificações</div>
-        <input type="text" id="slackChannelInput" value="#notificacoes-email" oninput="updateChannel()" placeholder="#canal" style="width:100%;padding:9px 12px;border-radius:10px;font-size:14px;font-family:'Sora',sans-serif;outline:none;box-sizing:border-box"/>
-      </div>
-      <div id="configTeams" style="border-radius:14px;padding:20px">
-        <div style="font-size:15px;font-weight:700;margin-bottom:4px">Times monitorados</div>
-        <div style="font-size:13px;margin-bottom:16px" id="teamsDesc">Regras de classificação configuradas no Google Apps Script.</div>
-        <div id="teamConfigRows"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-contact')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveContact()">Salvar contato</button>
       </div>
     </div>
+  </div>
 
-    <!-- ══ LOGS ══ -->
-    <div id="view-logs" style="display:none">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <h2 style="margin:0;font-size:22px;font-weight:700">Logs do sistema</h2>
-        <button onclick="clearLogs()" id="clearLogsBtn" style="margin-left:auto;font-size:12px;padding:5px 14px;background:transparent;border-radius:8px;cursor:pointer;font-family:'Sora',sans-serif">Limpar</button>
-      </div>
-      <div class="terminal" id="terminalOutput"><div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div></div>
-    </div>
 
-  </div><!-- /content -->
-</div><!-- /main-wrap -->
+  <!-- ═══════════ JAVASCRIPT ═══════════ -->
+  <script>
+    // ── State ──────────────────────────────────────────
+    const state = {
+      notifications: JSON.parse(localStorage.getItem('em_notifs') || '[]'),
+      notes:         JSON.parse(localStorage.getItem('em_notes') || '[]'),
+      links:         JSON.parse(localStorage.getItem('em_links') || '[]'),
+      workspace:     JSON.parse(localStorage.getItem('em_ws')    || '[]'),
+      contacts:      JSON.parse(localStorage.getItem('em_contacts') || '[]'),
+      logs:          []
+    };
 
-<script>
-// ══════════════════════════════════════════
-// THEME / BG CONFIG
-// ══════════════════════════════════════════
-const TEAMS=[
-  {id:"n3",label:"Time N3",color:"#185FA5",bg:"#E6F1FB",textColor:"#0C447C",icon:"ti-users"},
-  {id:"data-protection",label:"Proteção de Dados",color:"#533AB7",bg:"#EEEDFE",textColor:"#3C3489",icon:"ti-shield-lock"},
-  {id:"medical",label:"Gestão Médica",color:"#0F6E56",bg:"#E1F5EE",textColor:"#085041",icon:"ti-heart-rate-monitor"},
-  {id:"all",label:"Todos os Emails",color:"#BA7517",bg:"#FAEEDA",textColor:"#633806",icon:"ti-mail"},
-];
-const THEMES=[
-  {id:"blue",label:"Azul",primary:"#185FA5",light:"#E6F1FB"},
-  {id:"teal",label:"Verde",primary:"#0F6E56",light:"#E1F5EE"},
-  {id:"purple",label:"Roxo",primary:"#533AB7",light:"#EEEDFE"},
-  {id:"amber",label:"Âmbar",primary:"#BA7517",light:"#FAEEDA"},
-  {id:"rose",label:"Rosa",primary:"#9D3060",light:"#FBEAF0"},
-  {id:"slate",label:"Grafite",primary:"#3D3D3D",light:"#F1EFE8"},
-];
-const FONT_SIZES=[{id:"sm",label:"Pequena",base:13},{id:"md",label:"Média",base:15},{id:"lg",label:"Grande",base:17}];
-const BG_MODES=[
-  {id:"day",label:"Dia",icon:"ti-sun-high",bg:"#ffffff",surface:"#ffffff",surfaceAlt:"#f5f4f0",border:"rgba(0,0,0,0.1)",text:"#1a1a1a",textMuted:"#555",textFaint:"#999"},
-  {id:"light",label:"Claro",icon:"ti-sun",bg:"#f5f4f0",surface:"#ffffff",surfaceAlt:"#eeece6",border:"rgba(0,0,0,0.1)",text:"#1a1a1a",textMuted:"#555",textFaint:"#999"},
-  {id:"neutral",label:"Neutro",icon:"ti-circle-half",bg:"#e8e6e0",surface:"#f4f2ec",surfaceAlt:"#dddbd4",border:"rgba(0,0,0,0.12)",text:"#222",textMuted:"#555",textFaint:"#888"},
-  {id:"dusk",label:"Entardecer",icon:"ti-sunset-2",bg:"#2a2438",surface:"#342d4a",surfaceAlt:"#3e3558",border:"rgba(255,255,255,0.1)",text:"#e8e0f8",textMuted:"#b0a8cc",textFaint:"#7a6f96"},
-  {id:"night",label:"Noite",icon:"ti-moon",bg:"#111118",surface:"#1c1c26",surfaceAlt:"#25252f",border:"rgba(255,255,255,0.1)",text:"#e8e8f0",textMuted:"#aaa",textFaint:"#555"},
-  {id:"midnight",label:"Meia-noite",icon:"ti-moon-stars",bg:"#000008",surface:"#0d0d14",surfaceAlt:"#16161f",border:"rgba(255,255,255,0.08)",text:"#d0d0e8",textMuted:"#888",textFaint:"#444"},
-];
-
-// ══════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════
-const S={
-  view:"dashboard",themeId:"blue",fontSizeId:"md",bgModeId:"light",
-  slackChannel:"#notificacoes-email",
-  notifications:loadJSON("ems_notifications_v1",[]),
-  notes:loadJSON("ems_notes_v2",[{id:1,text:"Monitor automático ativo via Google Apps Script.",pinned:true,createdAt:new Date().toISOString(),updatedAt:null}]),
-  logs:[],editingNote:null,
-  links:loadJSON("ql_v2",[
-    {id:1,name:"Slack",url:"https://slack.com",icon:"💬",cat:"comunicação"},
-    {id:2,name:"Gmail",url:"https://mail.google.com",icon:"📧",cat:"comunicação"},
-    {id:3,name:"Google Drive",url:"https://drive.google.com",icon:"📁",cat:"produtividade"},
-    {id:4,name:"Apps Script",url:"https://script.google.com",icon:"⚙️",cat:"dev"},
-  ]),
-  linkEditId:null, linkActiveCat:"todos",
-  wsItems:loadJSON("ws_v1",[
-    {id:1,title:"Plano de onboarding Q3",type:"plano",status:"em andamento",desc:"Plano de trabalho para integração de novos colaboradores.",link:"",date:today()},
-    {id:2,title:"Formulário de feedback",type:"formulário",status:"concluído",desc:"Pesquisa trimestral de satisfação.",link:"",date:today()},
-    {id:3,title:"Projeto redesign email",type:"projeto",status:"em andamento",desc:"Revisão dos templates de e-mail monitorados.",link:"",date:today()},
-  ]),
-  wsEditId:null, wsActiveType:"todos", wsView:"grid",
-  contacts:loadJSON("ct_v1",[
-    {id:1,name:"Carlos Mendes",role:"Dev Backend",email:"carlos@empresa.com",phone:"+55 11 98000-0001",slack:"@carlos.m",cat:"time",group:"Engenharia",obs:"Responsável pelo Apps Script"},
-    {id:2,name:"Fernanda Rocha",role:"Designer",email:"fernanda@empresa.com",phone:"+55 11 98000-0002",slack:"@fe.rocha",cat:"área",group:"Design",obs:""},
-    {id:3,name:"Bruno Alves",role:"Gerente de CS",email:"bruno@cliente.com",phone:"+55 21 97000-0003",slack:"",cat:"cliente",group:"Suporte",obs:"Contato principal do cliente X"},
-  ]),
-  ctEditId:null, ctActiveCat:"todos",
-};
-
-function loadJSON(key,def){try{const s=localStorage.getItem(key);return s?JSON.parse(s):def;}catch{return def;}}
-function persist(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
-function today(){return new Date().toISOString().slice(0,10);}
-function theme(){return THEMES.find(t=>t.id===S.themeId)||THEMES[0];}
-function fsz(){return FONT_SIZES.find(f=>f.id===S.fontSizeId)||FONT_SIZES[1];}
-function bgm(){return BG_MODES.find(b=>b.id===S.bgModeId)||BG_MODES[1];}
-function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function fmtDate(iso){return new Date(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});}
-function fmtTime(iso){return new Date(iso).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});}
-function fmtFull(iso){return fmtDate(iso)+" às "+fmtTime(iso);}
-function isoToInput(iso){return new Date(iso).toISOString().slice(0,10);}
-let saveTimer=null;
-function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{persist("ems_notes_v2",S.notes);showSaveStatus();},300);}
-function showSaveStatus(){const el=document.getElementById("noteSaveStatus");if(!el)return;el.innerHTML='<i class="ti ti-cloud-check" style="font-size:13px"></i> Salvo';el.style.display="flex";setTimeout(()=>{el.style.display="none";},2500);}
-
-// ══════════════════════════════════════════
-// THEME APPLICATION
-// ══════════════════════════════════════════
-function applyTheme(){
-  const b=bgm(),t=theme(),f=fsz();
-  document.body.style.background=b.bg;
-  document.body.style.color=b.text;
-  document.body.style.fontSize=f.base+"px";
-  const tb=document.getElementById("topbar");
-  tb.style.background=b.surface;tb.style.borderBottom="1px solid "+b.border;
-  document.getElementById("topbarIcon").style.color=t.primary;
-  document.getElementById("topbarTitle").style.color=b.text;
-  document.getElementById("topbarPill").style.background=b.surfaceAlt;
-  document.getElementById("topbarPill").style.color=b.textFaint;
-  document.getElementById("topbarPill").style.border="1px solid "+b.border;
-  const bcb=document.getElementById("bgCycleBtn");
-  bcb.style.background=b.surfaceAlt;bcb.style.border="1px solid "+b.border;bcb.style.color=b.text;
-  bcb.innerHTML=`<i class="ti ${b.icon}"></i><span style="font-size:11px">${b.label}</span>`;
-  const sb=document.getElementById("sidebar");
-  sb.style.background=b.surface;sb.style.borderRight="1px solid "+b.border;
-  document.querySelectorAll(".nav-section").forEach(el=>el.style.color=b.textFaint);
-  document.querySelectorAll(".nav-btn").forEach(btn=>{
-    const active=btn.classList.contains("active");
-    btn.style.background=active?t.light:"transparent";
-    btn.style.borderLeftColor=active?t.primary:"transparent";
-    btn.style.color=active?t.primary:b.textMuted;
-  });
-  ["m1","m2","m3","m4"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=b.surfaceAlt;}});
-  const m2v=document.getElementById("m2v");if(m2v)m2v.style.color=t.primary;
-  document.querySelectorAll(".notif-card,.note-card").forEach(el=>{el.style.background=b.surface;el.style.border="1px solid "+b.border;});
-  document.querySelectorAll("#newNoteCard,#noteFilterCard,#configAppearance,#configSlack,#configTeams,#configGS").forEach(el=>{if(el){el.style.background=b.surface;el.style.border="1px solid "+b.border;}});
-  document.querySelectorAll("input[type=text],input[type=date],input[type=url],input[type=email],textarea,select").forEach(el=>{el.style.background=b.surfaceAlt;el.style.color=b.text;el.style.border="1px solid "+b.border;});
-  document.querySelectorAll(".search-bar,#noteSearchWrap").forEach(el=>{el.style.background=b.surface;el.style.border="1px solid "+b.border;});
-  document.querySelectorAll(".search-bar input").forEach(el=>el.style.color=b.text);
-  document.querySelectorAll("#clearLogsBtn,#clearFilterBtn").forEach(el=>{if(el){el.style.border="1px solid "+b.border;el.style.color=b.textMuted;}});
-  const anb=document.getElementById("addNoteBtn");if(anb)anb.style.background=t.primary;
-  document.querySelectorAll(".action-btn").forEach(el=>{el.style.background=t.primary;});
-  document.querySelectorAll(".inline-form").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;});
-  document.querySelectorAll(".btn-cancel").forEach(el=>{el.style.borderColor=b.border;el.style.color=b.textMuted;});
-  document.querySelectorAll(".btn-save").forEach(el=>{el.style.background=t.primary;});
-  document.querySelectorAll(".icon-sq").forEach(el=>{el.style.background=b.surfaceAlt;el.style.borderColor=b.border;el.style.color=b.textMuted;});
-  document.querySelectorAll(".mini-btn").forEach(el=>{el.style.borderColor=b.border;el.style.color=b.textMuted;});
-  document.querySelectorAll(".view-toggle").forEach(el=>el.style.borderColor=b.border);
-  document.querySelectorAll(".vt-btn").forEach(el=>{el.style.color=b.textMuted;el.style.background="transparent";});
-  document.querySelectorAll(".vt-btn.on").forEach(el=>{el.style.background=b.surfaceAlt;el.style.color=b.text;});
-  document.querySelectorAll(".link-card,.ws-card,.contact-card,.ws-list-row").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;});
-  document.querySelectorAll(".add-dashed").forEach(el=>{el.style.borderColor=b.textFaint;el.style.color=b.textFaint;});
-  document.querySelectorAll(".sugg-chip").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;el.style.color=b.text;});
-  document.querySelectorAll(".ws-thumb").forEach(el=>{/* keep inline bg */});
-  document.querySelectorAll(".pm-fields").forEach(el=>{el.style.borderColor=b.border;});
-  document.querySelectorAll(".pm-row").forEach(el=>{el.style.borderBottomColor=b.border;});
-  document.querySelectorAll(".prev-modal").forEach(el=>{el.style.background=b.surface;el.style.borderColor=b.border;});
-  const gsbanner=document.getElementById("gsBanner");
-  if(gsbanner){const light=(b.id==="day"||b.id==="light"||b.id==="neutral");gsbanner.style.background=light?"#E1F5EE":b.surfaceAlt;gsbanner.style.border="1px solid "+(light?"#5DCAA5":b.border);gsbanner.style.color=light?"#04342C":b.text;}
-  renderConfigAppearance();
-}
-
-// ══════════════════════════════════════════
-// CLOCK
-// ══════════════════════════════════════════
-function updateClock(){
-  const b=bgm(),f=fsz(),now=new Date();
-  document.getElementById("clockBox").innerHTML=`
-    <div style="display:flex;align-items:center;gap:6px">
-      <i class="ti ti-calendar" style="font-size:14px;color:${b.textFaint}"></i>
-      <span style="font-size:${f.base-1}px;color:${b.text};font-weight:500">${now.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})}</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <i class="ti ti-clock" style="font-size:14px;color:${b.textFaint}"></i>
-      <span style="font-size:${f.base-1}px;color:${b.text};font-weight:700;font-family:'IBM Plex Mono',monospace;letter-spacing:1px">${now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span>
-    </div>`;
-}
-setInterval(updateClock,1000);
-
-// ══════════════════════════════════════════
-// NAVIGATION
-// ══════════════════════════════════════════
-const ALL_VIEWS=["dashboard","notifications","notes","links","workspace","contacts","config","logs"];
-function switchView(v){
-  ALL_VIEWS.forEach(id=>{
-    const el=document.getElementById("view-"+id);
-    if(el)el.style.display=id===v?"":"none";
-    const btn=document.querySelector(`[data-view="${id}"]`);
-    if(btn)btn.classList.toggle("active",id===v);
-  });
-  S.view=v;applyTheme();
-  if(v==="notes")renderNotes();
-  if(v==="notifications")renderNotifications();
-  if(v==="dashboard")renderDashboard();
-  if(v==="links"){renderLinkFilters();renderLinksGrid();}
-  if(v==="workspace"){renderWsStats();renderWsFilters();renderWs();}
-  if(v==="contacts"){renderCtStats();renderCtFilters();renderContacts();}
-}
-function cycleBgMode(){const idx=BG_MODES.findIndex(b=>b.id===S.bgModeId);S.bgModeId=BG_MODES[(idx+1)%BG_MODES.length].id;applyTheme();updateClock();renderAll();}
-
-// ══════════════════════════════════════════
-// DASHBOARD
-// ══════════════════════════════════════════
-function renderDashboard(){
-  const b=bgm(),t=theme(),f=fsz();
-  document.getElementById("dashTitle").textContent="Dashboard";
-  document.getElementById("dashDate").textContent="Hoje é "+new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
-  document.getElementById("m1v").textContent=S.notifications.length;
-  document.getElementById("m2v").textContent=S.slackChannel;
-  const lc=localStorage.getItem("ems_last_check")||"";
-  document.getElementById("m3v").textContent=lc?fmtFull(lc):"Nunca";
-  document.getElementById("m4v").textContent=S.notes.length;
-  document.getElementById("teamRows").innerHTML=TEAMS.map(tm=>{
-    const count=S.notifications.filter(n=>n.teamId===tm.id).length;
-    return`<div class="team-row" style="background:${b.surface};border:1px solid ${b.border}">
-      <div class="team-avatar" style="background:${tm.bg}"><i class="ti ${tm.icon}" style="font-size:17px;color:${tm.color}"></i></div>
-      <div><div style="font-weight:700;font-size:${f.base-1}px;color:${b.text}">${tm.label}</div><div style="font-size:12px;color:${b.textFaint}">Monitorado</div></div>
-      <span style="font-size:22px;font-weight:700;color:${count>0?tm.color:b.border};font-family:'IBM Plex Mono',monospace;margin-left:auto">${count}</span>
-    </div>`;
-  }).join("");
-}
-function refreshFromStorage(){
-  const before=S.notifications.length;S.notifications=loadJSON("ems_notifications_v1",[]);
-  const diff=S.notifications.length-before;try{localStorage.setItem("ems_last_check",new Date().toISOString());}catch{}
-  renderAll();
-  const el=document.getElementById("checkResult");
-  el.className="result-banner "+(diff>0?"result-success":"result-info");
-  el.textContent=diff>0?`✓ ${diff} nova(s) notificação(ões). Total: ${S.notifications.length}`:`✓ Dados atualizados — ${S.notifications.length} notificação(ões).`;
-  el.style.display="";addLog(`Atualizado: ${S.notifications.length} notificação(ões).`,"success");
-}
-function clearNotifications(){if(!confirm("Limpar todo o histórico?"))return;S.notifications=[];persist("ems_notifications_v1",S.notifications);renderAll();addLog("Histórico limpo.","warn");}
-
-// ══════════════════════════════════════════
-// NOTIFICATIONS
-// ══════════════════════════════════════════
-function renderNotifications(){
-  const b=bgm(),f=fsz();
-  const q=(document.getElementById("notifSearch")||{}).value||"";
-  const filtered=S.notifications.filter(n=>!q||n.subject.toLowerCase().includes(q.toLowerCase())||n.from.toLowerCase().includes(q.toLowerCase()));
-  if(!filtered.length){
-    document.getElementById("notifList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-bell-off"></i><p>${S.notifications.length===0?"Nenhuma notificação ainda.":"Nenhum resultado."}</p></div>`;
-    return;
-  }
-  document.getElementById("notifList").innerHTML=filtered.map(n=>{
-    const team=TEAMS.find(t=>t.id===n.teamId)||TEAMS[3];
-    return`<div class="notif-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${team.color}">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span class="pill" style="background:${team.bg};color:${team.textColor};border:1px solid ${team.color}33"><i class="ti ${team.icon}"></i> ${team.label}</span>
-        <span style="font-size:11px;color:${b.textFaint};margin-left:auto">${fmtDate(n.receivedAt)} ${fmtTime(n.receivedAt)}</span>
-      </div>
-      <div style="font-weight:700;font-size:${f.base-1}px;margin-bottom:2px;color:${b.text}">${esc(n.subject)}</div>
-      <div style="font-size:${f.base-2}px;color:${b.textMuted}">De: <strong>${esc(n.from)}</strong></div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px">
-        <i class="ti ti-brand-slack" style="color:#1D9E75;font-size:13px"></i>
-        <span style="color:#0F6E56">Enviado · ${esc(n.slackChannel||S.slackChannel)}</span>
-        <span style="margin-left:auto" class="pill pill-sent"><i class="ti ti-check"></i> entregue</span>
-      </div>
-    </div>`;
-  }).join("");
-  const badge=document.getElementById("notifBadge");
-  badge.textContent=S.notifications.length;badge.style.display=S.notifications.length>0?"":"none";
-  const bge=document.getElementById("notifBadge");if(bge){bge.style.background=theme().primary;bge.style.color="#fff";}
-}
-
-// ══════════════════════════════════════════
-// NOTES
-// ══════════════════════════════════════════
-function renderNotes(){
-  const b=bgm(),t=theme(),f=fsz();
-  const q=(document.getElementById("noteSearch")||{}).value||"";
-  const df=(document.getElementById("noteDateFrom")||{}).value||"";
-  const dt=(document.getElementById("noteDateTo")||{}).value||"";
-  const filtered=[...S.notes].sort((a,z)=>z.pinned-a.pinned||new Date(z.createdAt)-new Date(a.createdAt))
-    .filter(n=>{const d=isoToInput(n.createdAt);return(!q||n.text.toLowerCase().includes(q.toLowerCase()))&&(!df||d>=df)&&(!dt||d<=dt);});
-  const hasFilter=q||df||dt;
-  const cfb=document.getElementById("clearFilterBtn");if(cfb)cfb.style.display=hasFilter?"flex":"none";
-  const fr=document.getElementById("noteFilterResult");
-  if(fr){fr.style.display=hasFilter?"block":"none";if(hasFilter){fr.style.color=b.textFaint;fr.textContent=`${filtered.length} anotação(ões) encontrada(s)`;}}
-  const anb=document.getElementById("addNoteBtn");if(anb)anb.style.background=t.primary;
-  const nb=document.getElementById("notesBadge");
-  const pinned=S.notes.filter(n=>n.pinned).length;
-  if(nb){nb.textContent=pinned;nb.style.display=pinned>0?"":"none";nb.style.background=t.primary;nb.style.color="#fff";}
-  if(!filtered.length){document.getElementById("noteList").innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-notes-off"></i><p>${S.notes.length===0?"Nenhuma anotação ainda.":"Nenhuma encontrada."}</p></div>`;return;}
-  document.getElementById("noteList").innerHTML=filtered.map(note=>{
-    if(S.editingNote===note.id){
-      return`<div class="note-card" style="background:${b.surface};border:1px solid ${b.border};border-left-color:${t.primary}">
-        <textarea id="edit-${note.id}" style="width:100%;min-height:70px;padding:8px 12px;border-radius:8px;border:1px solid ${t.primary};background:${b.surfaceAlt};color:${b.text};font-size:14px;font-family:'Sora',sans-serif;resize:vertical;outline:none;box-sizing:border-box">${esc(note.text)}</textarea>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button onclick="saveNote(${note.id})" style="padding:6px 16px;background:${t.primary};color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif;font-weight:700"><i class="ti ti-device-floppy"></i> Salvar</button>
-          <button onclick="S.editingNote=null;renderNotes()" style="padding:6px 16px;background:transparent;color:${b.textMuted};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:13px;font-family:'Sora',sans-serif">Cancelar</button>
-        </div>
-      </div>`;
+    function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+    function log(msg, type='sys') {
+      const t = new Date().toLocaleTimeString('pt-BR');
+      state.logs.push({ t, msg, type });
+      renderLogs();
     }
-    return`<div class="note-card" style="background:${b.surface};border:1px solid ${note.pinned?t.primary+"66":b.border};border-left-color:${note.pinned?t.primary:b.border}">
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
-        ${note.pinned?`<i class="ti ti-pin" style="font-size:14px;color:${t.primary};flex-shrink:0;margin-top:2px"></i>`:""}
-        <p style="flex:1;margin:0;font-size:${f.base-1}px;color:${b.text};line-height:1.6;cursor:pointer" onclick="S.editingNote=${note.id};renderNotes()">${esc(note.text)}</p>
-      </div>
-      <div style="font-size:11px;color:${b.textFaint};margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid ${b.border}">
-        <i class="ti ti-pencil-plus" style="font-size:11px"></i> ${fmtFull(note.createdAt)}
-        ${note.updatedAt?`&nbsp;·&nbsp;<i class="ti ti-pencil" style="font-size:11px"></i> Editada ${fmtFull(note.updatedAt)}`:""}
-      </div>
-      <div style="display:flex;gap:6px">
-        <button onclick="S.editingNote=${note.id};renderNotes()" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${b.textMuted};font-family:'Sora',sans-serif"><i class="ti ti-edit"></i> Editar</button>
-        <button onclick="togglePin(${note.id})" style="padding:4px 12px;background:${note.pinned?t.light:b.surfaceAlt};border:1px solid ${note.pinned?t.primary+"55":b.border};border-radius:8px;cursor:pointer;font-size:12px;color:${note.pinned?t.primary:b.textMuted};font-family:'Sora',sans-serif"><i class="ti ${note.pinned?"ti-pin":"ti-pin"}"></i> ${note.pinned?"Fixado":"Fixar"}</button>
-        <button onclick="deleteNote(${note.id})" style="padding:4px 12px;background:${b.surfaceAlt};border:1px solid ${b.border};border-radius:8px;cursor:pointer;font-size:12px;color:#A32D2D;font-family:'Sora',sans-serif;margin-left:auto"><i class="ti ti-trash"></i> Excluir</button>
-      </div>
-    </div>`;
-  }).join("");
-}
-function addNote(){const txt=document.getElementById("newNoteText").value.trim();if(!txt)return;S.notes.push({id:Date.now(),text:txt,pinned:false,createdAt:new Date().toISOString(),updatedAt:null});document.getElementById("newNoteText").value="";renderNotes();renderDashboard();scheduleSave();}
-function deleteNote(id){S.notes=S.notes.filter(n=>n.id!==id);renderNotes();renderDashboard();scheduleSave();}
-function togglePin(id){S.notes=S.notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n);renderNotes();scheduleSave();}
-function saveNote(id){const txt=document.getElementById("edit-"+id)?.value.trim();if(!txt)return;S.notes=S.notes.map(n=>n.id===id?{...n,text:txt,updatedAt:new Date().toISOString()}:n);S.editingNote=null;renderNotes();scheduleSave();}
-function clearNoteFilters(){["noteSearch","noteDateFrom","noteDateTo"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});renderNotes();}
 
-// ══════════════════════════════════════════
-// LINKS RÁPIDOS
-// ══════════════════════════════════════════
-const LINK_SUGGESTIONS=[
-  {name:"Trello",url:"https://trello.com",icon:"📌",cat:"produtividade"},
-  {name:"Asana",url:"https://asana.com",icon:"📋",cat:"produtividade"},
-  {name:"Jira",url:"https://atlassian.com/software/jira",icon:"🔵",cat:"dev"},
-  {name:"GitHub",url:"https://github.com",icon:"🐱",cat:"dev"},
-  {name:"Figma",url:"https://figma.com",icon:"🎨",cat:"produtividade"},
-  {name:"Sheets",url:"https://sheets.google.com",icon:"📊",cat:"dados"},
-  {name:"Looker",url:"https://lookerstudio.google.com",icon:"📈",cat:"dados"},
-  {name:"HubSpot",url:"https://hubspot.com",icon:"🟠",cat:"dados"},
-  {name:"Zoom",url:"https://zoom.us",icon:"📹",cat:"comunicação"},
-  {name:"Notion",url:"https://notion.so",icon:"📝",cat:"produtividade"},
-  {name:"Linear",url:"https://linear.app",icon:"🔷",cat:"dev"},
-  {name:"Vercel",url:"https://vercel.com",icon:"▲",cat:"dev"},
-  {name:"Canva",url:"https://canva.com",icon:"✏️",cat:"produtividade"},
-  {name:"Meet",url:"https://meet.google.com",icon:"🎥",cat:"comunicação"},
-];
-const LINK_CAT_COLORS={"comunicação":{bg:"#E6F1FB",color:"#185FA5"},"produtividade":{bg:"#E1F5EE",color:"#0F6E56"},"dados":{bg:"#FAEEDA",color:"#854F0B"},"dev":{bg:"#EEEDFE",color:"#534AB7"},"outros":{bg:"#F1EFE8",color:"#5F5E5A"}};
+    // ── Navigation ─────────────────────────────────────
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const sec = btn.dataset.section;
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('sec-' + sec).classList.add('active');
+      });
+    });
 
-function renderLinkFilters(){
-  const b=bgm(),t=theme();
-  const cats=["todos",...new Set(S.links.map(l=>l.cat))];
-  document.getElementById("link-filters").innerHTML=cats.map(c=>`<button class="fp" onclick="S.linkActiveCat='${c}';renderLinkFilters();renderLinksGrid()" style="background:${S.linkActiveCat===c?t.primary:"none"};color:${S.linkActiveCat===c?"#fff":b.textMuted};border-color:${S.linkActiveCat===c?t.primary:b.border}">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join("");
-}
-function renderLinksGrid(){
-  const b=bgm(),t=theme(),f=fsz();
-  const filtered=S.linkActiveCat==="todos"?S.links:S.links.filter(l=>l.cat===S.linkActiveCat);
-  const savedUrls=new Set(S.links.map(l=>l.url));
-  let html=filtered.map(l=>{
-    const cm=LINK_CAT_COLORS[l.cat]||LINK_CAT_COLORS["outros"];
-    return`<div class="link-card" onclick="window.open('${l.url}','_blank')" style="background:${b.surface};border-color:${b.border}">
-      <div class="lcard-actions">
-        <button class="icon-sq" onclick="event.stopPropagation();editLink(${l.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
-        <button class="icon-sq" onclick="event.stopPropagation();delLink(${l.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
-      </div>
-      <div style="font-size:26px;width:38px;height:38px;border-radius:9px;background:${b.surfaceAlt};display:flex;align-items:center;justify-content:center">${l.icon||"🔗"}</div>
-      <div style="font-size:${f.base-1}px;font-weight:700;color:${b.text}">${l.name}</div>
-      <div style="font-size:11px;color:${b.textFaint};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.url.replace(/^https?:\/\//,"")}</div>
-      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${cm.bg};color:${cm.color};display:inline-block">${l.cat}</span>
-    </div>`;
-  }).join("");
-  html+=`<div class="link-card add-dashed" onclick="showLinkForm()" style="background:none;border-color:${b.border}" aria-label="Adicionar link"><i class="ti ti-plus" style="font-size:22px;opacity:.4"></i><span style="color:${b.textFaint}">Novo link</span></div>`;
-  document.getElementById("links-grid").innerHTML=html;
-  // Suggestions
-  const avail=LINK_SUGGESTIONS.filter(s=>!savedUrls.has(s.url));
-  const sec=document.getElementById("link-suggestions");
-  if(!avail.length){sec.innerHTML="";return;}
-  sec.innerHTML=`<div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid ${b.border}">
-    <div style="font-size:12px;font-weight:700;color:${b.textFaint};margin-bottom:10px"><i class="ti ti-sparkles" style="font-size:13px"></i> Sugestões para adicionar</div>
-    <div class="sugg-chips">${avail.map(s=>`<button class="sugg-chip" onclick="addLinkSuggestion('${s.name}','${s.url}','${s.icon}','${s.cat}')" style="background:${b.surface};border-color:${b.border};color:${b.text}"><span>${s.icon}</span>${s.name}</button>`).join("")}</div>
-  </div>`;
-}
-function addLinkSuggestion(name,url,icon,cat){S.links.push({id:Date.now(),name,url,icon,cat});persist("ql_v2",S.links);renderLinkFilters();renderLinksGrid();}
-function showLinkForm(link){
-  S.linkEditId=link?link.id:null;
-  document.getElementById("link-form-title").textContent=link?"Editar link":"Adicionar link";
-  document.getElementById("lf-name").value=link?link.name:"";
-  document.getElementById("lf-url").value=link?link.url:"";
-  document.getElementById("lf-icon").value=link?link.icon:"";
-  document.getElementById("lf-cat").value=link?link.cat:"comunicação";
-  document.getElementById("link-form").style.display="block";
-  document.getElementById("lf-name").focus();
-  applyTheme();
-}
-function hideLinkForm(){document.getElementById("link-form").style.display="none";S.linkEditId=null;}
-function saveLink(){
-  const name=document.getElementById("lf-name").value.trim();
-  const url=document.getElementById("lf-url").value.trim();
-  if(!name||!url){alert("Preencha nome e URL.");return;}
-  const obj={id:S.linkEditId||Date.now(),name,url,icon:document.getElementById("lf-icon").value.trim()||"🔗",cat:document.getElementById("lf-cat").value};
-  if(S.linkEditId){const i=S.links.findIndex(l=>l.id===S.linkEditId);if(i>-1)S.links[i]=obj;}else S.links.push(obj);
-  persist("ql_v2",S.links);hideLinkForm();renderLinkFilters();renderLinksGrid();addLog(`Link "${name}" salvo.`,"success");
-}
-function editLink(id){showLinkForm(S.links.find(l=>l.id===id));}
-function delLink(id){if(!confirm("Remover este link?"))return;S.links=S.links.filter(l=>l.id!==id);persist("ql_v2",S.links);renderLinkFilters();renderLinksGrid();}
+    // ── Badges ─────────────────────────────────────────
+    function updateBadges() {
+      document.getElementById('badge-notif').textContent = state.notifications.length;
+      document.getElementById('badge-notes').textContent = state.notes.length;
+      document.getElementById('stat-total').textContent  = state.notifications.length;
+      document.getElementById('stat-notes').textContent  = state.notes.length;
+    }
 
-// ══════════════════════════════════════════
-// WORKSPACE
-// ══════════════════════════════════════════
-const WS_TYPE_META={"arquivo":{icon:"📄",bg:"#E6F1FB",color:"#185FA5"},"plano":{icon:"📅",bg:"#E1F5EE",color:"#0F6E56"},"formulário":{icon:"📋",bg:"#FAEEDA",color:"#854F0B"},"projeto":{icon:"🗂️",bg:"#EEEDFE",color:"#534AB7"},"relatório":{icon:"📊",bg:"#FAECE7",color:"#993C1D"},"template":{icon:"🔖",bg:"#F1EFE8",color:"#5F5E5A"}};
-const WS_STATUS_META={"em andamento":{bg:"#E6F1FB",color:"#185FA5"},"concluído":{bg:"#EAF3DE",color:"#3B6D11"},"aguardando":{bg:"#FAEEDA",color:"#854F0B"},"arquivado":{bg:"#F1EFE8",color:"#5F5E5A"}};
-
-function renderWsStats(){
-  const b=bgm();
-  const total=S.wsItems.length,andamento=S.wsItems.filter(i=>i.status==="em andamento").length,concluido=S.wsItems.filter(i=>i.status==="concluído").length,tipos=new Set(S.wsItems.map(i=>i.type)).size;
-  document.getElementById("ws-stats").innerHTML=`
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Total</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${total}</div></div>
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Em andamento</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${andamento}</div></div>
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Concluídos</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${concluido}</div></div>
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Tipos</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${tipos}</div></div>`;
-}
-function renderWsFilters(){
-  const b=bgm(),t=theme();
-  const types=["todos",...new Set(S.wsItems.map(i=>i.type))];
-  document.getElementById("ws-filters").innerHTML=types.map(tp=>`<button class="fp" onclick="S.wsActiveType='${tp}';renderWsFilters();renderWs()" style="background:${S.wsActiveType===tp?t.primary:"none"};color:${S.wsActiveType===tp?"#fff":b.textMuted};border-color:${S.wsActiveType===tp?t.primary:b.border}">${tp.charAt(0).toUpperCase()+tp.slice(1)}</button>`).join("");
-  ["ws-vt-grid","ws-vt-list"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.background=id.endsWith(S.wsView)?b.surfaceAlt:"transparent";el.style.color=id.endsWith(S.wsView)?b.text:b.textMuted;}});
-  document.getElementById("ws-view-toggle").style.borderColor=b.border;
-}
-function setWsView(v){S.wsView=v;renderWsFilters();renderWs();}
-function renderWs(){
-  const b=bgm(),t=theme(),f=fsz();
-  const q=(document.getElementById("ws-search")||{}).value||"";
-  const list=S.wsItems.filter(i=>{
-    const mType=S.wsActiveType==="todos"||i.type===S.wsActiveType;
-    const mQ=!q||i.title.toLowerCase().includes(q.toLowerCase())||i.type.toLowerCase().includes(q.toLowerCase());
-    return mType&&mQ;
-  });
-  const c=document.getElementById("ws-container");
-  if(!list.length){c.innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-folder-open"></i><p>Nenhum item encontrado.</p></div>`;return;}
-  if(S.wsView==="grid"){
-    c.innerHTML=`<div class="ws-grid">${list.map(i=>{const tm=WS_TYPE_META[i.type]||WS_TYPE_META["arquivo"];const sm=WS_STATUS_META[i.status]||WS_STATUS_META["arquivado"];return`<div class="ws-card" onclick="showWsPreview(${i.id})" style="background:${b.surface};border-color:${b.border}">
-      <div class="wcard-actions">
-        <button class="icon-sq" onclick="event.stopPropagation();editWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
-        <button class="icon-sq" onclick="event.stopPropagation();delWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
-      </div>
-      <div class="ws-thumb" style="background:${tm.bg}">${tm.icon}</div>
-      <div style="font-size:${f.base-1}px;font-weight:700;color:${b.text};margin-bottom:4px;line-height:1.35">${esc(i.title)}</div>
-      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${tm.bg};color:${tm.color}">${i.type}</span>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-size:11px;padding:2px 7px;border-radius:999px;background:${sm.bg};color:${sm.color}">${i.status}</span>
-        <span style="font-size:11px;color:${b.textFaint}">${i.date||""}</span>
-      </div>
-    </div>`}).join("")}
-    <div class="ws-card add-dashed" onclick="showWsForm()" style="background:none;border-style:dashed;border-color:${b.border};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:130px"><i class="ti ti-plus" style="font-size:22px;opacity:.4;color:${b.textFaint}"></i><span style="font-size:13px;color:${b.textFaint}">Novo item</span></div></div>`;
-  } else {
-    c.innerHTML=`<div style="border:1px solid ${b.border};border-radius:14px;overflow:hidden">${list.map(i=>{const tm=WS_TYPE_META[i.type]||WS_TYPE_META["arquivo"];const sm=WS_STATUS_META[i.status]||WS_STATUS_META["arquivado"];return`<div class="ws-list-row" onclick="showWsPreview(${i.id})" style="display:grid;grid-template-columns:32px 1fr auto auto 72px;gap:10px;align-items:center;padding:10px 14px;background:${b.surface};border-bottom:1px solid ${b.border};cursor:pointer;position:relative" onmouseover="this.style.background='${b.surfaceAlt}'" onmouseout="this.style.background='${b.surface}'">
-      <div style="font-size:20px;text-align:center">${tm.icon}</div>
-      <div style="font-size:13px;font-weight:700;color:${b.text};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.title)}</div>
-      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${tm.bg};color:${tm.color};white-space:nowrap">${i.type}</span>
-      <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${sm.bg};color:${sm.color};white-space:nowrap">${i.status}</span>
-      <div style="display:flex;gap:4px;justify-content:flex-end">
-        <button class="icon-sq" onclick="event.stopPropagation();editWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
-        <button class="icon-sq" onclick="event.stopPropagation();delWsItem(${i.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
-      </div>
-    </div>`}).join("")}</div>`;
-  }
-}
-function showWsPreview(id){
-  const i=S.wsItems.find(x=>x.id===id);if(!i)return;
-  const b=bgm(),t=theme(),tm=WS_TYPE_META[i.type]||WS_TYPE_META["arquivo"],sm=WS_STATUS_META[i.status]||WS_STATUS_META["arquivado"];
-  document.getElementById("ws-preview").innerHTML=`<div class="prev-overlay" onclick="if(event.target===this)document.getElementById('ws-preview').innerHTML=''">
-    <div class="prev-modal" style="background:${b.surface};border-color:${b.border}">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <span style="font-size:30px">${tm.icon}</span>
-        <div><div style="font-size:16px;font-weight:700;color:${b.text}">${esc(i.title)}</div>
-        <div style="display:flex;gap:6px;margin-top:5px">
-          <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${tm.bg};color:${tm.color}">${i.type}</span>
-          <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${sm.bg};color:${sm.color}">${i.status}</span>
-        </div></div>
-      </div>
-      ${i.desc?`<p style="font-size:13px;color:${b.textMuted};line-height:1.7;margin-bottom:14px">${esc(i.desc)}</p>`:""}
-      <div class="pm-fields" style="border-color:${b.border}">
-        <div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-calendar" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Data</span><span style="color:${b.text}">${i.date||"—"}</span></div>
-        <div class="pm-row" style="border-bottom:none"><i class="ti ti-link" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Link</span><span>${i.link?`<a href="${esc(i.link)}" target="_blank" style="color:${t.primary}">Abrir</a>`:"—"}</span></div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn-cancel" onclick="document.getElementById('ws-preview').innerHTML=''" style="border-color:${b.border};color:${b.textMuted}">Fechar</button>
-        <button class="btn-save" onclick="editWsItem(${i.id});document.getElementById('ws-preview').innerHTML=''" style="background:${t.primary}">Editar</button>
-      </div>
-    </div>
-  </div>`;
-}
-function showWsForm(item){
-  S.wsEditId=item?item.id:null;
-  document.getElementById("ws-form-title").textContent=item?"Editar item":"Adicionar novo item";
-  document.getElementById("wf-title").value=item?item.title:"";
-  document.getElementById("wf-type").value=item?item.type:"arquivo";
-  document.getElementById("wf-status").value=item?item.status:"em andamento";
-  document.getElementById("wf-link").value=item?item.link:"";
-  document.getElementById("wf-desc").value=item?item.desc:"";
-  document.getElementById("ws-form").style.display="block";
-  document.getElementById("wf-title").focus();
-  applyTheme();
-}
-function hideWsForm(){document.getElementById("ws-form").style.display="none";S.wsEditId=null;}
-function saveWsItem(){
-  const title=document.getElementById("wf-title").value.trim();if(!title){alert("Informe um título.");return;}
-  const obj={id:S.wsEditId||Date.now(),title,type:document.getElementById("wf-type").value,status:document.getElementById("wf-status").value,link:document.getElementById("wf-link").value.trim(),desc:document.getElementById("wf-desc").value.trim(),date:today()};
-  if(S.wsEditId){const idx=S.wsItems.findIndex(i=>i.id===S.wsEditId);if(idx>-1)S.wsItems[idx]=obj;}else S.wsItems.push(obj);
-  persist("ws_v1",S.wsItems);hideWsForm();renderWsStats();renderWsFilters();renderWs();addLog(`Workspace: "${title}" salvo.`,"success");
-}
-function editWsItem(id){showWsForm(S.wsItems.find(i=>i.id===id));}
-function delWsItem(id){if(!confirm("Remover este item?"))return;S.wsItems=S.wsItems.filter(i=>i.id!==id);persist("ws_v1",S.wsItems);renderWsStats();renderWsFilters();renderWs();}
-
-// ══════════════════════════════════════════
-// CONTACTS
-// ══════════════════════════════════════════
-const CT_CAT_COLORS={"time":{bg:"#E6F1FB",color:"#185FA5"},"área":{bg:"#EEEDFE",color:"#534AB7"},"cliente":{bg:"#E1F5EE",color:"#0F6E56"},"parceiro":{bg:"#FAEEDA",color:"#854F0B"},"fornecedor":{bg:"#FAECE7",color:"#993C1D"},"outro":{bg:"#F1EFE8",color:"#5F5E5A"}};
-const AV_COLORS=[{bg:"#E6F1FB",color:"#185FA5"},{bg:"#EEEDFE",color:"#534AB7"},{bg:"#E1F5EE",color:"#0F6E56"},{bg:"#FAEEDA",color:"#854F0B"},{bg:"#FAECE7",color:"#993C1D"},{bg:"#FBEAF0",color:"#993556"}];
-function initials(name){return name.split(" ").filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");}
-function avColor(id){return AV_COLORS[id%AV_COLORS.length];}
-function renderCtStats(){
-  const b=bgm();
-  const total=S.contacts.length,grupos=new Set(S.contacts.map(c=>c.group).filter(Boolean)).size,cats=new Set(S.contacts.map(c=>c.cat)).size,comEmail=S.contacts.filter(c=>c.email).length;
-  document.getElementById("ct-stats").innerHTML=`
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Total</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${total}</div></div>
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Grupos</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${grupos}</div></div>
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Categorias</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${cats}</div></div>
-    <div style="background:${b.surfaceAlt};border-radius:10px;padding:10px 12px"><div style="font-size:11px;color:${b.textFaint};margin-bottom:3px">Com e-mail</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace">${comEmail}</div></div>`;
-}
-function renderCtFilters(){
-  const b=bgm(),t=theme();
-  const cats=["todos",...new Set(S.contacts.map(c=>c.cat))];
-  document.getElementById("ct-filters").innerHTML=cats.map(c=>`<button class="fp" onclick="S.ctActiveCat='${c}';renderCtFilters();renderContacts()" style="background:${S.ctActiveCat===c?t.primary:"none"};color:${S.ctActiveCat===c?"#fff":b.textMuted};border-color:${S.ctActiveCat===c?t.primary:b.border}">${c.charAt(0).toUpperCase()+c.slice(1)}</button>`).join("");
-}
-function renderContacts(){
-  const b=bgm(),t=theme(),f=fsz();
-  const q=(document.getElementById("ct-search")||{}).value||"";
-  const filtered=S.contacts.filter(c=>{
-    const mCat=S.ctActiveCat==="todos"||c.cat===S.ctActiveCat;
-    const mQ=!q||[c.name,c.role,c.email,c.group,c.slack,c.phone].some(v=>v&&v.toLowerCase().includes(q.toLowerCase()));
-    return mCat&&mQ;
-  });
-  const container=document.getElementById("ct-container");
-  if(!filtered.length){container.innerHTML=`<div class="empty" style="color:${b.textFaint}"><i class="ti ti-users"></i><p>Nenhum contato encontrado.</p></div>`;return;}
-  const grouped={};
-  filtered.forEach(c=>{const g=c.group||c.cat||"Sem grupo";if(!grouped[g])grouped[g]=[];grouped[g].push(c);});
-  let html="";
-  Object.entries(grouped).sort(([a],[bb])=>a.localeCompare(bb)).forEach(([grp,members])=>{
-    html+=`<div style="margin-bottom:1.5rem">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:${b.textFaint};margin-bottom:8px;display:flex;align-items:center;gap:6px">
-        <i class="ti ti-users" style="font-size:14px"></i>${grp} <span style="font-weight:400;opacity:.6">(${members.length})</span>
-      </div>
-      <div class="contacts-grid">${members.map(c=>{
-        const ac=avColor(c.id);const cm=CT_CAT_COLORS[c.cat]||CT_CAT_COLORS["outro"];
-        return`<div class="contact-card" onclick="showCtPreview(${c.id})" style="background:${b.surface};border-color:${b.border}">
-          <div class="ccard-actions">
-            <button class="icon-sq" onclick="event.stopPropagation();editContact(${c.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:${b.textMuted}" aria-label="Editar"><i class="ti ti-edit"></i></button>
-            <button class="icon-sq" onclick="event.stopPropagation();delContact(${c.id})" style="background:${b.surfaceAlt};border-color:${b.border};color:#A32D2D" aria-label="Remover"><i class="ti ti-trash"></i></button>
+    // ── Notifications ──────────────────────────────────
+    function renderNotifications() {
+      const el = document.getElementById('notif-list');
+      if (!state.notifications.length) {
+        el.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div>Nenhuma notificação ainda.</div>';
+        return;
+      }
+      el.innerHTML = state.notifications.map((n, i) => `
+        <div class="notif-item">
+          <span class="notif-tag tag-${n.type || 'info'}">${n.tag || 'INFO'}</span>
+          <div class="notif-body">
+            <div class="notif-title">${n.title}</div>
+            <div class="notif-meta">${n.meta || ''}</div>
           </div>
-          <div class="c-avatar" style="background:${ac.bg};color:${ac.color}">${initials(c.name)}</div>
-          <div style="font-size:${f.base-1}px;font-weight:700;color:${b.text};margin-bottom:3px">${esc(c.name)}</div>
-          ${c.role?`<div style="font-size:12px;color:${b.textFaint};margin-bottom:8px">${esc(c.role)}</div>`:"<div style='margin-bottom:8px'></div>"}
-          <div style="display:flex;flex-direction:column;gap:5px">
-            ${c.email?`<div style="display:flex;align-items:center;gap:6px;font-size:12px"><i class="ti ti-mail" style="font-size:14px;color:${b.textFaint}"></i><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${b.text}">${esc(c.email)}</span></div>`:""}
-            ${c.phone?`<div style="display:flex;align-items:center;gap:6px;font-size:12px"><i class="ti ti-phone" style="font-size:14px;color:${b.textFaint}"></i><span style="color:${b.text}">${esc(c.phone)}</span></div>`:""}
-            ${c.slack?`<div style="display:flex;align-items:center;gap:6px;font-size:12px"><i class="ti ti-brand-slack" style="font-size:14px;color:${b.textFaint}"></i><span style="color:${b.text}">${esc(c.slack)}</span></div>`:""}
+          <button class="notif-close" onclick="removeNotif(${i})">✕</button>
+        </div>`).join('');
+    }
+    function removeNotif(i) {
+      state.notifications.splice(i, 1);
+      save('em_notifs', state.notifications);
+      renderNotifications(); updateBadges();
+      log('Notificação removida.', 'ok');
+    }
+    function clearNotifications() {
+      state.notifications = [];
+      save('em_notifs', state.notifications);
+      renderNotifications(); updateBadges();
+      log('Histórico de notificações limpo.', 'ok');
+    }
+
+    // ── Notes ──────────────────────────────────────────
+    document.getElementById('btn-new-note').addEventListener('click', () => {
+      const ed = document.getElementById('note-editor');
+      ed.style.display = ed.style.display === 'none' ? 'flex' : 'none';
+    });
+    document.getElementById('note-text').addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'Enter') saveNote();
+    });
+    function saveNote() {
+      const txt = document.getElementById('note-text').value.trim();
+      if (!txt) return;
+      state.notes.unshift({ txt, date: new Date().toISOString() });
+      save('em_notes', state.notes);
+      document.getElementById('note-text').value = '';
+      document.getElementById('note-editor').style.display = 'none';
+      renderNotes(); updateBadges();
+      log('Anotação salva.', 'ok');
+    }
+    function renderNotes() {
+      const q    = document.getElementById('note-search').value.toLowerCase();
+      const from = document.getElementById('note-from').value;
+      const to   = document.getElementById('note-to').value;
+      const el   = document.getElementById('notes-list');
+      let filtered = state.notes.filter(n => {
+        if (q && !n.txt.toLowerCase().includes(q)) return false;
+        const d = n.date.slice(0, 10);
+        if (from && d < from) return false;
+        if (to   && d > to)   return false;
+        return true;
+      });
+      if (!filtered.length) {
+        el.innerHTML = '<div class="empty" style="margin-top:.5rem;">Nenhuma anotação encontrada.</div>';
+        return;
+      }
+      el.innerHTML = filtered.map((n, i) => `
+        <div class="note-card">
+          <p>${escHtml(n.txt)}</p>
+          <div class="note-date">${new Date(n.date).toLocaleString('pt-BR')}</div>
+          <button class="note-del" onclick="deleteNote(${state.notes.indexOf(n)})">✕</button>
+        </div>`).join('');
+    }
+    function deleteNote(i) {
+      state.notes.splice(i, 1);
+      save('em_notes', state.notes);
+      renderNotes(); updateBadges();
+    }
+    function clearNoteFilter() {
+      document.getElementById('note-search').value = '';
+      document.getElementById('note-from').value   = '';
+      document.getElementById('note-to').value     = '';
+      renderNotes();
+    }
+
+    // ── Links ──────────────────────────────────────────
+    function saveLink() {
+      const nome  = document.getElementById('lnk-nome').value.trim();
+      const url   = document.getElementById('lnk-url').value.trim();
+      const emoji = document.getElementById('lnk-emoji').value.trim() || '🔗';
+      const cat   = document.getElementById('lnk-cat').value;
+      if (!nome || !url) return;
+      state.links.push({ nome, url, emoji, cat });
+      save('em_links', state.links);
+      closeModal('modal-link');
+      ['lnk-nome','lnk-url','lnk-emoji'].forEach(id => document.getElementById(id).value = '');
+      renderLinks();
+      log(`Link "${nome}" adicionado.`, 'ok');
+    }
+    function renderLinks() {
+      const el = document.getElementById('links-grid');
+      if (!state.links.length) {
+        el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">🔗</div>Nenhum link ainda.</div>';
+        return;
+      }
+      el.innerHTML = state.links.map(l => `
+        <a href="${escHtml(l.url)}" target="_blank" rel="noopener" class="qlink-card">
+          <span class="qlink-emoji">${l.emoji}</span>
+          <span class="qlink-name">${escHtml(l.nome)}</span>
+          <span class="qlink-cat">${escHtml(l.cat)}</span>
+        </a>`).join('');
+    }
+
+    // ── Workspace ──────────────────────────────────────
+    function saveWsItem() {
+      const titulo = document.getElementById('ws-titulo').value.trim();
+      if (!titulo) return;
+      const tipo   = document.getElementById('ws-tipo').value;
+      const status = document.getElementById('ws-status').value;
+      const link   = document.getElementById('ws-link').value.trim();
+      const desc   = document.getElementById('ws-desc').value.trim();
+      state.workspace.push({ titulo, tipo, status, link, desc });
+      save('em_ws', state.workspace);
+      closeModal('modal-ws');
+      ['ws-titulo','ws-link','ws-desc'].forEach(id => document.getElementById(id).value = '');
+      renderWorkspace();
+      log(`Item "${titulo}" adicionado ao workspace.`, 'ok');
+    }
+    const statusMap = {
+      progress: ['Em andamento', 'status-progress'],
+      done:     ['Concluído',    'status-done'],
+      wait:     ['Aguardando',   'status-wait'],
+      archived: ['Arquivado',    'status-archived'],
+    };
+    function renderWorkspace() {
+      const el = document.getElementById('ws-list');
+      if (!state.workspace.length) {
+        el.innerHTML = '<div class="empty"><div class="empty-icon">🗂️</div>Nenhum item ainda.</div>';
+        return;
+      }
+      el.innerHTML = state.workspace.map(w => {
+        const [label, cls] = statusMap[w.status] || ['—', ''];
+        return `<div class="ws-item">
+          <span class="ws-icon">${w.tipo}</span>
+          <div class="ws-info">
+            <div class="ws-title">${escHtml(w.titulo)}</div>
+            ${w.desc ? `<div class="ws-meta">${escHtml(w.desc)}</div>` : ''}
+            ${w.link ? `<a href="${escHtml(w.link)}" target="_blank" style="font-size:.72rem;color:var(--accent-hover)">↗ Abrir link</a>` : ''}
           </div>
-          <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:${cm.bg};color:${cm.color};display:inline-block;margin-top:8px">${c.cat}</span>
+          <span class="status-badge ${cls}">${label}</span>
         </div>`;
-      }).join("")}</div>
-    </div>`;
-  });
-  container.innerHTML=html;
-}
-function showCtPreview(id){
-  const c=S.contacts.find(x=>x.id===id);if(!c)return;
-  const b=bgm(),t=theme(),ac=avColor(c.id),cm=CT_CAT_COLORS[c.cat]||CT_CAT_COLORS["outro"];
-  const rows=[
-    c.email?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-mail" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">E-mail</span><a href="mailto:${esc(c.email)}" style="color:${t.primary}">${esc(c.email)}</a></div>`:"",
-    c.phone?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-phone" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Telefone</span><span style="color:${b.text}">${esc(c.phone)}</span></div>`:"",
-    c.slack?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-brand-slack" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Slack</span><span style="color:${b.text}">${esc(c.slack)}</span></div>`:"",
-    c.group?`<div class="pm-row" style="border-bottom-color:${b.border}"><i class="ti ti-users" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Grupo</span><span style="color:${b.text}">${esc(c.group)}</span></div>`:"",
-    c.obs?`<div class="pm-row" style="border-bottom:none"><i class="ti ti-notes" style="color:${b.textFaint}"></i><span style="color:${b.textFaint};width:70px">Obs.</span><span style="color:${b.text}">${esc(c.obs)}</span></div>`:"",
-  ].filter(Boolean).join("");
-  document.getElementById("ct-preview").innerHTML=`<div class="prev-overlay" onclick="if(event.target===this)document.getElementById('ct-preview').innerHTML=''">
-    <div class="prev-modal" style="background:${b.surface};border-color:${b.border}">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem">
-        <div style="width:52px;height:52px;border-radius:50%;background:${ac.bg};color:${ac.color};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0">${initials(c.name)}</div>
-        <div>
-          <div style="font-size:16px;font-weight:700;color:${b.text}">${esc(c.name)}</div>
-          <div style="font-size:13px;color:${b.textMuted}">${c.role||""} ${c.role&&c.group?" · ":""} ${c.group||""}</div>
-          <span style="font-size:11px;padding:2px 9px;border-radius:999px;background:${cm.bg};color:${cm.color};display:inline-block;margin-top:5px">${c.cat}</span>
-        </div>
-      </div>
-      ${rows?`<div class="pm-fields" style="border-color:${b.border}">${rows}</div>`:""}
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn-cancel" onclick="document.getElementById('ct-preview').innerHTML=''" style="border-color:${b.border};color:${b.textMuted}">Fechar</button>
-        <button class="btn-save" onclick="editContact(${c.id});document.getElementById('ct-preview').innerHTML=''" style="background:${t.primary}">Editar</button>
-      </div>
-    </div>
-  </div>`;
-}
-function showCtForm(c){
-  S.ctEditId=c?c.id:null;
-  document.getElementById("ct-form-title").textContent=c?"Editar contato":"Adicionar contato";
-  ["cf-name","cf-role","cf-email","cf-phone","cf-slack","cf-group","cf-obs"].forEach(id=>{const el=document.getElementById(id);if(el)el.value=c?c[id.replace("cf-","").replace("-","")]||"":"";});
-  document.getElementById("cf-name").value=c?c.name:"";
-  document.getElementById("cf-role").value=c?c.role:"";
-  document.getElementById("cf-email").value=c?c.email:"";
-  document.getElementById("cf-phone").value=c?c.phone:"";
-  document.getElementById("cf-slack").value=c?c.slack:"";
-  document.getElementById("cf-cat").value=c?c.cat:"time";
-  document.getElementById("cf-group").value=c?c.group:"";
-  document.getElementById("cf-obs").value=c?c.obs:"";
-  document.getElementById("ct-form").style.display="block";
-  document.getElementById("cf-name").focus();
-  applyTheme();
-}
-function hideCtForm(){document.getElementById("ct-form").style.display="none";S.ctEditId=null;}
-function saveContact(){
-  const name=document.getElementById("cf-name").value.trim();if(!name){alert("Informe o nome.");return;}
-  const obj={id:S.ctEditId||Date.now(),name,role:document.getElementById("cf-role").value.trim(),email:document.getElementById("cf-email").value.trim(),phone:document.getElementById("cf-phone").value.trim(),slack:document.getElementById("cf-slack").value.trim(),cat:document.getElementById("cf-cat").value,group:document.getElementById("cf-group").value.trim(),obs:document.getElementById("cf-obs").value.trim()};
-  if(S.ctEditId){const i=S.contacts.findIndex(c=>c.id===S.ctEditId);if(i>-1)S.contacts[i]=obj;}else S.contacts.push(obj);
-  persist("ct_v1",S.contacts);hideCtForm();renderCtStats();renderCtFilters();renderContacts();addLog(`Contato "${name}" salvo.`,"success");
-}
-function editContact(id){showCtForm(S.contacts.find(c=>c.id===id));}
-function delContact(id){if(!confirm("Remover este contato?"))return;S.contacts=S.contacts.filter(c=>c.id!==id);persist("ct_v1",S.contacts);renderCtStats();renderCtFilters();renderContacts();}
-function showCtForm(c){
-  S.ctEditId=c?c.id:null;
-  document.getElementById("ct-form-title").textContent=c?"Editar contato":"Adicionar contato";
-  document.getElementById("cf-name").value=c?c.name:"";
-  document.getElementById("cf-role").value=c?c.role:"";
-  document.getElementById("cf-email").value=c?c.email:"";
-  document.getElementById("cf-phone").value=c?c.phone:"";
-  document.getElementById("cf-slack").value=c?c.slack:"";
-  document.getElementById("cf-cat").value=c?c.cat:"time";
-  document.getElementById("cf-group").value=c?c.group:"";
-  document.getElementById("cf-obs").value=c?c.obs:"";
-  document.getElementById("ct-form").style.display="block";
-  document.getElementById("cf-name").focus();
-  applyTheme();
-}
+      }).join('');
+    }
 
-// ══════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════
-function renderConfigAppearance(){
-  const b=bgm(),t=theme(),f=fsz();
-  const tsw=document.getElementById("themeSwatches");
-  if(tsw)tsw.innerHTML=THEMES.map(th=>`<button onclick="S.themeId='${th.id}';applyTheme();renderAll()" title="${th.label}" style="width:32px;height:32px;border-radius:50%;background:${th.primary};border:${S.themeId===th.id?"3px solid "+b.text:"3px solid transparent"};cursor:pointer;transition:all 0.15s"></button>`).join("");
-  const tcl=document.getElementById("themeCurrentLabel");if(tcl){tcl.innerHTML=`Tema: <strong style="color:${t.primary}">${t.label}</strong>`;tcl.style.color=b.textFaint;}
-  const fsb=document.getElementById("fontSizeBtns");
-  if(fsb)fsb.innerHTML=FONT_SIZES.map(fs=>`<button onclick="S.fontSizeId='${fs.id}';applyTheme();renderAll()" style="padding:6px 16px;border-radius:8px;border:1px solid ${S.fontSizeId===fs.id?t.primary:b.border};background:${S.fontSizeId===fs.id?t.light:b.surfaceAlt};color:${S.fontSizeId===fs.id?t.primary:b.textMuted};cursor:pointer;font-size:${fs.base-1}px;font-family:'Sora',sans-serif;font-weight:${S.fontSizeId===fs.id?700:400}">${fs.label}</button>`).join("");
-  const bmg=document.getElementById("bgModeGrid");
-  if(bmg)bmg.innerHTML=BG_MODES.map(bm=>`<button onclick="S.bgModeId='${bm.id}';applyTheme();updateClock();renderAll()" style="padding:12px 8px;border-radius:10px;cursor:pointer;font-family:'Sora',sans-serif;border:${S.bgModeId===bm.id?"2px solid "+t.primary:"1px solid "+b.border};background:${bm.bg};display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.15s">
-    <i class="ti ${bm.icon}" style="font-size:20px;color:${bm.text}"></i>
-    <span style="font-size:11px;font-weight:${S.bgModeId===bm.id?700:400};color:${bm.text}">${bm.label}</span>
-    <div class="bg-swatches"><div class="bg-swatch" style="background:${bm.surface};border:1px solid ${bm.border}"></div><div class="bg-swatch" style="background:${bm.surfaceAlt};border:1px solid ${bm.border}"></div><div class="bg-swatch" style="background:${bm.bg};border:1px solid ${bm.border}"></div></div>
-  </button>`).join("");
-  const bcl=document.getElementById("bgCurrentLabel");if(bcl){bcl.innerHTML=`Atual: <strong style="color:${t.primary}">${b.label}</strong> · Clique no botão do topo para alternar`;bcl.style.color=b.textFaint;}
-  const tcr=document.getElementById("teamConfigRows");
-  if(tcr)tcr.innerHTML=TEAMS.map(tm=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid ${b.border}">
-    <div class="team-avatar" style="background:${tm.bg};width:32px;height:32px;flex-shrink:0"><i class="ti ${tm.icon}" style="font-size:15px;color:${tm.color}"></i></div>
-    <div style="flex:1;font-weight:700;font-size:13px;color:${b.text}">${tm.label}</div>
-    <span class="pill" style="background:${tm.bg};color:${tm.textColor};border:1px solid ${tm.color}33"><i class="ti ti-check"></i> Ativo</span>
-  </div>`).join("");
-}
-function updateChannel(){S.slackChannel=document.getElementById("slackChannelInput").value;renderDashboard();}
+    // ── Contacts ───────────────────────────────────────
+    function saveContact() {
+      const nome = document.getElementById('ct-nome').value.trim();
+      if (!nome) return;
+      state.contacts.push({
+        nome,
+        cargo: document.getElementById('ct-cargo').value.trim(),
+        email: document.getElementById('ct-email').value.trim(),
+        tel:   document.getElementById('ct-tel').value.trim(),
+        slack: document.getElementById('ct-slack').value.trim(),
+        cat:   document.getElementById('ct-cat').value,
+        grupo: document.getElementById('ct-grupo').value.trim(),
+        obs:   document.getElementById('ct-obs').value.trim(),
+      });
+      save('em_contacts', state.contacts);
+      closeModal('modal-contact');
+      ['ct-nome','ct-cargo','ct-email','ct-tel','ct-slack','ct-grupo','ct-obs']
+        .forEach(id => document.getElementById(id).value = '');
+      renderContacts();
+      log(`Contato "${nome}" adicionado.`, 'ok');
+    }
+    function renderContacts() {
+      const el = document.getElementById('contacts-grid');
+      if (!state.contacts.length) {
+        el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">👥</div>Nenhum contato ainda.</div>';
+        return;
+      }
+      el.innerHTML = state.contacts.map(c => `
+        <div class="contact-card">
+          <div class="contact-avatar">${c.nome.charAt(0).toUpperCase()}</div>
+          <div class="contact-name">${escHtml(c.nome)}</div>
+          ${c.cargo ? `<div class="contact-role">${escHtml(c.cargo)}</div>` : ''}
+          <span class="contact-cat">${escHtml(c.cat)}</span>
+        </div>`).join('');
+    }
 
-// ══════════════════════════════════════════
-// LOGS
-// ══════════════════════════════════════════
-function addLog(msg,type="info"){S.logs.unshift({msg,type,ts:new Date().toISOString()});if(S.logs.length>100)S.logs.pop();renderLogs();}
-function clearLogs(){S.logs=[];renderLogs();}
-function renderLogs(){
-  const term=document.getElementById("terminalOutput");
-  if(!S.logs.length){term.innerHTML=`<div class="log-info"><span class="log-ts">[sistema]</span>Aguardando eventos...</div>`;return;}
-  term.innerHTML=S.logs.map(l=>`<div class="log-${l.type}"><span class="log-ts">[${new Date(l.ts).toLocaleTimeString("pt-BR")}]</span>${esc(l.msg)}</div>`).join("");
-}
+    // ── Logs ───────────────────────────────────────────
+    function renderLogs() {
+      const el = document.getElementById('log-area');
+      if (!state.logs.length) {
+        el.innerHTML = '<div class="log-line"><span class="log-tag-sys">[sistema]</span><span>Aguardando eventos...</span></div>';
+        return;
+      }
+      el.innerHTML = state.logs.map(l => `
+        <div class="log-line">
+          <span class="log-time">${l.t}</span>
+          <span class="log-tag-${l.type}">[${l.type}]</span>
+          <span>${escHtml(l.msg)}</span>
+        </div>`).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+    function clearLogs() { state.logs = []; renderLogs(); }
 
-// ══════════════════════════════════════════
-// RENDER ALL
-// ══════════════════════════════════════════
-function renderAll(){
-  renderDashboard();renderNotifications();renderNotes();renderLogs();renderConfigAppearance();applyTheme();
-  if(S.view==="links"){renderLinkFilters();renderLinksGrid();}
-  if(S.view==="workspace"){renderWsStats();renderWsFilters();renderWs();}
-  if(S.view==="contacts"){renderCtStats();renderCtFilters();renderContacts();}
-}
+    // ── Modals ─────────────────────────────────────────
+    function openModal(id)  { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+    });
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-updateClock();
-renderAll();
-addLog("Painel carregado. Monitor automático via Google Apps Script.","success");
-</script>
+    // ── Topbar buttons ─────────────────────────────────
+    document.getElementById('btn-refresh').addEventListener('click', () => {
+      document.getElementById('stat-ultima').textContent = new Date().toLocaleTimeString('pt-BR');
+      log('Atualização manual solicitada.', 'sys');
+    });
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('Limpar todo o histórico de notificações?')) clearNotifications();
+    });
+
+    // ── Utility ────────────────────────────────────────
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Init ───────────────────────────────────────────
+    renderNotifications();
+    renderNotes();
+    renderLinks();
+    renderWorkspace();
+    renderContacts();
+    renderLogs();
+    updateBadges();
+    log('Sistema iniciado.', 'sys');
+
+    // ═══════════════════════════════════════════════════
+    // ── EXPORTAR PDF ───────────────────────────────────
+    // ═══════════════════════════════════════════════════
+    document.getElementById('btn-export-pdf').addEventListener('click', function () {
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = '⏳ Gerando PDF…';
+
+      // Torna todas as sections visíveis temporariamente para capturar tudo
+      const sections = document.querySelectorAll('.section');
+      const sidebar  = document.getElementById('sidebar');
+      const topbar   = document.getElementById('topbar');
+
+      // Snapshot de estados
+      const wasActive = [];
+      sections.forEach(s => { wasActive.push(s.classList.contains('active')); s.classList.add('active'); });
+
+      // Oculta elementos que não devem ir para o PDF
+      btn.style.display = 'none';
+
+      const elemento = document.getElementById('main');
+
+      const opcoes = {
+        margin:      [8, 8, 8, 8],
+        filename:    'email-monitor-dashboard.pdf',
+        image:       { type: 'jpeg', quality: 0.95 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          scrollY: 0,
+          windowWidth: document.body.scrollWidth,
+          backgroundColor: '#0f172a'
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      html2pdf()
+        .set(opcoes)
+        .from(elemento)
+        .save()
+        .then(() => {
+          // Restaura estado original
+          sections.forEach((s, i) => {
+            s.classList.remove('active');
+            if (wasActive[i]) s.classList.add('active');
+          });
+          btn.style.display = '';
+          btn.disabled = false;
+          btn.textContent = '📄 Salvar PDF';
+          log('Dashboard exportado como PDF.', 'ok');
+        })
+        .catch(err => {
+          console.error('Erro ao gerar PDF:', err);
+          sections.forEach((s, i) => {
+            s.classList.remove('active');
+            if (wasActive[i]) s.classList.add('active');
+          });
+          btn.style.display = '';
+          btn.disabled = false;
+          btn.textContent = '📄 Salvar PDF';
+          log('Erro ao gerar PDF: ' + err.message, 'err');
+        });
+    });
+  </script>
+
 </body>
 </html>
