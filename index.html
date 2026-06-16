@@ -4,1317 +4,861 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Email Monitor · Slack</title>
-
-  <!-- html2pdf: exportação do dashboard para PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
   <style>
-    /* ───────── Reset & Base ───────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Temas de cor ── */
     :root {
-      --bg: #0f172a;
-      --bg-card: #1e293b;
-      --bg-input: #0f172a;
-      --border: #334155;
-      --accent: #6366f1;
-      --accent-hover: #818cf8;
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
-      --green: #22c55e;
-      --red: #ef4444;
-      --yellow: #eab308;
-      --sidebar-w: 220px;
-      --radius: 10px;
+      --accent:       #6366f1;
+      --accent-h:     #818cf8;
+      --accent-rgb:   99,102,241;
+      --green:  #22c55e; --red: #ef4444; --yellow: #eab308;
+      --sidebar-w: 220px; --radius: 10px;
+      --font-size: 14px;
     }
+    /* escuro (padrão) */
+    :root, [data-theme="dark"] {
+      --bg:       #0f172a; --bg-card: #1e293b; --bg-input: #0f172a;
+      --border:   #334155; --text: #e2e8f0;    --text-muted: #94a3b8;
+    }
+    /* claro */
+    [data-theme="light"] {
+      --bg:       #f1f5f9; --bg-card: #ffffff; --bg-input: #f8fafc;
+      --border:   #cbd5e1; --text: #0f172a;    --text-muted: #64748b;
+    }
+
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-      font-size: 14px;
+      background: var(--bg); color: var(--text);
+      display: flex; min-height: 100vh;
+      font-size: var(--font-size);
+      transition: background .25s, color .25s;
     }
 
-    /* ───────── Sidebar ───────── */
+    /* ── Sidebar ── */
     #sidebar {
-      width: var(--sidebar-w);
-      background: var(--bg-card);
+      width: var(--sidebar-w); background: var(--bg-card);
       border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem 1rem;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 100;
+      display: flex; flex-direction: column; padding: 1.5rem 1rem;
+      position: fixed; top:0; left:0; bottom:0; z-index:100;
+      transition: background .25s;
     }
-    .sidebar-logo {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .sidebar-logo span.badge {
-      font-size: 0.65rem;
-      background: var(--green);
-      color: #000;
-      padding: 2px 6px;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-    .sidebar-nav { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 2px; }
-    .nav-label { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: .08em; margin: 1rem 0 0.4rem 0.5rem; }
+    .sidebar-logo { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.4rem; display:flex; align-items:center; gap:.5rem; }
+    .sidebar-logo .badge { font-size:.65rem; background:var(--green); color:#000; padding:2px 6px; border-radius:20px; font-weight:600; }
+    .sidebar-nav  { margin-top:1.5rem; display:flex; flex-direction:column; gap:2px; }
+    .nav-label    { font-size:.65rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:.08em; margin:1rem 0 .4rem .5rem; }
     .nav-item {
-      display: flex; align-items: center; gap: 0.6rem;
-      padding: 0.5rem 0.75rem;
-      border-radius: 7px;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      transition: background .15s, color .15s;
-      border: none; background: none; width: 100%; text-align: left;
+      display:flex; align-items:center; gap:.6rem; padding:.5rem .75rem; border-radius:7px;
+      cursor:pointer; color:var(--text-muted); font-size:.85rem;
+      transition:background .15s,color .15s; border:none; background:none; width:100%; text-align:left;
     }
-    .nav-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
-    .nav-item.active { background: rgba(99,102,241,.15); color: var(--accent-hover); }
-    .nav-badge {
-      margin-left: auto;
-      background: var(--accent);
-      color: #fff;
-      font-size: 0.65rem;
-      padding: 1px 6px;
-      border-radius: 20px;
-    }
+    .nav-item:hover  { background:rgba(var(--accent-rgb),.08); color:var(--text); }
+    .nav-item.active { background:rgba(var(--accent-rgb),.15); color:var(--accent-h); }
+    .nav-badge { margin-left:auto; background:var(--accent); color:#fff; font-size:.65rem; padding:1px 6px; border-radius:20px; }
 
-    /* ───────── Main ───────── */
-    #main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+    /* ── Main ── */
+    #main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; }
 
-    /* ───────── Top bar ───────── */
+    /* ── Topbar ── */
     #topbar {
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
-      padding: 0.75rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      position: sticky; top: 0; z-index: 50;
+      background:var(--bg-card); border-bottom:1px solid var(--border);
+      padding:.75rem 1.5rem; display:flex; align-items:center;
+      justify-content:space-between; gap:1rem;
+      position:sticky; top:0; z-index:50; transition:background .25s;
     }
-    .topbar-info {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .topbar-info strong { color: var(--green); }
-    .topbar-info a { color: var(--accent-hover); text-decoration: none; }
-    .topbar-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .btn {
-      padding: 0.4rem 0.9rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: background .15s;
-    }
-    .btn-ghost {
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-    }
-    .btn-ghost:hover { background: rgba(255,255,255,.12); }
-    .btn-danger { background: rgba(239,68,68,.15); color: var(--red); }
-    .btn-danger:hover { background: rgba(239,68,68,.25); }
+    .topbar-info { font-size:.8rem; color:var(--text-muted); }
+    .topbar-info strong { color:var(--green); }
+    .topbar-info a { color:var(--accent-h); text-decoration:none; }
+    .topbar-actions { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
 
-    /* ── PDF button ── */
+    /* ── Buttons ── */
+    .btn { padding:.4rem .9rem; border-radius:6px; border:none; cursor:pointer; font-size:.8rem; font-weight:600; transition:background .15s; font-family:inherit; }
+    .btn-ghost  { background:rgba(128,128,128,.1); color:var(--text); }
+    .btn-ghost:hover { background:rgba(128,128,128,.2); }
+    .btn-danger { background:rgba(239,68,68,.12); color:var(--red); }
+    .btn-danger:hover { background:rgba(239,68,68,.22); }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:var(--accent-h); }
     #btn-export-pdf {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.9rem;
-      background: #4f46e5;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.4rem .9rem; background:#4f46e5; color:#fff;
+      border:none; border-radius:6px; font-size:.8rem; font-weight:600;
+      cursor:pointer; transition:background .2s;
     }
-    #btn-export-pdf:hover { background: #4338ca; }
-    #btn-export-pdf:active { background: #3730a3; }
-    #btn-export-pdf:disabled { opacity: 0.7; cursor: wait; }
+    #btn-export-pdf:hover    { background:#4338ca; }
+    #btn-export-pdf:disabled { opacity:.7; cursor:wait; }
 
-    /* ───────── Content area ───────── */
-    #content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    /* ── Content ── */
+    #content { padding:1.5rem; display:flex; flex-direction:column; gap:1.5rem; }
 
-    /* ───────── Panels (sections) ───────── */
-    .panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .panel-header {
-      padding: 0.85rem 1.2rem;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-    .panel-header h2 { font-size: 0.95rem; font-weight: 600; }
-    .panel-body { padding: 1.2rem; }
+    /* ── Panel ── */
+    .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:background .25s; }
+    .panel-header { padding:.85rem 1.2rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+    .panel-header h2 { font-size:.95rem; font-weight:600; }
+    .panel-body { padding:1.2rem; }
 
-    /* ───────── Stats row ───────── */
-    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
-    .stat-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.2rem;
-    }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-    .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text); }
-    .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    /* ── Stats ── */
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; }
+    .stat-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:1rem 1.2rem; transition:background .25s; }
+    .stat-label { font-size:.75rem; color:var(--text-muted); margin-bottom:.4rem; }
+    .stat-value { font-size:1.8rem; font-weight:700; color:var(--text); }
 
-    /* ───────── Category chips ───────── */
-    .chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
-    .chip {
-      padding: 0.25rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      background: var(--bg);
-    }
+    /* ── Chips ── */
+    .chip-row { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.75rem; }
+    .chip { padding:.25rem .7rem; border-radius:20px; font-size:.75rem; border:1px solid var(--border); color:var(--text-muted); background:var(--bg); }
 
-    /* ───────── Empty state ───────── */
-    .empty {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-    .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    /* ── Empty ── */
+    .empty { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); font-size:.85rem; }
+    .empty-icon { font-size:2rem; margin-bottom:.5rem; }
 
-    /* ───────── Notification list ───────── */
-    #notif-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .notif-item {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.75rem 1rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-    }
-    .notif-tag {
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 20px;
-      white-space: nowrap;
-    }
-    .tag-info { background: rgba(99,102,241,.2); color: var(--accent-hover); }
-    .tag-alerta { background: rgba(239,68,68,.15); color: var(--red); }
-    .tag-ok { background: rgba(34,197,94,.15); color: var(--green); }
-    .notif-body { flex: 1; }
-    .notif-title { font-size: 0.85rem; font-weight: 600; }
-    .notif-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-    .notif-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 0 0.2rem; }
-    .notif-close:hover { color: var(--red); }
+    /* ── Notifications ── */
+    #notif-list { display:flex; flex-direction:column; gap:.5rem; }
+    .notif-item { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:.75rem 1rem; display:flex; align-items:flex-start; gap:.75rem; }
+    .notif-tag { font-size:.65rem; font-weight:700; padding:2px 7px; border-radius:20px; white-space:nowrap; }
+    .tag-info   { background:rgba(var(--accent-rgb),.2); color:var(--accent-h); }
+    .tag-alerta { background:rgba(239,68,68,.15); color:var(--red); }
+    .tag-ok     { background:rgba(34,197,94,.15);  color:var(--green); }
+    .notif-body { flex:1; }
+    .notif-title { font-size:.85rem; font-weight:600; }
+    .notif-meta  { font-size:.75rem; color:var(--text-muted); margin-top:2px; }
+    .notif-close { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem; }
+    .notif-close:hover { color:var(--red); }
 
-    /* ───────── Anotações ───────── */
-    .note-form { display: flex; flex-direction: column; gap: 0.6rem; }
-    .note-form textarea {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.6rem 0.8rem;
-      color: var(--text);
-      font-size: 0.85rem;
-      resize: vertical;
-      min-height: 80px;
-      font-family: inherit;
-    }
-    .note-form textarea:focus { outline: none; border-color: var(--accent); }
-    .note-hint { font-size: 0.72rem; color: var(--text-muted); }
-    .note-actions { display: flex; justify-content: flex-end; }
+    /* ── Notes ── */
+    .note-form textarea { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.6rem .8rem; color:var(--text); font-size:.85rem; resize:vertical; min-height:80px; font-family:inherit; width:100%; }
+    .note-form textarea:focus { outline:none; border-color:var(--accent); }
+    .note-hint { font-size:.72rem; color:var(--text-muted); }
+    .search-bar { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.75rem; }
+    .search-bar input { flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .75rem; color:var(--text); font-size:.82rem; font-family:inherit; min-width:140px; }
+    .search-bar input:focus { outline:none; border-color:var(--accent); }
+    .filter-dates { display:flex; gap:.5rem; align-items:center; }
+    .filter-dates label { font-size:.75rem; color:var(--text-muted); }
+    .filter-dates input[type="date"] { background:var(--bg-input); border:1px solid var(--border); border-radius:6px; padding:.3rem .5rem; color:var(--text); font-size:.78rem; font-family:inherit; }
+    #notes-list { display:flex; flex-direction:column; gap:.5rem; margin-top:.75rem; }
+    .note-card { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:.75rem 1rem; position:relative; }
+    .note-card p { font-size:.85rem; white-space:pre-wrap; }
+    .note-card .note-date { font-size:.72rem; color:var(--text-muted); margin-top:.3rem; }
+    .note-del { position:absolute; top:.6rem; right:.75rem; background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.9rem; }
+    .note-del:hover { color:var(--red); }
 
-    .search-bar {
-      display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
-      margin-bottom: 0.75rem;
-    }
-    .search-bar input {
-      flex: 1;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.4rem 0.75rem;
-      color: var(--text);
-      font-size: 0.82rem;
-      font-family: inherit;
-      min-width: 140px;
-    }
-    .search-bar input:focus { outline: none; border-color: var(--accent); }
-    .filter-dates { display: flex; gap: 0.5rem; align-items: center; }
-    .filter-dates label { font-size: 0.75rem; color: var(--text-muted); }
-    .filter-dates input[type="date"] {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.3rem 0.5rem;
-      color: var(--text);
-      font-size: 0.78rem;
-      font-family: inherit;
-    }
+    /* ── Links rápidos ── */
+    .quick-links-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:.6rem; }
+    .qlink-wrap { position:relative; }
+    .qlink-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.75rem .8rem; text-decoration:none; color:var(--text); font-size:.82rem; display:flex; flex-direction:column; gap:.3rem; transition:border-color .15s,background .15s; height:100%; }
+    .qlink-card:hover { border-color:var(--accent); background:rgba(var(--accent-rgb),.08); }
+    .qlink-emoji { font-size:1.3rem; }
+    .qlink-name  { font-weight:600; }
+    .qlink-cat   { font-size:.7rem; color:var(--text-muted); }
+    .qlink-del   { position:absolute; top:.35rem; right:.4rem; background:rgba(239,68,68,.15); border:none; border-radius:50%; width:18px; height:18px; cursor:pointer; color:var(--red); font-size:.65rem; display:none; align-items:center; justify-content:center; line-height:1; }
+    .qlink-wrap:hover .qlink-del { display:flex; }
 
-    #notes-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
-    .note-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.75rem 1rem;
-      position: relative;
-    }
-    .note-card p { font-size: 0.85rem; white-space: pre-wrap; }
-    .note-card .note-date { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
-    .note-del {
-      position: absolute; top: 0.6rem; right: 0.75rem;
-      background: none; border: none; cursor: pointer;
-      color: var(--text-muted); font-size: 0.9rem;
-    }
-    .note-del:hover { color: var(--red); }
+    /* ── Modal ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; width:min(480px,95vw); display:flex; flex-direction:column; gap:.9rem; max-height:90vh; overflow-y:auto; }
+    .modal h3 { font-size:1rem; font-weight:700; }
+    .field-group { display:flex; flex-direction:column; gap:.3rem; }
+    .field-group label { font-size:.78rem; color:var(--text-muted); }
+    .field-group input, .field-group select, .field-group textarea { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.45rem .75rem; color:var(--text); font-size:.85rem; font-family:inherit; width:100%; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline:none; border-color:var(--accent); }
+    .field-group .required::after { content:' *'; color:var(--red); }
+    .modal-footer { display:flex; justify-content:flex-end; gap:.6rem; }
 
-    /* ───────── Links rápidos ───────── */
-    .quick-links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; }
-    .qlink-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem 0.8rem;
-      text-decoration: none;
-      color: var(--text);
-      font-size: 0.82rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      transition: border-color .15s, background .15s;
-    }
-    .qlink-card:hover { border-color: var(--accent); background: rgba(99,102,241,.08); }
-    .qlink-emoji { font-size: 1.3rem; }
-    .qlink-name { font-weight: 600; }
-    .qlink-cat { font-size: 0.7rem; color: var(--text-muted); }
+    /* ── Workspace ── */
+    .ws-list { display:flex; flex-direction:column; gap:.5rem; }
+    .ws-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.8rem 1rem; display:flex; align-items:center; gap:.75rem; transition:background .25s; }
+    .ws-icon  { font-size:1.3rem; flex-shrink:0; }
+    .ws-info  { flex:1; min-width:0; }
+    .ws-title { font-size:.88rem; font-weight:600; }
+    .ws-meta  { font-size:.73rem; color:var(--text-muted); margin-top:2px; }
+    .ws-actions { display:flex; gap:.4rem; align-items:center; }
+    .status-badge { font-size:.68rem; font-weight:600; padding:2px 7px; border-radius:20px; white-space:nowrap; }
+    .status-progress { background:rgba(var(--accent-rgb),.2); color:var(--accent-h); }
+    .status-done     { background:rgba(34,197,94,.15);  color:var(--green); }
+    .status-wait     { background:rgba(234,179,8,.15);  color:var(--yellow); }
+    .status-archived { background:rgba(148,163,184,.1); color:var(--text-muted); }
+    .ws-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.85rem; padding:.2rem .35rem; border-radius:4px; }
+    .ws-del:hover { background:rgba(239,68,68,.12); color:var(--red); }
 
-    /* ── Add link form ── */
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.6);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      width: min(480px, 95vw);
-      display: flex;
-      flex-direction: column;
-      gap: 0.9rem;
-    }
-    .modal h3 { font-size: 1rem; font-weight: 700; }
-    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
-    .field-group label { font-size: 0.78rem; color: var(--text-muted); }
-    .field-group input, .field-group select, .field-group textarea {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.45rem 0.75rem;
-      color: var(--text);
-      font-size: 0.85rem;
-      font-family: inherit;
-      width: 100%;
-    }
-    .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
-      outline: none; border-color: var(--accent);
-    }
-    .field-group .required::after { content: ' *'; color: var(--red); }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 0.6rem; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-hover); }
+    /* ── Contatos ── */
+    .contacts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:.6rem; }
+    .contact-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem; position:relative; }
+    .contact-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.9rem; color:#fff; margin-bottom:.6rem; }
+    .contact-name { font-size:.88rem; font-weight:600; }
+    .contact-role { font-size:.75rem; color:var(--text-muted); }
+    .contact-cat  { font-size:.68rem; font-weight:600; padding:2px 6px; border-radius:20px; background:rgba(var(--accent-rgb),.15); color:var(--accent-h); display:inline-block; margin-top:.4rem; }
+    .contact-del  { position:absolute; top:.6rem; right:.75rem; background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.85rem; }
+    .contact-del:hover { color:var(--red); }
 
-    /* ───────── Workspace ───────── */
-    .ws-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .ws-item {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.8rem 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .ws-icon { font-size: 1.3rem; }
-    .ws-info { flex: 1; }
-    .ws-title { font-size: 0.88rem; font-weight: 600; }
-    .ws-meta { font-size: 0.73rem; color: var(--text-muted); }
-    .status-badge {
-      font-size: 0.68rem;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 20px;
-    }
-    .status-progress { background: rgba(99,102,241,.2); color: var(--accent-hover); }
-    .status-done { background: rgba(34,197,94,.15); color: var(--green); }
-    .status-wait { background: rgba(234,179,8,.15); color: var(--yellow); }
-    .status-archived { background: rgba(148,163,184,.1); color: var(--text-muted); }
+    /* ── Configurações ── */
+    .config-section { display:flex; flex-direction:column; gap:0; }
+    .config-row { display:flex; align-items:center; justify-content:space-between; padding:.9rem 0; border-bottom:1px solid var(--border); gap:1rem; flex-wrap:wrap; }
+    .config-row:last-child { border-bottom:none; }
+    .config-label { font-size:.85rem; font-weight:600; }
+    .config-desc  { font-size:.78rem; color:var(--text-muted); margin-top:.2rem; }
 
-    /* ───────── Contatos ───────── */
-    .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; }
-    .contact-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.9rem 1rem;
-    }
-    .contact-avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.9rem; color: #fff;
-      margin-bottom: 0.6rem;
-    }
-    .contact-name { font-size: 0.88rem; font-weight: 600; }
-    .contact-role { font-size: 0.75rem; color: var(--text-muted); }
-    .contact-cat {
-      font-size: 0.68rem; font-weight: 600;
-      padding: 2px 6px; border-radius: 20px;
-      background: rgba(99,102,241,.15); color: var(--accent-hover);
-      display: inline-block; margin-top: 0.4rem;
-    }
+    /* Toggle switch */
+    .toggle { width:42px; height:24px; border-radius:20px; position:relative; cursor:pointer; flex-shrink:0; transition:background .2s; }
+    .toggle::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .2s; }
+    .toggle.on  { background:var(--green); }
+    .toggle.on::after  { transform:translateX(18px); }
+    .toggle.off { background:var(--border); }
 
-    /* ───────── Configurações ───────── */
-    .config-section { display: flex; flex-direction: column; gap: 1rem; }
-    .config-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid var(--border);
-      gap: 1rem;
-      flex-wrap: wrap;
+    /* Color swatches */
+    .swatches { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .swatch {
+      width:28px; height:28px; border-radius:50%; cursor:pointer;
+      border:3px solid transparent; transition:border-color .15s, transform .1s;
     }
-    .config-row:last-child { border-bottom: none; }
-    .config-label { font-size: 0.85rem; font-weight: 600; }
-    .config-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
-    .toggle {
-      width: 42px; height: 24px;
-      background: var(--green);
-      border-radius: 20px;
-      position: relative;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      top: 3px; left: 3px;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: #fff;
-      transition: transform .2s;
-    }
-    .toggle.off { background: var(--border); }
-    .toggle.off::after { transform: none; }
-    .toggle.on::after { transform: translateX(18px); }
+    .swatch:hover    { transform:scale(1.15); }
+    .swatch.selected { border-color:var(--text); }
 
-    .config-input {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.4rem 0.75rem;
-      color: var(--text);
-      font-size: 0.82rem;
-      font-family: inherit;
-      min-width: 180px;
-    }
-    .config-input:focus { outline: none; border-color: var(--accent); }
+    /* Font size buttons */
+    .font-btns { display:flex; gap:.4rem; }
+    .font-btn { padding:.3rem .8rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-input); color:var(--text); cursor:pointer; font-family:inherit; font-size:.8rem; transition:background .15s; }
+    .font-btn:hover    { background:rgba(var(--accent-rgb),.1); }
+    .font-btn.active   { background:var(--accent); color:#fff; border-color:var(--accent); }
 
-    .select-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .config-select {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.35rem 0.6rem;
-      color: var(--text);
-      font-size: 0.82rem;
-      font-family: inherit;
-    }
-    .color-swatch {
-      width: 24px; height: 24px;
-      border-radius: 4px;
-      border: 2px solid var(--border);
-      cursor: pointer;
-    }
-    .color-swatch.selected { border-color: var(--text); }
+    /* Theme buttons */
+    .theme-btns { display:flex; gap:.4rem; }
+    .theme-btn { padding:.3rem .8rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-input); color:var(--text); cursor:pointer; font-family:inherit; font-size:.8rem; transition:background .15s; display:flex; align-items:center; gap:.35rem; }
+    .theme-btn:hover  { background:rgba(var(--accent-rgb),.1); }
+    .theme-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
 
-    /* ───────── Logs ───────── */
-    #log-area {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 0.75rem 1rem;
-      font-family: 'Courier New', monospace;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      min-height: 140px;
-      max-height: 280px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .log-line { display: flex; gap: 0.5rem; }
-    .log-time { color: var(--accent-hover); white-space: nowrap; }
-    .log-tag-sys { color: var(--text-muted); }
-    .log-tag-ok { color: var(--green); }
-    .log-tag-err { color: var(--red); }
+    .config-input { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .75rem; color:var(--text); font-size:.82rem; font-family:inherit; min-width:200px; }
+    .config-input:focus { outline:none; border-color:var(--accent); }
 
-    /* ───────── Section visibility ───────── */
-    .section { display: none; }
-    .section.active { display: flex; flex-direction: column; gap: 1.5rem; }
+    /* ── Logs ── */
+    #log-area { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:.75rem 1rem; font-family:'Courier New',monospace; font-size:.78rem; color:var(--text-muted); min-height:140px; max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:3px; }
+    .log-line { display:flex; gap:.5rem; }
+    .log-time    { color:var(--accent-h); white-space:nowrap; }
+    .log-tag-sys { color:var(--text-muted); }
+    .log-tag-ok  { color:var(--green); }
+    .log-tag-err { color:var(--red); }
 
-    /* ───────── Print / PDF ───────── */
+    /* ── Sections ── */
+    .section { display:none; }
+    .section.active { display:flex; flex-direction:column; gap:1.5rem; }
+
+    /* ── Toast ── */
+    #toast { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--accent); color:#fff; padding:.6rem 1.1rem; border-radius:8px; font-size:.82rem; font-weight:600; opacity:0; transform:translateY(8px); transition:opacity .25s,transform .25s; pointer-events:none; z-index:999; }
+    #toast.show { opacity:1; transform:translateY(0); }
+
     @media print {
-      #btn-export-pdf { display: none !important; }
-      #sidebar { display: none !important; }
-      #main { margin-left: 0 !important; }
-      #topbar { position: static !important; }
+      #btn-export-pdf,#sidebar { display:none !important; }
+      #main { margin-left:0 !important; }
+      #topbar { position:static !important; }
     }
   </style>
 </head>
-<body>
+<body data-theme="dark">
 
-  <!-- ═══════════ SIDEBAR ═══════════ -->
-  <aside id="sidebar">
-    <div class="sidebar-logo">
-      📧 Email Monitor
-      <span class="badge">Apps Script ativo</span>
+<!-- ══ SIDEBAR ══ -->
+<aside id="sidebar">
+  <div class="sidebar-logo">📧 Email Monitor <span class="badge">Apps Script ativo</span></div>
+  <nav class="sidebar-nav">
+    <span class="nav-label">Principal</span>
+    <button class="nav-item active" data-section="dashboard">📊 Dashboard</button>
+    <button class="nav-item" data-section="notificacoes">🔔 Notificações <span class="nav-badge" id="badge-notif">0</span></button>
+    <button class="nav-item" data-section="anotacoes">📝 Anotações <span class="nav-badge" id="badge-notes">0</span></button>
+    <span class="nav-label">Meu espaço</span>
+    <button class="nav-item" data-section="links">🔗 Links rápidos</button>
+    <button class="nav-item" data-section="workspace">🗂️ Workspace</button>
+    <button class="nav-item" data-section="contatos">👥 Contatos</button>
+    <span class="nav-label">Sistema</span>
+    <button class="nav-item" data-section="config">⚙️ Configurações</button>
+    <button class="nav-item" data-section="logs">🖥️ Logs</button>
+  </nav>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div id="main">
+  <div id="topbar">
+    <div class="topbar-info">
+      <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
+      <a href="https://script.google.com" target="_blank">Gerenciar →</a>
     </div>
-
-    <nav class="sidebar-nav">
-      <span class="nav-label">Principal</span>
-      <button class="nav-item active" data-section="dashboard">📊 Dashboard</button>
-      <button class="nav-item" data-section="notificacoes">
-        🔔 Notificações <span class="nav-badge" id="badge-notif">0</span>
-      </button>
-      <button class="nav-item" data-section="anotacoes">
-        📝 Anotações <span class="nav-badge" id="badge-notes">0</span>
-      </button>
-
-      <span class="nav-label">Meu espaço</span>
-      <button class="nav-item" data-section="links">🔗 Links rápidos</button>
-      <button class="nav-item" data-section="workspace">🗂️ Workspace</button>
-      <button class="nav-item" data-section="contatos">👥 Contatos</button>
-
-      <span class="nav-label">Sistema</span>
-      <button class="nav-item" data-section="config">⚙️ Configurações</button>
-      <button class="nav-item" data-section="logs">🖥️ Logs</button>
-    </nav>
-  </aside>
-
-  <!-- ═══════════ MAIN ═══════════ -->
-  <div id="main">
-
-    <!-- Top bar -->
-    <div id="topbar">
-      <div class="topbar-info">
-        <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
-        <a href="https://script.google.com" target="_blank">Gerenciar →</a>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-ghost" id="btn-refresh">🔄 Atualizar notificações</button>
-        <button class="btn btn-danger" id="btn-clear">🗑️ Limpar histórico</button>
-        <button id="btn-export-pdf">📄 Salvar PDF</button>
-      </div>
-    </div>
-
-    <!-- Content -->
-    <div id="content">
-
-      <!-- ── DASHBOARD ── -->
-      <div class="section active" id="sec-dashboard">
-
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-label">Total notificações</div>
-            <div class="stat-value" id="stat-total">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Canal Slack</div>
-            <div class="stat-value" style="font-size:1rem;padding-top:.5rem;" id="stat-canal">#notificacoes-email</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Última verificação</div>
-            <div class="stat-value" style="font-size:1.1rem;padding-top:.4rem;" id="stat-ultima">—</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Anotações</div>
-            <div class="stat-value" id="stat-notes">0</div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-header"><h2>Por categoria</h2></div>
-          <div class="panel-body">
-            <div class="chip-row" id="cat-chips">
-              <span class="chip">Sem dados ainda</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── NOTIFICAÇÕES ── -->
-      <div class="section" id="sec-notificacoes">
-        <div class="panel">
-          <div class="panel-header">
-            <h2>Notificações enviadas</h2>
-            <button class="btn btn-danger btn-sm" onclick="clearNotifications()">✕ Limpar</button>
-          </div>
-          <div class="panel-body">
-            <div id="notif-list">
-              <div class="empty">
-                <div class="empty-icon">🔔</div>
-                Nenhuma notificação ainda.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── ANOTAÇÕES ── -->
-      <div class="section" id="sec-anotacoes">
-        <div class="panel">
-          <div class="panel-header"><h2>Anotações</h2></div>
-          <div class="panel-body">
-            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
-              Suas anotações são salvas automaticamente no navegador.
-            </p>
-
-            <div class="note-form">
-              <button class="btn btn-ghost" style="align-self:flex-start" id="btn-new-note">+ Nova anotação</button>
-              <div id="note-editor" style="display:none;flex-direction:column;gap:.6rem;">
-                <textarea id="note-text" placeholder="Digite sua anotação…"></textarea>
-                <div class="note-hint">Ctrl+Enter para salvar</div>
-                <div class="note-actions">
-                  <button class="btn btn-primary" onclick="saveNote()">Salvar anotação</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="search-bar" style="margin-top:1rem;">
-              <input type="text" id="note-search" placeholder="Pesquisar anotações" oninput="renderNotes()" />
-              <div class="filter-dates">
-                <label>Data inicial</label>
-                <input type="date" id="note-from" onchange="renderNotes()" />
-                <label>Data final</label>
-                <input type="date" id="note-to" onchange="renderNotes()" />
-                <button class="btn btn-ghost" onclick="clearNoteFilter()">Limpar</button>
-              </div>
-            </div>
-
-            <div id="notes-list"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── LINKS RÁPIDOS ── -->
-      <div class="section" id="sec-links">
-        <div class="panel">
-          <div class="panel-header">
-            <h2>Links rápidos</h2>
-            <button class="btn btn-ghost" onclick="openModal('modal-link')">+ Novo link</button>
-          </div>
-          <div class="panel-body">
-            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
-              Acesse suas plataformas favoritas com um clique.
-            </p>
-            <div class="quick-links-grid" id="links-grid">
-              <div class="empty" style="grid-column:1/-1;">
-                <div class="empty-icon">🔗</div>
-                Nenhum link ainda.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── WORKSPACE ── -->
-      <div class="section" id="sec-workspace">
-        <div class="panel">
-          <div class="panel-header">
-            <h2>Workspace</h2>
-            <button class="btn btn-ghost" onclick="openModal('modal-ws')">+ Novo item</button>
-          </div>
-          <div class="panel-body">
-            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
-              Arquivos, planos, formulários, projetos e templates.
-            </p>
-            <div class="ws-list" id="ws-list">
-              <div class="empty">
-                <div class="empty-icon">🗂️</div>
-                Nenhum item ainda.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── CONTATOS ── -->
-      <div class="section" id="sec-contatos">
-        <div class="panel">
-          <div class="panel-header">
-            <h2>Contatos</h2>
-            <button class="btn btn-ghost" onclick="openModal('modal-contact')">+ Novo contato</button>
-          </div>
-          <div class="panel-body">
-            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem;">
-              Times, áreas e pessoas que você mais utiliza.
-            </p>
-            <div class="contacts-grid" id="contacts-grid">
-              <div class="empty" style="grid-column:1/-1;">
-                <div class="empty-icon">👥</div>
-                Nenhum contato ainda.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── CONFIGURAÇÕES ── -->
-      <div class="section" id="sec-config">
-        <div class="panel">
-          <div class="panel-header"><h2>Configurações</h2></div>
-          <div class="panel-body config-section">
-
-            <div class="config-row">
-              <div>
-                <div class="config-label">Monitor automático</div>
-                <div class="config-desc">O Google Apps Script monitora seus emails automaticamente a cada 5 minutos e envia notificações para o Slack.</div>
-                <a href="https://script.google.com" target="_blank" style="font-size:.78rem;color:var(--accent-hover);text-decoration:none;margin-top:.3rem;display:inline-block;">
-                  Abrir Google Apps Script ↗
-                </a>
-              </div>
-              <div>
-                <div style="font-size:.75rem;color:var(--green);font-weight:600;margin-bottom:.4rem;">Ativo</div>
-                <div class="toggle on" id="toggle-monitor" onclick="this.classList.toggle('on');this.classList.toggle('off');"></div>
-              </div>
-            </div>
-
-            <div class="config-row">
-              <div>
-                <div class="config-label">Aparência</div>
-                <div class="config-desc">Cor do tema</div>
-              </div>
-              <div class="select-row">
-                <div class="color-swatch selected" style="background:#6366f1;" title="Índigo"></div>
-                <div class="color-swatch" style="background:#22c55e;" title="Verde"></div>
-                <div class="color-swatch" style="background:#ef4444;" title="Vermelho"></div>
-                <div class="color-swatch" style="background:#eab308;" title="Amarelo"></div>
-                <div class="color-swatch" style="background:#06b6d4;" title="Ciano"></div>
-              </div>
-            </div>
-
-            <div class="config-row">
-              <div>
-                <div class="config-label">Tamanho da fonte</div>
-              </div>
-              <select class="config-select">
-                <option>Pequeno</option>
-                <option selected>Médio</option>
-                <option>Grande</option>
-              </select>
-            </div>
-
-            <div class="config-row">
-              <div>
-                <div class="config-label">Plano de fundo</div>
-              </div>
-              <select class="config-select">
-                <option selected>Escuro</option>
-                <option>Claro</option>
-                <option>Auto</option>
-              </select>
-            </div>
-
-            <div class="config-row">
-              <div>
-                <div class="config-label">Canal Slack</div>
-                <div class="config-desc">Nome do canal para receber notificações</div>
-              </div>
-              <input class="config-input" type="text" id="cfg-canal" value="#notificacoes-email"
-                     onchange="document.getElementById('stat-canal').textContent=this.value" />
-            </div>
-
-            <div class="config-row">
-              <div>
-                <div class="config-label">Times monitorados</div>
-                <div class="config-desc">Regras de classificação configuradas no Google Apps Script.</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ── LOGS ── -->
-      <div class="section" id="sec-logs">
-        <div class="panel">
-          <div class="panel-header">
-            <h2>Logs do sistema</h2>
-            <button class="btn btn-danger" onclick="clearLogs()">Limpar</button>
-          </div>
-          <div class="panel-body">
-            <div id="log-area">
-              <div class="log-line">
-                <span class="log-time">--:--:--</span>
-                <span class="log-tag-sys">[sistema]</span>
-                <span>Aguardando eventos...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /content -->
-  </div><!-- /main -->
-
-
-  <!-- ═══════════ MODAIS ═══════════ -->
-
-  <!-- Modal: Adicionar link -->
-  <div class="modal-overlay" id="modal-link">
-    <div class="modal">
-      <h3>Adicionar link</h3>
-      <div class="field-group">
-        <label class="required">Nome</label>
-        <input type="text" id="lnk-nome" placeholder="Ex.: Slack" />
-      </div>
-      <div class="field-group">
-        <label class="required">URL</label>
-        <input type="url" id="lnk-url" placeholder="https://" />
-      </div>
-      <div class="field-group">
-        <label>Emoji</label>
-        <input type="text" id="lnk-emoji" placeholder="🔗" maxlength="4" />
-      </div>
-      <div class="field-group">
-        <label>Categoria</label>
-        <select id="lnk-cat">
-          <option>Comunicação</option>
-          <option>Produtividade</option>
-          <option>Dados & análises</option>
-          <option>Dev & infra</option>
-          <option>Outros</option>
-        </select>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('modal-link')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveLink()">Salvar link</button>
-      </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="btn-refresh">🔄 Atualizar</button>
+      <button class="btn btn-danger" id="btn-clear">🗑️ Limpar histórico</button>
+      <button id="btn-export-pdf">📄 Salvar PDF</button>
     </div>
   </div>
 
-  <!-- Modal: Workspace -->
-  <div class="modal-overlay" id="modal-ws">
-    <div class="modal">
-      <h3>Adicionar item</h3>
-      <div class="field-group">
-        <label class="required">Título</label>
-        <input type="text" id="ws-titulo" placeholder="Título do item" />
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Total notificações</div><div class="stat-value" id="stat-total">0</div></div>
+        <div class="stat-card"><div class="stat-label">Canal Slack</div><div class="stat-value" style="font-size:1rem;padding-top:.5rem" id="stat-canal">#notificacoes-email</div></div>
+        <div class="stat-card"><div class="stat-label">Última verificação</div><div class="stat-value" style="font-size:1.1rem;padding-top:.4rem" id="stat-ultima">—</div></div>
+        <div class="stat-card"><div class="stat-label">Anotações</div><div class="stat-value" id="stat-notes">0</div></div>
       </div>
-      <div class="field-group">
-        <label>Tipo</label>
-        <select id="ws-tipo">
-          <option value="📄">📄 Arquivo</option>
-          <option value="📅">📅 Plano de trabalho</option>
-          <option value="📋">📋 Formulário</option>
-          <option value="🗂️">🗂️ Projeto</option>
-          <option value="📊">📊 Relatório</option>
-          <option value="🔖">🔖 Template</option>
-        </select>
-      </div>
-      <div class="field-group">
-        <label>Status</label>
-        <select id="ws-status">
-          <option value="progress">Em andamento</option>
-          <option value="done">Concluído</option>
-          <option value="wait">Aguardando</option>
-          <option value="archived">Arquivado</option>
-        </select>
-      </div>
-      <div class="field-group">
-        <label>Link externo</label>
-        <input type="url" id="ws-link" placeholder="https://" />
-      </div>
-      <div class="field-group">
-        <label>Descrição</label>
-        <textarea id="ws-desc" rows="2" placeholder="Descrição opcional"></textarea>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('modal-ws')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveWsItem()">Salvar</button>
+      <div class="panel">
+        <div class="panel-header"><h2>Por categoria</h2></div>
+        <div class="panel-body"><div class="chip-row" id="cat-chips"><span class="chip">Sem dados ainda</span></div></div>
       </div>
     </div>
-  </div>
 
-  <!-- Modal: Contato -->
-  <div class="modal-overlay" id="modal-contact">
-    <div class="modal">
-      <h3>Adicionar contato</h3>
-      <div class="field-group">
-        <label class="required">Nome completo</label>
-        <input type="text" id="ct-nome" placeholder="Nome" />
-      </div>
-      <div class="field-group">
-        <label>Cargo / função</label>
-        <input type="text" id="ct-cargo" placeholder="Ex.: Analista de Dados" />
-      </div>
-      <div class="field-group">
-        <label>E-mail</label>
-        <input type="email" id="ct-email" placeholder="email@exemplo.com" />
-      </div>
-      <div class="field-group">
-        <label>Telefone / WhatsApp</label>
-        <input type="tel" id="ct-tel" placeholder="+55 11 9..." />
-      </div>
-      <div class="field-group">
-        <label>Slack / usuário</label>
-        <input type="text" id="ct-slack" placeholder="@usuario" />
-      </div>
-      <div class="field-group">
-        <label>Categoria</label>
-        <select id="ct-cat">
-          <option>Time</option>
-          <option>Área</option>
-          <option>Cliente</option>
-          <option>Parceiro</option>
-          <option>Fornecedor</option>
-          <option>Outro</option>
-        </select>
-      </div>
-      <div class="field-group">
-        <label>Grupo personalizado</label>
-        <input type="text" id="ct-grupo" placeholder="Ex.: Dados Brasil" />
-      </div>
-      <div class="field-group">
-        <label>Observações</label>
-        <textarea id="ct-obs" rows="2" placeholder="Notas opcionais"></textarea>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-ghost" onclick="closeModal('modal-contact')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveContact()">Salvar contato</button>
+    <!-- NOTIFICAÇÕES -->
+    <div class="section" id="sec-notificacoes">
+      <div class="panel">
+        <div class="panel-header"><h2>Notificações enviadas</h2><button class="btn btn-danger" onclick="clearNotifications()">✕ Limpar</button></div>
+        <div class="panel-body"><div id="notif-list"><div class="empty"><div class="empty-icon">🔔</div>Nenhuma notificação ainda.</div></div></div>
       </div>
     </div>
+
+    <!-- ANOTAÇÕES -->
+    <div class="section" id="sec-anotacoes">
+      <div class="panel">
+        <div class="panel-header"><h2>Anotações</h2></div>
+        <div class="panel-body">
+          <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Suas anotações são salvas automaticamente no navegador.</p>
+          <div class="note-form">
+            <button class="btn btn-ghost" style="align-self:flex-start" id="btn-new-note">+ Nova anotação</button>
+            <div id="note-editor" style="display:none;flex-direction:column;gap:.6rem">
+              <textarea id="note-text" placeholder="Digite sua anotação…"></textarea>
+              <div class="note-hint">Ctrl+Enter para salvar</div>
+              <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="saveNote()">Salvar anotação</button></div>
+            </div>
+          </div>
+          <div class="search-bar" style="margin-top:1rem">
+            <input type="text" id="note-search" placeholder="Pesquisar anotações" oninput="renderNotes()" />
+            <div class="filter-dates">
+              <label>De</label><input type="date" id="note-from" onchange="renderNotes()" />
+              <label>Até</label><input type="date" id="note-to" onchange="renderNotes()" />
+              <button class="btn btn-ghost" onclick="clearNoteFilter()">Limpar</button>
+            </div>
+          </div>
+          <div id="notes-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINKS RÁPIDOS -->
+    <div class="section" id="sec-links">
+      <div class="panel">
+        <div class="panel-header"><h2>Links rápidos</h2><button class="btn btn-ghost" onclick="openModal('modal-link')">+ Novo link</button></div>
+        <div class="panel-body">
+          <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Acesse suas plataformas favoritas com um clique.</p>
+          <div class="quick-links-grid" id="links-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="section" id="sec-workspace">
+      <div class="panel">
+        <div class="panel-header"><h2>Workspace</h2><button class="btn btn-ghost" onclick="openModal('modal-ws')">+ Novo item</button></div>
+        <div class="panel-body">
+          <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Arquivos, planos, formulários, projetos e templates.</p>
+          <div class="ws-list" id="ws-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTATOS -->
+    <div class="section" id="sec-contatos">
+      <div class="panel">
+        <div class="panel-header"><h2>Contatos</h2><button class="btn btn-ghost" onclick="openModal('modal-contact')">+ Novo contato</button></div>
+        <div class="panel-body">
+          <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Times, áreas e pessoas que você mais utiliza.</p>
+          <div class="contacts-grid" id="contacts-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="section" id="sec-config">
+      <div class="panel">
+        <div class="panel-header"><h2>Configurações</h2></div>
+        <div class="panel-body config-section">
+
+          <!-- Monitor -->
+          <div class="config-row">
+            <div>
+              <div class="config-label">Monitor automático</div>
+              <div class="config-desc">Apps Script verifica emails a cada 5 minutos e envia ao Slack.</div>
+              <a href="https://script.google.com" target="_blank" style="font-size:.78rem;color:var(--accent-h);text-decoration:none;display:inline-block;margin-top:.3rem">Abrir Google Apps Script ↗</a>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
+              <span style="font-size:.75rem;color:var(--green);font-weight:600">Ativo</span>
+              <div class="toggle on" id="toggle-monitor" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+            </div>
+          </div>
+
+          <!-- Cor do tema -->
+          <div class="config-row">
+            <div><div class="config-label">Cor do tema</div><div class="config-desc">Clique para trocar a cor de destaque</div></div>
+            <div class="swatches" id="swatches">
+              <div class="swatch selected" data-accent="#6366f1" data-accenth="#818cf8" data-rgb="99,102,241"  style="background:#6366f1" title="Índigo"></div>
+              <div class="swatch"          data-accent="#22c55e" data-accenth="#4ade80" data-rgb="34,197,94"   style="background:#22c55e" title="Verde"></div>
+              <div class="swatch"          data-accent="#ef4444" data-accenth="#f87171" data-rgb="239,68,68"   style="background:#ef4444" title="Vermelho"></div>
+              <div class="swatch"          data-accent="#eab308" data-accenth="#facc15" data-rgb="234,179,8"   style="background:#eab308" title="Amarelo"></div>
+              <div class="swatch"          data-accent="#06b6d4" data-accenth="#22d3ee" data-rgb="6,182,212"   style="background:#06b6d4" title="Ciano"></div>
+              <div class="swatch"          data-accent="#f97316" data-accenth="#fb923c" data-rgb="249,115,22"  style="background:#f97316" title="Laranja"></div>
+              <div class="swatch"          data-accent="#ec4899" data-accenth="#f472b6" data-rgb="236,72,153"  style="background:#ec4899" title="Rosa"></div>
+            </div>
+          </div>
+
+          <!-- Tamanho da fonte -->
+          <div class="config-row">
+            <div><div class="config-label">Tamanho da fonte</div><div class="config-desc">Ajuste o tamanho do texto da interface</div></div>
+            <div class="font-btns">
+              <button class="font-btn" data-size="12px">A<span style="font-size:.65em">−</span></button>
+              <button class="font-btn active" data-size="14px">A</button>
+              <button class="font-btn" data-size="16px">A<span style="font-size:.65em">+</span></button>
+            </div>
+          </div>
+
+          <!-- Plano de fundo -->
+          <div class="config-row">
+            <div><div class="config-label">Plano de fundo</div><div class="config-desc">Alterne entre tema escuro e claro</div></div>
+            <div class="theme-btns">
+              <button class="theme-btn active" data-theme="dark">🌙 Escuro</button>
+              <button class="theme-btn" data-theme="light">☀️ Claro</button>
+            </div>
+          </div>
+
+          <!-- Canal Slack -->
+          <div class="config-row">
+            <div><div class="config-label">Canal Slack</div><div class="config-desc">Nome do canal para receber notificações</div></div>
+            <input class="config-input" type="text" id="cfg-canal" value="#notificacoes-email"
+                   onchange="document.getElementById('stat-canal').textContent=this.value;saveConfig()" />
+          </div>
+
+          <!-- Times monitorados -->
+          <div class="config-row">
+            <div><div class="config-label">Times monitorados</div><div class="config-desc">Regras de classificação configuradas no Google Apps Script.</div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="section" id="sec-logs">
+      <div class="panel">
+        <div class="panel-header"><h2>Logs do sistema</h2><button class="btn btn-danger" onclick="clearLogs()">Limpar</button></div>
+        <div class="panel-body"><div id="log-area"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ══ MODAIS ══ -->
+
+<!-- Link -->
+<div class="modal-overlay" id="modal-link">
+  <div class="modal">
+    <h3>Adicionar link</h3>
+    <div class="field-group"><label class="required">Nome</label><input type="text" id="lnk-nome" placeholder="Ex.: Slack" /></div>
+    <div class="field-group"><label class="required">URL</label><input type="url" id="lnk-url" placeholder="https://" /></div>
+    <div class="field-group"><label>Emoji</label><input type="text" id="lnk-emoji" placeholder="🔗" maxlength="4" /></div>
+    <div class="field-group">
+      <label>Categoria</label>
+      <select id="lnk-cat"><option>Comunicação</option><option>Produtividade</option><option>Dados & análises</option><option>Dev & infra</option><option>Outros</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-link')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLink()">Salvar link</button>
+    </div>
   </div>
+</div>
 
+<!-- Workspace -->
+<div class="modal-overlay" id="modal-ws">
+  <div class="modal">
+    <h3>Adicionar item</h3>
+    <div class="field-group"><label class="required">Título</label><input type="text" id="ws-titulo" placeholder="Título do item" /></div>
+    <div class="field-group">
+      <label>Tipo</label>
+      <select id="ws-tipo">
+        <option value="📄">📄 Arquivo</option><option value="📅">📅 Plano de trabalho</option>
+        <option value="📋">📋 Formulário</option><option value="🗂️">🗂️ Projeto</option>
+        <option value="📊">📊 Relatório</option><option value="🔖">🔖 Template</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Status</label>
+      <select id="ws-status">
+        <option value="progress">Em andamento</option><option value="done">Concluído</option>
+        <option value="wait">Aguardando</option><option value="archived">Arquivado</option>
+      </select>
+    </div>
+    <div class="field-group"><label>Link externo</label><input type="url" id="ws-link" placeholder="https://" /></div>
+    <div class="field-group"><label>Descrição</label><textarea id="ws-desc" rows="2" placeholder="Descrição opcional"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ws')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveWsItem()">Salvar</button>
+    </div>
+  </div>
+</div>
 
-  <!-- ═══════════ JAVASCRIPT ═══════════ -->
-  <script>
-    // ── Dados padrão (exibidos na primeira abertura) ────
-    const DEFAULT_LINKS = [
-      { nome: 'Slack',           url: 'https://slack.com',              emoji: '💬', cat: 'Comunicação'     },
-      { nome: 'Gmail',           url: 'https://mail.google.com',        emoji: '📧', cat: 'Comunicação'     },
-      { nome: 'Google Drive',    url: 'https://drive.google.com',       emoji: '📁', cat: 'Produtividade'   },
-      { nome: 'Google Meet',     url: 'https://meet.google.com',        emoji: '🎥', cat: 'Comunicação'     },
-      { nome: 'Google Agenda',   url: 'https://calendar.google.com',    emoji: '📅', cat: 'Produtividade'   },
-      { nome: 'Notion',          url: 'https://notion.so',              emoji: '📒', cat: 'Produtividade'   },
-      { nome: 'Trello',          url: 'https://trello.com',             emoji: '📋', cat: 'Produtividade'   },
-      { nome: 'Apps Script',     url: 'https://script.google.com',      emoji: '⚙️', cat: 'Dev & infra'     },
-      { nome: 'Looker Studio',   url: 'https://lookerstudio.google.com',emoji: '📊', cat: 'Dados & análises'},
-      { nome: 'GitHub',          url: 'https://github.com',             emoji: '🐙', cat: 'Dev & infra'     },
-      { nome: 'Jira',            url: 'https://www.atlassian.com/jira', emoji: '🎯', cat: 'Produtividade'   },
-      { nome: 'Figma',           url: 'https://figma.com',              emoji: '🎨', cat: 'Produtividade'   },
-    ];
+<!-- Contato -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <h3>Adicionar contato</h3>
+    <div class="field-group"><label class="required">Nome completo</label><input type="text" id="ct-nome" placeholder="Nome" /></div>
+    <div class="field-group"><label>Cargo / função</label><input type="text" id="ct-cargo" placeholder="Ex.: Analista de Dados" /></div>
+    <div class="field-group"><label>E-mail</label><input type="email" id="ct-email" placeholder="email@exemplo.com" /></div>
+    <div class="field-group"><label>Telefone / WhatsApp</label><input type="tel" id="ct-tel" placeholder="+55 11 9..." /></div>
+    <div class="field-group"><label>Slack / usuário</label><input type="text" id="ct-slack" placeholder="@usuario" /></div>
+    <div class="field-group">
+      <label>Categoria</label>
+      <select id="ct-cat"><option>Time</option><option>Área</option><option>Cliente</option><option>Parceiro</option><option>Fornecedor</option><option>Outro</option></select>
+    </div>
+    <div class="field-group"><label>Grupo personalizado</label><input type="text" id="ct-grupo" placeholder="Ex.: Dados Brasil" /></div>
+    <div class="field-group"><label>Observações</label><textarea id="ct-obs" rows="2" placeholder="Notas opcionais"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-contact')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveContact()">Salvar contato</button>
+    </div>
+  </div>
+</div>
 
-    const DEFAULT_WORKSPACE = [
-      { tipo: '📄', titulo: 'Relatório Mensal de Emails',        status: 'progress', link: 'https://drive.google.com', desc: 'Consolidado de notificações enviadas ao Slack por mês.'      },
-      { tipo: '📅', titulo: 'Plano de Monitoramento Q3',         status: 'progress', link: 'https://drive.google.com', desc: 'Definição de regras e times monitorados no trimestre.'        },
-      { tipo: '📋', titulo: 'Formulário de Solicitação de Acesso',status: 'wait',     link: 'https://forms.google.com', desc: 'Formulário para novos membros solicitarem acesso ao canal.'  },
-      { tipo: '🗂️', titulo: 'Projeto: Automação de Alertas',     status: 'progress', link: 'https://github.com',       desc: 'Scripts de automação para classificação e envio ao Slack.'   },
-      { tipo: '📊', titulo: 'Dashboard de KPIs de Email',        status: 'done',     link: 'https://lookerstudio.google.com', desc: 'Painel com volume, categorias e tempos de resposta.'   },
-      { tipo: '🔖', titulo: 'Template: Regras do Apps Script',   status: 'done',     link: 'https://script.google.com', desc: 'Template base de classificação por remetente e assunto.'    },
-      { tipo: '📄', titulo: 'Ata de Reunião — Revisão de Regras',status: 'archived', link: 'https://drive.google.com', desc: 'Última revisão das regras de triagem de emails críticos.'    },
-      { tipo: '🗂️', titulo: 'Projeto: Integração com Notion',   status: 'wait',     link: 'https://notion.so',        desc: 'Sincronizar notificações do Slack com páginas do Notion.'    },
-    ];
+<!-- ══ SCRIPT ══ -->
+<script>
+// ── Defaults ───────────────────────────────────────────────────
+const DEFAULT_LINKS = [
+  { nome:'Slack',          url:'https://slack.com',                emoji:'💬', cat:'Comunicação'      },
+  { nome:'Gmail',          url:'https://mail.google.com',          emoji:'📧', cat:'Comunicação'      },
+  { nome:'Google Drive',   url:'https://drive.google.com',         emoji:'📁', cat:'Produtividade'    },
+  { nome:'Google Meet',    url:'https://meet.google.com',          emoji:'🎥', cat:'Comunicação'      },
+  { nome:'Google Agenda',  url:'https://calendar.google.com',      emoji:'📅', cat:'Produtividade'    },
+  { nome:'Notion',         url:'https://notion.so',                emoji:'📒', cat:'Produtividade'    },
+  { nome:'Trello',         url:'https://trello.com',               emoji:'📋', cat:'Produtividade'    },
+  { nome:'Apps Script',    url:'https://script.google.com',        emoji:'⚙️', cat:'Dev & infra'      },
+  { nome:'Looker Studio',  url:'https://lookerstudio.google.com',  emoji:'📊', cat:'Dados & análises' },
+  { nome:'GitHub',         url:'https://github.com',               emoji:'🐙', cat:'Dev & infra'      },
+  { nome:'Jira',           url:'https://www.atlassian.com/jira',   emoji:'🎯', cat:'Produtividade'    },
+  { nome:'Figma',          url:'https://figma.com',                emoji:'🎨', cat:'Produtividade'    },
+];
+const DEFAULT_WORKSPACE = [
+  { tipo:'📄', titulo:'Relatório Mensal de Emails',         status:'progress', link:'https://drive.google.com',          desc:'Consolidado de notificações enviadas ao Slack por mês.' },
+  { tipo:'📅', titulo:'Plano de Monitoramento Q3',          status:'progress', link:'https://drive.google.com',          desc:'Definição de regras e times monitorados no trimestre.'  },
+  { tipo:'📋', titulo:'Formulário de Solicitação de Acesso',status:'wait',     link:'https://forms.google.com',          desc:'Formulário para novos membros solicitarem acesso.'       },
+  { tipo:'🗂️', titulo:'Projeto: Automação de Alertas',      status:'progress', link:'https://github.com',               desc:'Scripts de automação para classificação e envio ao Slack.'},
+  { tipo:'📊', titulo:'Dashboard de KPIs de Email',         status:'done',     link:'https://lookerstudio.google.com',   desc:'Painel com volume, categorias e tempos de resposta.'    },
+  { tipo:'🔖', titulo:'Template: Regras do Apps Script',    status:'done',     link:'https://script.google.com',         desc:'Template base de classificação por remetente e assunto.' },
+  { tipo:'📄', titulo:'Ata — Revisão de Regras',            status:'archived', link:'https://drive.google.com',          desc:'Última revisão das regras de triagem de emails críticos.'},
+  { tipo:'🗂️', titulo:'Projeto: Integração com Notion',    status:'wait',     link:'https://notion.so',                 desc:'Sincronizar notificações do Slack com páginas do Notion.'},
+];
+const DEFAULT_CONTACTS = [
+  { nome:'Ana Lima',       cargo:'Gestora de TI',         email:'ana.lima@empresa.com',  tel:'', slack:'@ana.lima',   cat:'Time',      grupo:'TI',      obs:'' },
+  { nome:'Bruno Souza',    cargo:'Analista de Dados',      email:'bruno@empresa.com',     tel:'', slack:'@bruno.s',    cat:'Time',      grupo:'Dados',   obs:'' },
+  { nome:'Carla Mendes',   cargo:'Product Manager',        email:'carla@empresa.com',     tel:'', slack:'@carla.m',    cat:'Área',      grupo:'Produto', obs:'' },
+  { nome:'Diego Ferreira', cargo:'Dev Backend',            email:'diego@empresa.com',     tel:'', slack:'@diego.f',    cat:'Time',      grupo:'Dev',     obs:'' },
+  { nome:'Suporte Google', cargo:'Atendimento',            email:'support@google.com',    tel:'', slack:'',            cat:'Fornecedor',grupo:'',        obs:'Apps Script e Workspace' },
+  { nome:'Fernanda Costa', cargo:'Analista de Comunicação',email:'fernanda@empresa.com',  tel:'', slack:'@feh.costa',  cat:'Área',      grupo:'Comms',   obs:'' },
+];
 
-    const DEFAULT_CONTACTS = [
-      { nome: 'Ana Lima',       cargo: 'Gestora de TI',          email: 'ana.lima@empresa.com',     tel: '', slack: '@ana.lima',    cat: 'Time',     grupo: 'TI', obs: '' },
-      { nome: 'Bruno Souza',    cargo: 'Analista de Dados',       email: 'bruno@empresa.com',        tel: '', slack: '@bruno.s',     cat: 'Time',     grupo: 'Dados', obs: '' },
-      { nome: 'Carla Mendes',   cargo: 'Product Manager',         email: 'carla@empresa.com',        tel: '', slack: '@carla.m',     cat: 'Área',     grupo: 'Produto', obs: '' },
-      { nome: 'Diego Ferreira', cargo: 'Dev Backend',             email: 'diego@empresa.com',        tel: '', slack: '@diego.f',     cat: 'Time',     grupo: 'Dev', obs: '' },
-      { nome: 'Suporte Google', cargo: 'Atendimento',             email: 'support@google.com',       tel: '', slack: '',             cat: 'Fornecedor',grupo: '', obs: 'Apps Script e Workspace' },
-      { nome: 'Fernanda Costa', cargo: 'Analista de Comunicação', email: 'fernanda@empresa.com',     tel: '', slack: '@feh.costa',   cat: 'Área',     grupo: 'Comms', obs: '' },
-    ];
+// ── State ──────────────────────────────────────────────────────
+const state = {
+  notifications: JSON.parse(localStorage.getItem('em_notifs')   || '[]'),
+  notes:         JSON.parse(localStorage.getItem('em_notes')     || '[]'),
+  links:         JSON.parse(localStorage.getItem('em_links')     || 'null') ?? DEFAULT_LINKS,
+  workspace:     JSON.parse(localStorage.getItem('em_ws')        || 'null') ?? DEFAULT_WORKSPACE,
+  contacts:      JSON.parse(localStorage.getItem('em_contacts')  || 'null') ?? DEFAULT_CONTACTS,
+  config:        JSON.parse(localStorage.getItem('em_config')    || 'null') ?? { theme:'dark', accent:'#6366f1', accentH:'#818cf8', rgb:'99,102,241', fontSize:'14px', canal:'#notificacoes-email' },
+  logs: []
+};
 
-    // ── State ──────────────────────────────────────────
-    const state = {
-      notifications: JSON.parse(localStorage.getItem('em_notifs')   || '[]'),
-      notes:         JSON.parse(localStorage.getItem('em_notes')     || '[]'),
-      links:         JSON.parse(localStorage.getItem('em_links')     || 'null') ?? DEFAULT_LINKS,
-      workspace:     JSON.parse(localStorage.getItem('em_ws')        || 'null') ?? DEFAULT_WORKSPACE,
-      contacts:      JSON.parse(localStorage.getItem('em_contacts')  || 'null') ?? DEFAULT_CONTACTS,
-      logs:          []
-    };
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+function saveConfig()   { save('em_config', state.config); }
 
-    function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
-    function log(msg, type='sys') {
-      const t = new Date().toLocaleTimeString('pt-BR');
-      state.logs.push({ t, msg, type });
-      renderLogs();
-    }
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+function log(msg, type='sys') {
+  const t = new Date().toLocaleTimeString('pt-BR');
+  state.logs.push({ t, msg, type });
+  renderLogs();
+}
 
-    // ── Navigation ─────────────────────────────────────
-    document.querySelectorAll('.nav-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const sec = btn.dataset.section;
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('sec-' + sec).classList.add('active');
-      });
-    });
+// ── Navigation ─────────────────────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + btn.dataset.section).classList.add('active');
+  });
+});
 
-    // ── Badges ─────────────────────────────────────────
-    function updateBadges() {
-      document.getElementById('badge-notif').textContent = state.notifications.length;
-      document.getElementById('badge-notes').textContent = state.notes.length;
-      document.getElementById('stat-total').textContent  = state.notifications.length;
-      document.getElementById('stat-notes').textContent  = state.notes.length;
-    }
+// ── Badges ─────────────────────────────────────────────────────
+function updateBadges() {
+  document.getElementById('badge-notif').textContent = state.notifications.length;
+  document.getElementById('badge-notes').textContent = state.notes.length;
+  document.getElementById('stat-total').textContent  = state.notifications.length;
+  document.getElementById('stat-notes').textContent  = state.notes.length;
+}
 
-    // ── Notifications ──────────────────────────────────
-    function renderNotifications() {
-      const el = document.getElementById('notif-list');
-      if (!state.notifications.length) {
-        el.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div>Nenhuma notificação ainda.</div>';
-        return;
-      }
-      el.innerHTML = state.notifications.map((n, i) => `
-        <div class="notif-item">
-          <span class="notif-tag tag-${n.type || 'info'}">${n.tag || 'INFO'}</span>
-          <div class="notif-body">
-            <div class="notif-title">${n.title}</div>
-            <div class="notif-meta">${n.meta || ''}</div>
-          </div>
-          <button class="notif-close" onclick="removeNotif(${i})">✕</button>
-        </div>`).join('');
-    }
-    function removeNotif(i) {
-      state.notifications.splice(i, 1);
-      save('em_notifs', state.notifications);
-      renderNotifications(); updateBadges();
-      log('Notificação removida.', 'ok');
-    }
-    function clearNotifications() {
-      state.notifications = [];
-      save('em_notifs', state.notifications);
-      renderNotifications(); updateBadges();
-      log('Histórico de notificações limpo.', 'ok');
-    }
+// ── Notifications ──────────────────────────────────────────────
+function renderNotifications() {
+  const el = document.getElementById('notif-list');
+  if (!state.notifications.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div>Nenhuma notificação ainda.</div>'; return; }
+  el.innerHTML = state.notifications.map((n,i) => `
+    <div class="notif-item">
+      <span class="notif-tag tag-${n.type||'info'}">${n.tag||'INFO'}</span>
+      <div class="notif-body"><div class="notif-title">${escHtml(n.title)}</div><div class="notif-meta">${escHtml(n.meta||'')}</div></div>
+      <button class="notif-close" onclick="removeNotif(${i})">✕</button>
+    </div>`).join('');
+}
+function removeNotif(i)    { state.notifications.splice(i,1); save('em_notifs',state.notifications); renderNotifications(); updateBadges(); }
+function clearNotifications() { state.notifications=[]; save('em_notifs',state.notifications); renderNotifications(); updateBadges(); toast('Histórico limpo.'); }
 
-    // ── Notes ──────────────────────────────────────────
-    document.getElementById('btn-new-note').addEventListener('click', () => {
-      const ed = document.getElementById('note-editor');
-      ed.style.display = ed.style.display === 'none' ? 'flex' : 'none';
-    });
-    document.getElementById('note-text').addEventListener('keydown', e => {
-      if (e.ctrlKey && e.key === 'Enter') saveNote();
-    });
-    function saveNote() {
-      const txt = document.getElementById('note-text').value.trim();
-      if (!txt) return;
-      state.notes.unshift({ txt, date: new Date().toISOString() });
-      save('em_notes', state.notes);
-      document.getElementById('note-text').value = '';
-      document.getElementById('note-editor').style.display = 'none';
-      renderNotes(); updateBadges();
-      log('Anotação salva.', 'ok');
-    }
-    function renderNotes() {
-      const q    = document.getElementById('note-search').value.toLowerCase();
-      const from = document.getElementById('note-from').value;
-      const to   = document.getElementById('note-to').value;
-      const el   = document.getElementById('notes-list');
-      let filtered = state.notes.filter(n => {
-        if (q && !n.txt.toLowerCase().includes(q)) return false;
-        const d = n.date.slice(0, 10);
-        if (from && d < from) return false;
-        if (to   && d > to)   return false;
-        return true;
-      });
-      if (!filtered.length) {
-        el.innerHTML = '<div class="empty" style="margin-top:.5rem;">Nenhuma anotação encontrada.</div>';
-        return;
-      }
-      el.innerHTML = filtered.map((n, i) => `
-        <div class="note-card">
-          <p>${escHtml(n.txt)}</p>
-          <div class="note-date">${new Date(n.date).toLocaleString('pt-BR')}</div>
-          <button class="note-del" onclick="deleteNote(${state.notes.indexOf(n)})">✕</button>
-        </div>`).join('');
-    }
-    function deleteNote(i) {
-      state.notes.splice(i, 1);
-      save('em_notes', state.notes);
-      renderNotes(); updateBadges();
-    }
-    function clearNoteFilter() {
-      document.getElementById('note-search').value = '';
-      document.getElementById('note-from').value   = '';
-      document.getElementById('note-to').value     = '';
-      renderNotes();
-    }
+// ── Notes ──────────────────────────────────────────────────────
+document.getElementById('btn-new-note').addEventListener('click', () => {
+  const ed = document.getElementById('note-editor');
+  ed.style.display = ed.style.display === 'none' ? 'flex' : 'none';
+});
+document.getElementById('note-text').addEventListener('keydown', e => { if (e.ctrlKey && e.key==='Enter') saveNote(); });
+function saveNote() {
+  const txt = document.getElementById('note-text').value.trim();
+  if (!txt) return;
+  state.notes.unshift({ txt, date: new Date().toISOString() });
+  save('em_notes', state.notes);
+  document.getElementById('note-text').value = '';
+  document.getElementById('note-editor').style.display = 'none';
+  renderNotes(); updateBadges(); toast('Anotação salva!');
+}
+function renderNotes() {
+  const q=document.getElementById('note-search').value.toLowerCase();
+  const from=document.getElementById('note-from').value;
+  const to=document.getElementById('note-to').value;
+  const el=document.getElementById('notes-list');
+  const filtered=state.notes.filter(n => {
+    if (q && !n.txt.toLowerCase().includes(q)) return false;
+    const d=n.date.slice(0,10);
+    if (from && d<from) return false;
+    if (to   && d>to)   return false;
+    return true;
+  });
+  if (!filtered.length) { el.innerHTML='<div class="empty" style="margin-top:.5rem">Nenhuma anotação encontrada.</div>'; return; }
+  el.innerHTML = filtered.map(n => `
+    <div class="note-card">
+      <p>${escHtml(n.txt)}</p>
+      <div class="note-date">${new Date(n.date).toLocaleString('pt-BR')}</div>
+      <button class="note-del" onclick="deleteNote(${state.notes.indexOf(n)})">✕</button>
+    </div>`).join('');
+}
+function deleteNote(i) { state.notes.splice(i,1); save('em_notes',state.notes); renderNotes(); updateBadges(); }
+function clearNoteFilter() { document.getElementById('note-search').value=''; document.getElementById('note-from').value=''; document.getElementById('note-to').value=''; renderNotes(); }
 
-    // ── Links ──────────────────────────────────────────
-    function saveLink() {
-      const nome  = document.getElementById('lnk-nome').value.trim();
-      const url   = document.getElementById('lnk-url').value.trim();
-      const emoji = document.getElementById('lnk-emoji').value.trim() || '🔗';
-      const cat   = document.getElementById('lnk-cat').value;
-      if (!nome || !url) return;
-      state.links.push({ nome, url, emoji, cat });
-      save('em_links', state.links);
-      closeModal('modal-link');
-      ['lnk-nome','lnk-url','lnk-emoji'].forEach(id => document.getElementById(id).value = '');
-      renderLinks();
-      log(`Link "${nome}" adicionado.`, 'ok');
-    }
-    function renderLinks() {
-      const el = document.getElementById('links-grid');
-      if (!state.links.length) {
-        el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">🔗</div>Nenhum link ainda.</div>';
-        return;
-      }
-      el.innerHTML = state.links.map(l => `
-        <a href="${escHtml(l.url)}" target="_blank" rel="noopener" class="qlink-card">
-          <span class="qlink-emoji">${l.emoji}</span>
-          <span class="qlink-name">${escHtml(l.nome)}</span>
-          <span class="qlink-cat">${escHtml(l.cat)}</span>
-        </a>`).join('');
-    }
+// ── Links ──────────────────────────────────────────────────────
+function saveLink() {
+  const nome=document.getElementById('lnk-nome').value.trim();
+  const url=document.getElementById('lnk-url').value.trim();
+  if (!nome||!url) return;
+  const emoji=document.getElementById('lnk-emoji').value.trim()||'🔗';
+  const cat=document.getElementById('lnk-cat').value;
+  state.links.push({ nome, url, emoji, cat });
+  save('em_links', state.links);
+  closeModal('modal-link');
+  ['lnk-nome','lnk-url','lnk-emoji'].forEach(id => document.getElementById(id).value='');
+  renderLinks(); toast('Link salvo!'); log(`Link "${nome}" adicionado.`,'ok');
+}
+function deleteLink(i) { state.links.splice(i,1); save('em_links',state.links); renderLinks(); toast('Link removido.'); }
+function renderLinks() {
+  const el=document.getElementById('links-grid');
+  if (!state.links.length) { el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔗</div>Nenhum link ainda.</div>'; return; }
+  el.innerHTML = state.links.map((l,i) => `
+    <div class="qlink-wrap">
+      <a href="${escHtml(l.url)}" target="_blank" rel="noopener" class="qlink-card">
+        <span class="qlink-emoji">${l.emoji}</span>
+        <span class="qlink-name">${escHtml(l.nome)}</span>
+        <span class="qlink-cat">${escHtml(l.cat)}</span>
+      </a>
+      <button class="qlink-del" onclick="deleteLink(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
 
-    // ── Workspace ──────────────────────────────────────
-    function saveWsItem() {
-      const titulo = document.getElementById('ws-titulo').value.trim();
-      if (!titulo) return;
-      const tipo   = document.getElementById('ws-tipo').value;
-      const status = document.getElementById('ws-status').value;
-      const link   = document.getElementById('ws-link').value.trim();
-      const desc   = document.getElementById('ws-desc').value.trim();
-      state.workspace.push({ titulo, tipo, status, link, desc });
-      save('em_ws', state.workspace);
-      closeModal('modal-ws');
-      ['ws-titulo','ws-link','ws-desc'].forEach(id => document.getElementById(id).value = '');
-      renderWorkspace();
-      log(`Item "${titulo}" adicionado ao workspace.`, 'ok');
-    }
-    const statusMap = {
-      progress: ['Em andamento', 'status-progress'],
-      done:     ['Concluído',    'status-done'],
-      wait:     ['Aguardando',   'status-wait'],
-      archived: ['Arquivado',    'status-archived'],
-    };
-    function renderWorkspace() {
-      const el = document.getElementById('ws-list');
-      if (!state.workspace.length) {
-        el.innerHTML = '<div class="empty"><div class="empty-icon">🗂️</div>Nenhum item ainda.</div>';
-        return;
-      }
-      el.innerHTML = state.workspace.map(w => {
-        const [label, cls] = statusMap[w.status] || ['—', ''];
-        return `<div class="ws-item">
-          <span class="ws-icon">${w.tipo}</span>
-          <div class="ws-info">
-            <div class="ws-title">${escHtml(w.titulo)}</div>
-            ${w.desc ? `<div class="ws-meta">${escHtml(w.desc)}</div>` : ''}
-            ${w.link ? `<a href="${escHtml(w.link)}" target="_blank" style="font-size:.72rem;color:var(--accent-hover)">↗ Abrir link</a>` : ''}
-          </div>
-          <span class="status-badge ${cls}">${label}</span>
-        </div>`;
-      }).join('');
-    }
+// ── Workspace ──────────────────────────────────────────────────
+const statusMap = { progress:['Em andamento','status-progress'], done:['Concluído','status-done'], wait:['Aguardando','status-wait'], archived:['Arquivado','status-archived'] };
+function saveWsItem() {
+  const titulo=document.getElementById('ws-titulo').value.trim();
+  if (!titulo) return;
+  state.workspace.push({ tipo:document.getElementById('ws-tipo').value, titulo, status:document.getElementById('ws-status').value, link:document.getElementById('ws-link').value.trim(), desc:document.getElementById('ws-desc').value.trim() });
+  save('em_ws', state.workspace);
+  closeModal('modal-ws');
+  ['ws-titulo','ws-link','ws-desc'].forEach(id => document.getElementById(id).value='');
+  renderWorkspace(); toast('Item salvo!'); log(`Item "${titulo}" adicionado.`,'ok');
+}
+function deleteWsItem(i) { state.workspace.splice(i,1); save('em_ws',state.workspace); renderWorkspace(); toast('Item removido.'); }
+function renderWorkspace() {
+  const el=document.getElementById('ws-list');
+  if (!state.workspace.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🗂️</div>Nenhum item ainda.</div>'; return; }
+  el.innerHTML = state.workspace.map((w,i) => {
+    const [label,cls]=statusMap[w.status]||['—',''];
+    return `<div class="ws-item">
+      <span class="ws-icon">${w.tipo}</span>
+      <div class="ws-info">
+        <div class="ws-title">${escHtml(w.titulo)}</div>
+        ${w.desc?`<div class="ws-meta">${escHtml(w.desc)}</div>`:''}
+        ${w.link?`<a href="${escHtml(w.link)}" target="_blank" style="font-size:.72rem;color:var(--accent-h)">↗ Abrir link</a>`:''}
+      </div>
+      <div class="ws-actions">
+        <span class="status-badge ${cls}">${label}</span>
+        <button class="ws-del" onclick="deleteWsItem(${i})" title="Remover">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-    // ── Contacts ───────────────────────────────────────
-    function saveContact() {
-      const nome = document.getElementById('ct-nome').value.trim();
-      if (!nome) return;
-      state.contacts.push({
-        nome,
-        cargo: document.getElementById('ct-cargo').value.trim(),
-        email: document.getElementById('ct-email').value.trim(),
-        tel:   document.getElementById('ct-tel').value.trim(),
-        slack: document.getElementById('ct-slack').value.trim(),
-        cat:   document.getElementById('ct-cat').value,
-        grupo: document.getElementById('ct-grupo').value.trim(),
-        obs:   document.getElementById('ct-obs').value.trim(),
-      });
-      save('em_contacts', state.contacts);
-      closeModal('modal-contact');
-      ['ct-nome','ct-cargo','ct-email','ct-tel','ct-slack','ct-grupo','ct-obs']
-        .forEach(id => document.getElementById(id).value = '');
-      renderContacts();
-      log(`Contato "${nome}" adicionado.`, 'ok');
-    }
-    function renderContacts() {
-      const el = document.getElementById('contacts-grid');
-      if (!state.contacts.length) {
-        el.innerHTML = '<div class="empty" style="grid-column:1/-1;"><div class="empty-icon">👥</div>Nenhum contato ainda.</div>';
-        return;
-      }
-      el.innerHTML = state.contacts.map(c => `
-        <div class="contact-card">
-          <div class="contact-avatar">${c.nome.charAt(0).toUpperCase()}</div>
-          <div class="contact-name">${escHtml(c.nome)}</div>
-          ${c.cargo ? `<div class="contact-role">${escHtml(c.cargo)}</div>` : ''}
-          <span class="contact-cat">${escHtml(c.cat)}</span>
-        </div>`).join('');
-    }
+// ── Contacts ───────────────────────────────────────────────────
+function saveContact() {
+  const nome=document.getElementById('ct-nome').value.trim();
+  if (!nome) return;
+  state.contacts.push({ nome, cargo:document.getElementById('ct-cargo').value.trim(), email:document.getElementById('ct-email').value.trim(), tel:document.getElementById('ct-tel').value.trim(), slack:document.getElementById('ct-slack').value.trim(), cat:document.getElementById('ct-cat').value, grupo:document.getElementById('ct-grupo').value.trim(), obs:document.getElementById('ct-obs').value.trim() });
+  save('em_contacts', state.contacts);
+  closeModal('modal-contact');
+  ['ct-nome','ct-cargo','ct-email','ct-tel','ct-slack','ct-grupo','ct-obs'].forEach(id => document.getElementById(id).value='');
+  renderContacts(); toast('Contato salvo!'); log(`Contato "${nome}" adicionado.`,'ok');
+}
+function deleteContact(i) { state.contacts.splice(i,1); save('em_contacts',state.contacts); renderContacts(); toast('Contato removido.'); }
+function renderContacts() {
+  const el=document.getElementById('contacts-grid');
+  if (!state.contacts.length) { el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div>Nenhum contato ainda.</div>'; return; }
+  el.innerHTML = state.contacts.map((c,i) => `
+    <div class="contact-card">
+      <div class="contact-avatar">${c.nome.charAt(0).toUpperCase()}</div>
+      <div class="contact-name">${escHtml(c.nome)}</div>
+      ${c.cargo?`<div class="contact-role">${escHtml(c.cargo)}</div>`:''}
+      <span class="contact-cat">${escHtml(c.cat)}</span>
+      <button class="contact-del" onclick="deleteContact(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
 
-    // ── Logs ───────────────────────────────────────────
-    function renderLogs() {
-      const el = document.getElementById('log-area');
-      if (!state.logs.length) {
-        el.innerHTML = '<div class="log-line"><span class="log-tag-sys">[sistema]</span><span>Aguardando eventos...</span></div>';
-        return;
-      }
-      el.innerHTML = state.logs.map(l => `
-        <div class="log-line">
-          <span class="log-time">${l.t}</span>
-          <span class="log-tag-${l.type}">[${l.type}]</span>
-          <span>${escHtml(l.msg)}</span>
-        </div>`).join('');
-      el.scrollTop = el.scrollHeight;
-    }
-    function clearLogs() { state.logs = []; renderLogs(); }
+// ── Logs ───────────────────────────────────────────────────────
+function renderLogs() {
+  const el=document.getElementById('log-area');
+  if (!state.logs.length) { el.innerHTML='<div class="log-line"><span class="log-tag-sys">[sistema]</span><span>Aguardando eventos...</span></div>'; return; }
+  el.innerHTML=state.logs.map(l=>`<div class="log-line"><span class="log-time">${l.t}</span><span class="log-tag-${l.type}">[${l.type}]</span><span>${escHtml(l.msg)}</span></div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function clearLogs() { state.logs=[]; renderLogs(); }
 
-    // ── Modals ─────────────────────────────────────────
-    function openModal(id)  { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    document.querySelectorAll('.modal-overlay').forEach(m => {
-      m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-    });
+// ── Modals ─────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target===m) m.classList.remove('open'); }));
 
-    // ── Topbar buttons ─────────────────────────────────
-    document.getElementById('btn-refresh').addEventListener('click', () => {
-      document.getElementById('stat-ultima').textContent = new Date().toLocaleTimeString('pt-BR');
-      log('Atualização manual solicitada.', 'sys');
-    });
-    document.getElementById('btn-clear').addEventListener('click', () => {
-      if (confirm('Limpar todo o histórico de notificações?')) clearNotifications();
-    });
+// ── Topbar ─────────────────────────────────────────────────────
+document.getElementById('btn-refresh').addEventListener('click', () => { document.getElementById('stat-ultima').textContent=new Date().toLocaleTimeString('pt-BR'); log('Atualização manual solicitada.','sys'); toast('Atualizado!'); });
+document.getElementById('btn-clear').addEventListener('click', () => { if (confirm('Limpar todo o histórico de notificações?')) clearNotifications(); });
 
-    // ── Utility ────────────────────────────────────────
-    function escHtml(str) {
-      return String(str)
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+// ── Aparência: cor do tema ──────────────────────────────────────
+document.getElementById('swatches').addEventListener('click', e => {
+  const sw = e.target.closest('.swatch');
+  if (!sw) return;
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+  sw.classList.add('selected');
+  const r = document.documentElement;
+  r.style.setProperty('--accent',     sw.dataset.accent);
+  r.style.setProperty('--accent-h',   sw.dataset.accenth);
+  r.style.setProperty('--accent-rgb', sw.dataset.rgb);
+  state.config.accent  = sw.dataset.accent;
+  state.config.accentH = sw.dataset.accenth;
+  state.config.rgb     = sw.dataset.rgb;
+  saveConfig();
+  toast('Cor aplicada!');
+  log(`Cor do tema alterada para ${sw.title}.`,'ok');
+});
 
-    // ── Init ───────────────────────────────────────────
-    // Persiste dados padrão se ainda não existiam no localStorage
-    if (!localStorage.getItem('em_links'))    save('em_links',    state.links);
-    if (!localStorage.getItem('em_ws'))       save('em_ws',       state.workspace);
-    if (!localStorage.getItem('em_contacts')) save('em_contacts', state.contacts);
+// ── Aparência: tamanho da fonte ─────────────────────────────────
+document.querySelectorAll('.font-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.documentElement.style.setProperty('--font-size', btn.dataset.size);
+    document.body.style.fontSize = btn.dataset.size;
+    state.config.fontSize = btn.dataset.size;
+    saveConfig();
+    toast('Fonte ajustada!');
+  });
+});
 
-    renderNotifications();
-    renderNotes();
-    renderLinks();
-    renderWorkspace();
-    renderContacts();
-    renderLogs();
-    updateBadges();
-    log('Sistema iniciado.', 'sys');
+// ── Aparência: plano de fundo ───────────────────────────────────
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.body.dataset.theme = btn.dataset.theme;
+    state.config.theme = btn.dataset.theme;
+    saveConfig();
+    toast(btn.dataset.theme==='dark' ? '🌙 Tema escuro!' : '☀️ Tema claro!');
+    log(`Tema alterado para ${btn.dataset.theme}.`,'ok');
+  });
+});
 
-    // ═══════════════════════════════════════════════════
-    // ── EXPORTAR PDF ───────────────────────────────────
-    // ═══════════════════════════════════════════════════
-    document.getElementById('btn-export-pdf').addEventListener('click', function () {
-      const btn = this;
-      btn.disabled = true;
-      btn.textContent = '⏳ Gerando PDF…';
+// ── Aplicar config salva ────────────────────────────────────────
+function applyConfig() {
+  const c = state.config;
+  const r = document.documentElement;
+  if (c.accent)   { r.style.setProperty('--accent',     c.accent);  r.style.setProperty('--accent-h', c.accentH); r.style.setProperty('--accent-rgb', c.rgb); }
+  if (c.fontSize) { r.style.setProperty('--font-size',  c.fontSize); document.body.style.fontSize = c.fontSize; }
+  if (c.theme)    { document.body.dataset.theme = c.theme; }
+  if (c.canal)    { document.getElementById('cfg-canal').value = c.canal; document.getElementById('stat-canal').textContent = c.canal; }
+  // Marcar swatch ativo
+  document.querySelectorAll('.swatch').forEach(s => { s.classList.toggle('selected', s.dataset.accent === c.accent); });
+  // Marcar font-btn ativo
+  document.querySelectorAll('.font-btn').forEach(b => { b.classList.toggle('active', b.dataset.size === (c.fontSize||'14px')); });
+  // Marcar theme-btn ativo
+  document.querySelectorAll('.theme-btn').forEach(b => { b.classList.toggle('active', b.dataset.theme === (c.theme||'dark')); });
+}
 
-      // Torna todas as sections visíveis temporariamente para capturar tudo
-      const sections = document.querySelectorAll('.section');
-      const sidebar  = document.getElementById('sidebar');
-      const topbar   = document.getElementById('topbar');
+// ── Utility ────────────────────────────────────────────────────
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-      // Snapshot de estados
-      const wasActive = [];
-      sections.forEach(s => { wasActive.push(s.classList.contains('active')); s.classList.add('active'); });
+// ── PDF export ─────────────────────────────────────────────────
+document.getElementById('btn-export-pdf').addEventListener('click', function () {
+  const btn = this;
+  btn.disabled = true; btn.textContent = '⏳ Gerando PDF…';
+  const sections = document.querySelectorAll('.section');
+  const wasActive = [];
+  sections.forEach(s => { wasActive.push(s.classList.contains('active')); s.classList.add('active'); });
+  btn.style.display = 'none';
+  const bgColor = document.body.dataset.theme === 'light' ? '#f1f5f9' : '#0f172a';
+  html2pdf().set({
+    margin: [8,8,8,8], filename: 'email-monitor-dashboard.pdf',
+    image: { type:'jpeg', quality:.95 },
+    html2canvas: { scale:2, useCORS:true, scrollY:0, windowWidth:document.body.scrollWidth, backgroundColor:bgColor },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+    pagebreak: { mode:['avoid-all','css','legacy'] }
+  }).from(document.getElementById('main')).save().then(() => {
+    sections.forEach((s,i) => { s.classList.remove('active'); if (wasActive[i]) s.classList.add('active'); });
+    btn.style.display=''; btn.disabled=false; btn.textContent='📄 Salvar PDF';
+    log('Dashboard exportado como PDF.','ok'); toast('PDF salvo!');
+  }).catch(err => {
+    sections.forEach((s,i) => { s.classList.remove('active'); if (wasActive[i]) s.classList.add('active'); });
+    btn.style.display=''; btn.disabled=false; btn.textContent='📄 Salvar PDF';
+    log('Erro ao gerar PDF: '+err.message,'err');
+  });
+});
 
-      // Oculta elementos que não devem ir para o PDF
-      btn.style.display = 'none';
+// ── Init ───────────────────────────────────────────────────────
+if (!localStorage.getItem('em_links'))    save('em_links',    state.links);
+if (!localStorage.getItem('em_ws'))       save('em_ws',       state.workspace);
+if (!localStorage.getItem('em_contacts')) save('em_contacts', state.contacts);
 
-      const elemento = document.getElementById('main');
-
-      const opcoes = {
-        margin:      [8, 8, 8, 8],
-        filename:    'email-monitor-dashboard.pdf',
-        image:       { type: 'jpeg', quality: 0.95 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          scrollY: 0,
-          windowWidth: document.body.scrollWidth,
-          backgroundColor: '#0f172a'
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      html2pdf()
-        .set(opcoes)
-        .from(elemento)
-        .save()
-        .then(() => {
-          // Restaura estado original
-          sections.forEach((s, i) => {
-            s.classList.remove('active');
-            if (wasActive[i]) s.classList.add('active');
-          });
-          btn.style.display = '';
-          btn.disabled = false;
-          btn.textContent = '📄 Salvar PDF';
-          log('Dashboard exportado como PDF.', 'ok');
-        })
-        .catch(err => {
-          console.error('Erro ao gerar PDF:', err);
-          sections.forEach((s, i) => {
-            s.classList.remove('active');
-            if (wasActive[i]) s.classList.add('active');
-          });
-          btn.style.display = '';
-          btn.disabled = false;
-          btn.textContent = '📄 Salvar PDF';
-          log('Erro ao gerar PDF: ' + err.message, 'err');
-        });
-    });
-  </script>
-
+applyConfig();
+renderNotifications();
+renderNotes();
+renderLinks();
+renderWorkspace();
+renderContacts();
+renderLogs();
+updateBadges();
+log('Sistema iniciado.','sys');
+</script>
 </body>
 </html>
