@@ -931,13 +931,49 @@
 
   <!-- ═══════════ JAVASCRIPT ═══════════ -->
   <script>
+    // ── Dados padrão (exibidos na primeira abertura) ────
+    const DEFAULT_LINKS = [
+      { nome: 'Slack',           url: 'https://slack.com',              emoji: '💬', cat: 'Comunicação'     },
+      { nome: 'Gmail',           url: 'https://mail.google.com',        emoji: '📧', cat: 'Comunicação'     },
+      { nome: 'Google Drive',    url: 'https://drive.google.com',       emoji: '📁', cat: 'Produtividade'   },
+      { nome: 'Google Meet',     url: 'https://meet.google.com',        emoji: '🎥', cat: 'Comunicação'     },
+      { nome: 'Google Agenda',   url: 'https://calendar.google.com',    emoji: '📅', cat: 'Produtividade'   },
+      { nome: 'Notion',          url: 'https://notion.so',              emoji: '📒', cat: 'Produtividade'   },
+      { nome: 'Trello',          url: 'https://trello.com',             emoji: '📋', cat: 'Produtividade'   },
+      { nome: 'Apps Script',     url: 'https://script.google.com',      emoji: '⚙️', cat: 'Dev & infra'     },
+      { nome: 'Looker Studio',   url: 'https://lookerstudio.google.com',emoji: '📊', cat: 'Dados & análises'},
+      { nome: 'GitHub',          url: 'https://github.com',             emoji: '🐙', cat: 'Dev & infra'     },
+      { nome: 'Jira',            url: 'https://www.atlassian.com/jira', emoji: '🎯', cat: 'Produtividade'   },
+      { nome: 'Figma',           url: 'https://figma.com',              emoji: '🎨', cat: 'Produtividade'   },
+    ];
+
+    const DEFAULT_WORKSPACE = [
+      { tipo: '📄', titulo: 'Relatório Mensal de Emails',        status: 'progress', link: 'https://drive.google.com', desc: 'Consolidado de notificações enviadas ao Slack por mês.'      },
+      { tipo: '📅', titulo: 'Plano de Monitoramento Q3',         status: 'progress', link: 'https://drive.google.com', desc: 'Definição de regras e times monitorados no trimestre.'        },
+      { tipo: '📋', titulo: 'Formulário de Solicitação de Acesso',status: 'wait',     link: 'https://forms.google.com', desc: 'Formulário para novos membros solicitarem acesso ao canal.'  },
+      { tipo: '🗂️', titulo: 'Projeto: Automação de Alertas',     status: 'progress', link: 'https://github.com',       desc: 'Scripts de automação para classificação e envio ao Slack.'   },
+      { tipo: '📊', titulo: 'Dashboard de KPIs de Email',        status: 'done',     link: 'https://lookerstudio.google.com', desc: 'Painel com volume, categorias e tempos de resposta.'   },
+      { tipo: '🔖', titulo: 'Template: Regras do Apps Script',   status: 'done',     link: 'https://script.google.com', desc: 'Template base de classificação por remetente e assunto.'    },
+      { tipo: '📄', titulo: 'Ata de Reunião — Revisão de Regras',status: 'archived', link: 'https://drive.google.com', desc: 'Última revisão das regras de triagem de emails críticos.'    },
+      { tipo: '🗂️', titulo: 'Projeto: Integração com Notion',   status: 'wait',     link: 'https://notion.so',        desc: 'Sincronizar notificações do Slack com páginas do Notion.'    },
+    ];
+
+    const DEFAULT_CONTACTS = [
+      { nome: 'Ana Lima',       cargo: 'Gestora de TI',          email: 'ana.lima@empresa.com',     tel: '', slack: '@ana.lima',    cat: 'Time',     grupo: 'TI', obs: '' },
+      { nome: 'Bruno Souza',    cargo: 'Analista de Dados',       email: 'bruno@empresa.com',        tel: '', slack: '@bruno.s',     cat: 'Time',     grupo: 'Dados', obs: '' },
+      { nome: 'Carla Mendes',   cargo: 'Product Manager',         email: 'carla@empresa.com',        tel: '', slack: '@carla.m',     cat: 'Área',     grupo: 'Produto', obs: '' },
+      { nome: 'Diego Ferreira', cargo: 'Dev Backend',             email: 'diego@empresa.com',        tel: '', slack: '@diego.f',     cat: 'Time',     grupo: 'Dev', obs: '' },
+      { nome: 'Suporte Google', cargo: 'Atendimento',             email: 'support@google.com',       tel: '', slack: '',             cat: 'Fornecedor',grupo: '', obs: 'Apps Script e Workspace' },
+      { nome: 'Fernanda Costa', cargo: 'Analista de Comunicação', email: 'fernanda@empresa.com',     tel: '', slack: '@feh.costa',   cat: 'Área',     grupo: 'Comms', obs: '' },
+    ];
+
     // ── State ──────────────────────────────────────────
     const state = {
-      notifications: JSON.parse(localStorage.getItem('em_notifs') || '[]'),
-      notes:         JSON.parse(localStorage.getItem('em_notes') || '[]'),
-      links:         JSON.parse(localStorage.getItem('em_links') || '[]'),
-      workspace:     JSON.parse(localStorage.getItem('em_ws')    || '[]'),
-      contacts:      JSON.parse(localStorage.getItem('em_contacts') || '[]'),
+      notifications: JSON.parse(localStorage.getItem('em_notifs')   || '[]'),
+      notes:         JSON.parse(localStorage.getItem('em_notes')     || '[]'),
+      links:         JSON.parse(localStorage.getItem('em_links')     || 'null') ?? DEFAULT_LINKS,
+      workspace:     JSON.parse(localStorage.getItem('em_ws')        || 'null') ?? DEFAULT_WORKSPACE,
+      contacts:      JSON.parse(localStorage.getItem('em_contacts')  || 'null') ?? DEFAULT_CONTACTS,
       logs:          []
     };
 
@@ -1196,6 +1232,11 @@
     }
 
     // ── Init ───────────────────────────────────────────
+    // Persiste dados padrão se ainda não existiam no localStorage
+    if (!localStorage.getItem('em_links'))    save('em_links',    state.links);
+    if (!localStorage.getItem('em_ws'))       save('em_ws',       state.workspace);
+    if (!localStorage.getItem('em_contacts')) save('em_contacts', state.contacts);
+
     renderNotifications();
     renderNotes();
     renderLinks();
