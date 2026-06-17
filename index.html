@@ -237,10 +237,11 @@
     .files-toolbar input[type="text"] { flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .75rem; color:var(--text); font-size:.82rem; font-family:inherit; min-width:140px; }
     .files-toolbar input[type="text"]:focus { outline:none; border-color:var(--accent); }
     .files-toolbar select { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .65rem; color:var(--text); font-size:.78rem; font-family:inherit; }
-    .drop-zone { border:2px dashed var(--border); border-radius:10px; padding:2.5rem 1rem; text-align:center; color:var(--text-muted); font-size:.85rem; cursor:pointer; transition:border-color .2s, background .2s; margin-bottom:1rem; }
-    .drop-zone:hover, .drop-zone.drag-over { border-color:var(--accent); background:rgba(var(--accent-rgb),.05); color:var(--text); }
+    .drop-zone { border:2px dashed var(--border); border-radius:10px; padding:2.5rem 1rem; text-align:center; color:var(--text-muted); font-size:.85rem; cursor:pointer; transition:border-color .2s, background .2s, color .2s; margin-bottom:1rem; user-select:none; }
+    .drop-zone:hover { border-color:var(--accent); background:rgba(var(--accent-rgb),.04); color:var(--text); }
+    .drop-zone.drag-over { border-color:var(--accent); background:rgba(var(--accent-rgb),.1); color:var(--text); border-style:solid; transform:scale(1.01); }
+    .drop-zone > * { pointer-events:none; } /* evita falso dragleave ao passar sobre filhos */
     .drop-zone-icon { font-size:2rem; margin-bottom:.4rem; }
-    .drop-zone input[type="file"] { display:none; }
     .files-grid { display:flex; flex-direction:column; gap:.45rem; }
     .file-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.7rem 1rem; display:flex; align-items:center; gap:.8rem; transition:background .15s; }
     .file-item:hover { background:rgba(var(--accent-rgb),.04); }
@@ -715,7 +716,9 @@ function monitorarEmails() {
   <div class="modal">
     <h3>Adicionar link</h3>
     <div class="field-group"><label class="required">Nome</label><input type="text" id="lnk-nome" placeholder="Ex.: Slack" /></div>
-    <div class="field-group"><label class="required">URL</label><input type="url" id="lnk-url" placeholder="https://" /></div>
+    <div class="field-group"><label class="required">URL</label><input type="url" id="lnk-url" placeholder="https://site.com" />
+      <span style="font-size:.72rem;color:var(--text-muted)">💡 Se esquecer o https://, ele será adicionado automaticamente</span>
+    </div>
     <div class="field-group"><label>Emoji</label><input type="text" id="lnk-emoji" placeholder="🔗" maxlength="4" /></div>
     <div class="field-group">
       <label>Categoria</label>
@@ -943,31 +946,47 @@ function deleteNote(i) { state.notes.splice(i,1); save('em_notes',state.notes); 
 function clearNoteFilter() { document.getElementById('note-search').value=''; document.getElementById('note-from').value=''; document.getElementById('note-to').value=''; renderNotes(); }
 
 // ── Links ──────────────────────────────────────────────────────
+function normalizeUrl(url) {
+  if (!url) return '';
+  const trimmed = url.trim();
+  // Se não tem protocolo, adiciona https://
+  if (!/^https?:\/\//i.test(trimmed) && !/^mailto:/i.test(trimmed)) {
+    return 'https://' + trimmed;
+  }
+  return trimmed;
+}
+
 function saveLink() {
-  const nome=document.getElementById('lnk-nome').value.trim();
-  const url=document.getElementById('lnk-url').value.trim();
-  if (!nome||!url) return;
-  const emoji=document.getElementById('lnk-emoji').value.trim()||'🔗';
-  const cat=document.getElementById('lnk-cat').value;
+  const nome = document.getElementById('lnk-nome').value.trim();
+  let url     = document.getElementById('lnk-url').value.trim();
+  if (!nome || !url) { toast('⚠️ Preencha nome e URL'); return; }
+  url = normalizeUrl(url);
+  // Valida URL
+  try { new URL(url); } catch(e) { toast('⚠️ URL inválida. Use o formato https://site.com'); return; }
+  const emoji = document.getElementById('lnk-emoji').value.trim() || '🔗';
+  const cat   = document.getElementById('lnk-cat').value;
   state.links.push({ nome, url, emoji, cat });
   save('em_links', state.links);
   closeModal('modal-link');
   ['lnk-nome','lnk-url','lnk-emoji'].forEach(id => document.getElementById(id).value='');
-  renderLinks(); toast('Link salvo!'); log(`Link "${nome}" adicionado.`,'ok');
+  renderLinks(); toast('✅ Link salvo!'); log(`Link "${nome}" adicionado.`,'ok');
 }
 function deleteLink(i) { state.links.splice(i,1); save('em_links',state.links); renderLinks(); toast('Link removido.'); }
 function renderLinks() {
   const el=document.getElementById('links-grid');
   if (!state.links.length) { el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔗</div>Nenhum link ainda.</div>'; return; }
-  el.innerHTML = state.links.map((l,i) => `
+  el.innerHTML = state.links.map((l,i) => {
+    const url = normalizeUrl(l.url);
+    return `
     <div class="qlink-wrap">
-      <a href="${escHtml(l.url)}" target="_blank" rel="noopener" class="qlink-card">
+      <a href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" class="qlink-card">
         <span class="qlink-emoji">${l.emoji}</span>
         <span class="qlink-name">${escHtml(l.nome)}</span>
         <span class="qlink-cat">${escHtml(l.cat)}</span>
       </a>
       <button class="qlink-del" onclick="deleteLink(${i})" title="Remover">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── Workspace ──────────────────────────────────────────────────
@@ -975,7 +994,8 @@ const statusMap = { progress:['Em andamento','status-progress'], done:['Concluí
 function saveWsItem() {
   const titulo=document.getElementById('ws-titulo').value.trim();
   if (!titulo) return;
-  state.workspace.push({ tipo:document.getElementById('ws-tipo').value, titulo, status:document.getElementById('ws-status').value, link:document.getElementById('ws-link').value.trim(), desc:document.getElementById('ws-desc').value.trim() });
+  const link = normalizeUrl(document.getElementById('ws-link').value.trim());
+  state.workspace.push({ tipo:document.getElementById('ws-tipo').value, titulo, status:document.getElementById('ws-status').value, link, desc:document.getElementById('ws-desc').value.trim() });
   save('em_ws', state.workspace);
   closeModal('modal-ws');
   ['ws-titulo','ws-link','ws-desc'].forEach(id => document.getElementById(id).value='');
@@ -987,12 +1007,13 @@ function renderWorkspace() {
   if (!state.workspace.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🗂️</div>Nenhum item ainda.</div>'; return; }
   el.innerHTML = state.workspace.map((w,i) => {
     const [label,cls]=statusMap[w.status]||['—',''];
+    const link = normalizeUrl(w.link);
     return `<div class="ws-item">
       <span class="ws-icon">${w.tipo}</span>
       <div class="ws-info">
         <div class="ws-title">${escHtml(w.titulo)}</div>
         ${w.desc?`<div class="ws-meta">${escHtml(w.desc)}</div>`:''}
-        ${w.link?`<a href="${escHtml(w.link)}" target="_blank" style="font-size:.72rem;color:var(--accent-h)">↗ Abrir link</a>`:''}
+        ${link?`<a href="${escHtml(link)}" target="_blank" rel="noopener noreferrer" style="font-size:.72rem;color:var(--accent-h)">↗ Abrir link</a>`:''}
       </div>
       <div class="ws-actions">
         <span class="status-badge ${cls}">${label}</span>
@@ -1061,29 +1082,9 @@ function formatBytes(bytes) {
 }
 
 function handleFileInput(input) {
-  const files = Array.from(input.files);
-  let added = 0;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const entry = {
-        id: Date.now() + '_' + Math.floor(Math.random()*10000),
-        name: file.name,
-        size: file.size,
-        type: getFileType(file.name),
-        date: new Date().toISOString(),
-        dataUrl: e.target.result
-      };
-      state.files.push(entry);
-      try { save('em_files', state.files); } catch(ex) { toast('⚠️ Arquivo muito grande para armazenar localmente'); state.files.pop(); return; }
-      added++;
-      renderFiles(); updateBadges();
-      log(`Arquivo "${file.name}" adicionado (${formatBytes(file.size)}).`,'ok');
-    };
-    reader.readAsDataURL(file);
-  });
+  if (!input.files || !input.files.length) return;
+  handleFilesDirectly(input.files);
   input.value = '';
-  if (files.length) toast(`✅ ${files.length} arquivo(s) carregado(s)`);
 }
 
 function deleteFile(id) {
@@ -1107,6 +1108,7 @@ function downloadFile(id) {
 function renderFiles() {
   const grid  = document.getElementById('files-grid');
   const stats = document.getElementById('files-stats');
+  const dz    = document.getElementById('drop-zone');
   const q     = (document.getElementById('files-search').value || '').toLowerCase();
   const type  = document.getElementById('files-filter-type').value;
   const sort  = document.getElementById('files-sort').value;
@@ -1126,10 +1128,15 @@ function renderFiles() {
   });
 
   const totalSize = state.files.reduce((s,f)=>s+f.size,0);
-  stats.innerHTML = `<span class="files-stat"><strong>${state.files.length}</strong> arquivo(s)</span><span class="files-stat"><strong>${formatBytes(totalSize)}</strong> total</span>${list.length!==state.files.length?`<span class="files-stat">${list.length} resultado(s)</span>`:''}`;
+  stats.innerHTML = state.files.length
+    ? `<span class="files-stat"><strong>${state.files.length}</strong> arquivo(s)</span><span class="files-stat"><strong>${formatBytes(totalSize)}</strong> total</span>${list.length!==state.files.length?`<span class="files-stat">${list.length} resultado(s)</span>`:''}`
+    : '';
+
+  // Mostra ou esconde drop zone conforme há arquivos
+  if (dz) dz.style.display = state.files.length ? 'none' : '';
 
   if (!state.files.length) {
-    grid.innerHTML='<div class="empty"><div class="empty-icon">📂</div>Nenhum arquivo ainda. Arraste ou clique para adicionar.</div>';
+    grid.innerHTML = '';
     return;
   }
   if (!list.length) { grid.innerHTML='<div class="empty" style="margin-top:.5rem">Nenhum arquivo encontrado.</div>'; return; }
@@ -1151,21 +1158,101 @@ function renderFiles() {
     </div>`).join('');
 }
 
-// Drop zone
+// Drop zone — drag & drop robusto
 (function() {
   const dz = document.getElementById('drop-zone');
   if (!dz) return;
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('drag-over');
-    const fi = document.getElementById('file-input');
-    const dt = new DataTransfer();
-    Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
-    fi.files = dt.files;
-    handleFileInput(fi);
+
+  // Contador de entradas para evitar falso dragleave ao passar sobre filhos
+  let dragDepth = 0;
+
+  function highlight()   { dz.classList.add('drag-over'); }
+  function unhighlight() { dz.classList.remove('drag-over'); }
+
+  dz.addEventListener('dragenter', e => {
+    e.preventDefault();
+    dragDepth++;
+    highlight();
   });
+  dz.addEventListener('dragleave', e => {
+    e.preventDefault();
+    dragDepth--;
+    if (dragDepth <= 0) { dragDepth = 0; unhighlight(); }
+  });
+  dz.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dragDepth = 0;
+    unhighlight();
+    const files = e.dataTransfer.files;
+    if (files && files.length) handleFilesDirectly(files);
+  });
+
+  // Também permite arrastar para qualquer lugar da seção de arquivos
+  const section = document.getElementById('sec-arquivos');
+  if (section) {
+    let sectionDepth = 0;
+    section.addEventListener('dragenter', e => {
+      e.preventDefault();
+      sectionDepth++;
+      if (state.files.length === 0) { dz.style.display = ''; }
+      highlight();
+    });
+    section.addEventListener('dragleave', e => {
+      sectionDepth--;
+      if (sectionDepth <= 0) { sectionDepth = 0; unhighlight(); }
+    });
+    section.addEventListener('dragover', e => e.preventDefault());
+    section.addEventListener('drop', e => {
+      e.preventDefault();
+      sectionDepth = 0;
+      unhighlight();
+      const files = e.dataTransfer.files;
+      if (files && files.length) handleFilesDirectly(files);
+    });
+  }
 })();
+
+// Processa FileList diretamente (sem passar por input)
+function handleFilesDirectly(fileList) {
+  const files = Array.from(fileList);
+  if (!files.length) return;
+  let processados = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const entry = {
+        id: Date.now() + '_' + Math.floor(Math.random() * 10000),
+        name: file.name,
+        size: file.size,
+        type: getFileType(file.name),
+        date: new Date().toISOString(),
+        dataUrl: e.target.result
+      };
+      state.files.push(entry);
+      try {
+        save('em_files', state.files);
+      } catch(ex) {
+        toast('⚠️ Arquivo muito grande para armazenar localmente');
+        state.files.pop();
+        return;
+      }
+      processados++;
+      renderFiles();
+      updateBadges();
+      log(`Arquivo "${file.name}" adicionado (${formatBytes(file.size)}).`, 'ok');
+    };
+    reader.onerror = () => {
+      toast(`❌ Erro ao ler: ${file.name}`);
+      log(`Erro ao ler arquivo "${file.name}".`, 'err');
+    };
+    reader.readAsDataURL(file);
+  });
+  toast(`📂 ${files.length} arquivo(s) carregando…`);
+}
 
 // ── Logs ───────────────────────────────────────────────────────
 function renderLogs() {
