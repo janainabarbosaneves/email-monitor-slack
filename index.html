@@ -844,7 +844,7 @@ const state = {
   links:         JSON.parse(localStorage.getItem('em_links')     || 'null') ?? DEFAULT_LINKS,
   workspace:     JSON.parse(localStorage.getItem('em_ws')        || 'null') ?? DEFAULT_WORKSPACE,
   contacts:      JSON.parse(localStorage.getItem('em_contacts')  || 'null') ?? DEFAULT_CONTACTS,
-  files:         JSON.parse(localStorage.getItem('em_files')     || '[]'),
+  files:         [], // carregado do IndexedDB via loadFilesFromDB()
   config:        JSON.parse(localStorage.getItem('em_config')    || 'null') ?? { theme:'dark', accent:'#6366f1', accentH:'#818cf8', rgb:'99,102,241', fontSize:'14px', canal:'#notificacoes-email' },
   logs: []
 };
@@ -1068,7 +1068,7 @@ function renderContacts() {
     </div>`).join('');
 }
 
-// ── Files ───────────────────────────────────────────────────────
+// ── Files — IndexedDB (suporta arquivos grandes) ────────────────
 const FILE_ICONS = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📑', pptx:'📑', txt:'📃', png:'🖼️', jpg:'🖼️', jpeg:'🖼️', gif:'🖼️', zip:'📦', rar:'📦', csv:'📊' };
 const FILE_TYPES = { pdf:'pdf', doc:'doc', docx:'doc', xls:'xls', xlsx:'xls', ppt:'ppt', pptx:'ppt', png:'img', jpg:'img', jpeg:'img', gif:'img' };
 
@@ -1076,33 +1076,160 @@ function getFileExt(name) { return name.split('.').pop().toLowerCase(); }
 function getFileIcon(name) { return FILE_ICONS[getFileExt(name)] || '📁'; }
 function getFileType(name) { return FILE_TYPES[getFileExt(name)] || 'outro'; }
 function formatBytes(bytes) {
+  if (!bytes) return '0 B';
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1048576).toFixed(1) + ' MB';
+  if (bytes < 1073741824) return (bytes/1048576).toFixed(1) + ' MB';
+  return (bytes/1073741824).toFixed(2) + ' GB';
 }
 
+// ── IndexedDB setup ──
+let _db = null;
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open('EmailMonitorDB', 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('files')) {
+        const store = db.createObjectStore('files', { keyPath: 'id' });
+        store.createIndex('date', 'date', { unique: false });
+      }
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbGetAll() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('files', 'readonly');
+    const req = tx.objectStore('files').getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbAdd(entry) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('files', 'readwrite');
+    const req = tx.objectStore('files').add(entry);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbDelete(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('files', 'readwrite');
+    const req = tx.objectStore('files').delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function dbGet(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('files', 'readonly');
+    const req = tx.objectStore('files').get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+// ── File handlers ──
 function handleFileInput(input) {
   if (!input.files || !input.files.length) return;
   handleFilesDirectly(input.files);
   input.value = '';
 }
 
-function deleteFile(id) {
+async function handleFilesDirectly(fileList) {
+  const files = Array.from(fileList);
+  if (!files.length) return;
+  toast(`📂 Carregando ${files.length} arquivo(s)…`);
+
+  // Mostra progresso no drop zone
+  const dz = document.getElementById('drop-zone');
+  if (dz) { dz.querySelector('.drop-zone-icon').textContent = '⏳'; }
+
+  let ok = 0, erros = 0;
+  for (const file of files) {
+    try {
+      const dataUrl = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload  = e => res(e.target.result);
+        reader.onerror = () => rej(new Error('Leitura falhou'));
+        reader.readAsDataURL(file);
+      });
+      const entry = {
+        id:      Date.now() + '_' + Math.floor(Math.random() * 100000),
+        name:    file.name,
+        size:    file.size,
+        type:    getFileType(file.name),
+        date:    new Date().toISOString(),
+        dataUrl
+      };
+      await dbAdd(entry);
+      state.files.push({ id: entry.id, name: entry.name, size: entry.size, type: entry.type, date: entry.date });
+      ok++;
+      log(`Arquivo "${file.name}" adicionado (${formatBytes(file.size)}).`, 'ok');
+    } catch(err) {
+      erros++;
+      log(`Erro ao adicionar "${file.name}": ${err.message}`, 'err');
+    }
+  }
+
+  if (dz) { dz.querySelector('.drop-zone-icon').textContent = '📂'; }
+  renderFiles();
+  updateBadges();
+  if (ok > 0)    toast(`✅ ${ok} arquivo(s) adicionado(s)!`);
+  if (erros > 0) toast(`⚠️ ${erros} arquivo(s) com erro`);
+}
+
+async function deleteFile(id) {
   const idx = state.files.findIndex(f => f.id === id);
   if (idx < 0) return;
   const name = state.files[idx].name;
-  state.files.splice(idx, 1);
-  save('em_files', state.files);
-  renderFiles(); updateBadges();
-  toast('Arquivo removido.'); log(`Arquivo "${name}" removido.`,'sys');
+  try {
+    await dbDelete(id);
+    state.files.splice(idx, 1);
+    renderFiles();
+    updateBadges();
+    toast('🗑️ Arquivo removido.');
+    log(`Arquivo "${name}" removido.`, 'sys');
+  } catch(err) {
+    toast('❌ Erro ao remover arquivo');
+    log(`Erro ao remover "${name}": ${err.message}`, 'err');
+  }
 }
 
-function downloadFile(id) {
-  const f = state.files.find(x => x.id === id);
-  if (!f) return;
-  const a = document.createElement('a');
-  a.href = f.dataUrl; a.download = f.name; a.click();
-  log(`Download: "${f.name}".`,'ok');
+async function downloadFile(id) {
+  try {
+    const f = await dbGet(id);
+    if (!f) { toast('❌ Arquivo não encontrado'); return; }
+    const a = document.createElement('a');
+    a.href = f.dataUrl; a.download = f.name; a.click();
+    log(`Download: "${f.name}".`, 'ok');
+  } catch(err) {
+    toast('❌ Erro ao baixar arquivo');
+  }
+}
+
+async function loadFilesFromDB() {
+  try {
+    const all = await dbGetAll();
+    // state.files guarda só metadados (sem dataUrl) para economia de memória
+    state.files = all.map(f => ({ id: f.id, name: f.name, size: f.size, type: f.type, date: f.date }));
+    renderFiles();
+    updateBadges();
+  } catch(err) {
+    log('Erro ao carregar arquivos do banco: ' + err.message, 'err');
+  }
 }
 
 function renderFiles() {
@@ -1127,19 +1254,18 @@ function renderFiles() {
     return new Date(b.date)-new Date(a.date);
   });
 
-  const totalSize = state.files.reduce((s,f)=>s+f.size,0);
+  const totalSize = state.files.reduce((s,f) => s + (f.size||0), 0);
   stats.innerHTML = state.files.length
-    ? `<span class="files-stat"><strong>${state.files.length}</strong> arquivo(s)</span><span class="files-stat"><strong>${formatBytes(totalSize)}</strong> total</span>${list.length!==state.files.length?`<span class="files-stat">${list.length} resultado(s)</span>`:''}`
+    ? `<span class="files-stat"><strong>${state.files.length}</strong> arquivo(s)</span>` +
+      `<span class="files-stat"><strong>${formatBytes(totalSize)}</strong> total</span>` +
+      (list.length !== state.files.length ? `<span class="files-stat">${list.length} resultado(s)</span>` : '')
     : '';
 
-  // Mostra ou esconde drop zone conforme há arquivos
+  // Mostra drop zone só quando não há arquivos
   if (dz) dz.style.display = state.files.length ? 'none' : '';
 
-  if (!state.files.length) {
-    grid.innerHTML = '';
-    return;
-  }
-  if (!list.length) { grid.innerHTML='<div class="empty" style="margin-top:.5rem">Nenhum arquivo encontrado.</div>'; return; }
+  if (!state.files.length) { grid.innerHTML = ''; return; }
+  if (!list.length) { grid.innerHTML = '<div class="empty" style="margin-top:.5rem">Nenhum arquivo encontrado para este filtro.</div>'; return; }
 
   grid.innerHTML = list.map(f => `
     <div class="file-item">
@@ -1147,13 +1273,13 @@ function renderFiles() {
       <div class="file-info">
         <div class="file-name" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
         <div class="file-meta">
-          <span class="file-tag">${f.type.toUpperCase()}</span>
+          <span class="file-tag">${(f.type||'outro').toUpperCase()}</span>
           &nbsp;${formatBytes(f.size)} · ${new Date(f.date).toLocaleDateString('pt-BR')}
         </div>
       </div>
       <div class="file-actions">
-        <button class="file-btn" onclick="downloadFile('${f.id}')" title="Baixar">⬇️</button>
-        <button class="file-btn del" onclick="deleteFile('${f.id}')" title="Remover">🗑️</button>
+        <button class="file-btn" onclick="downloadFile('${f.id}')" title="Baixar arquivo">⬇️</button>
+        <button class="file-btn del" onclick="deleteFile('${f.id}')" title="Remover arquivo">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -1163,96 +1289,31 @@ function renderFiles() {
   const dz = document.getElementById('drop-zone');
   if (!dz) return;
 
-  // Contador de entradas para evitar falso dragleave ao passar sobre filhos
   let dragDepth = 0;
-
   function highlight()   { dz.classList.add('drag-over'); }
   function unhighlight() { dz.classList.remove('drag-over'); }
 
-  dz.addEventListener('dragenter', e => {
-    e.preventDefault();
-    dragDepth++;
-    highlight();
-  });
-  dz.addEventListener('dragleave', e => {
-    e.preventDefault();
-    dragDepth--;
-    if (dragDepth <= 0) { dragDepth = 0; unhighlight(); }
-  });
-  dz.addEventListener('dragover', e => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-  });
+  dz.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; highlight(); });
+  dz.addEventListener('dragleave', e => { e.preventDefault(); dragDepth--; if (dragDepth <= 0) { dragDepth = 0; unhighlight(); } });
+  dz.addEventListener('dragover',  e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
   dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dragDepth = 0;
-    unhighlight();
-    const files = e.dataTransfer.files;
-    if (files && files.length) handleFilesDirectly(files);
+    e.preventDefault(); dragDepth = 0; unhighlight();
+    if (e.dataTransfer.files.length) handleFilesDirectly(e.dataTransfer.files);
   });
 
-  // Também permite arrastar para qualquer lugar da seção de arquivos
+  // Arrastar para qualquer área da seção também funciona
   const section = document.getElementById('sec-arquivos');
   if (section) {
-    let sectionDepth = 0;
-    section.addEventListener('dragenter', e => {
-      e.preventDefault();
-      sectionDepth++;
-      if (state.files.length === 0) { dz.style.display = ''; }
-      highlight();
-    });
-    section.addEventListener('dragleave', e => {
-      sectionDepth--;
-      if (sectionDepth <= 0) { sectionDepth = 0; unhighlight(); }
-    });
-    section.addEventListener('dragover', e => e.preventDefault());
+    let sd = 0;
+    section.addEventListener('dragenter', e => { e.preventDefault(); sd++; if (!state.files.length) dz.style.display=''; highlight(); });
+    section.addEventListener('dragleave', e => { sd--; if (sd<=0) { sd=0; unhighlight(); } });
+    section.addEventListener('dragover',  e => e.preventDefault());
     section.addEventListener('drop', e => {
-      e.preventDefault();
-      sectionDepth = 0;
-      unhighlight();
-      const files = e.dataTransfer.files;
-      if (files && files.length) handleFilesDirectly(files);
+      e.preventDefault(); sd=0; unhighlight();
+      if (e.dataTransfer.files.length) handleFilesDirectly(e.dataTransfer.files);
     });
   }
 })();
-
-// Processa FileList diretamente (sem passar por input)
-function handleFilesDirectly(fileList) {
-  const files = Array.from(fileList);
-  if (!files.length) return;
-  let processados = 0;
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const entry = {
-        id: Date.now() + '_' + Math.floor(Math.random() * 10000),
-        name: file.name,
-        size: file.size,
-        type: getFileType(file.name),
-        date: new Date().toISOString(),
-        dataUrl: e.target.result
-      };
-      state.files.push(entry);
-      try {
-        save('em_files', state.files);
-      } catch(ex) {
-        toast('⚠️ Arquivo muito grande para armazenar localmente');
-        state.files.pop();
-        return;
-      }
-      processados++;
-      renderFiles();
-      updateBadges();
-      log(`Arquivo "${file.name}" adicionado (${formatBytes(file.size)}).`, 'ok');
-    };
-    reader.onerror = () => {
-      toast(`❌ Erro ao ler: ${file.name}`);
-      log(`Erro ao ler arquivo "${file.name}".`, 'err');
-    };
-    reader.readAsDataURL(file);
-  });
-  toast(`📂 ${files.length} arquivo(s) carregando…`);
-}
 
 // ── Logs ───────────────────────────────────────────────────────
 function renderLogs() {
@@ -1530,7 +1591,7 @@ renderNotes();
 renderLinks();
 renderWorkspace();
 renderContacts();
-renderFiles();
+loadFilesFromDB(); // carrega do IndexedDB (suporta arquivos grandes)
 renderLogs();
 updateBadges();
 log('Sistema iniciado.','sys');
