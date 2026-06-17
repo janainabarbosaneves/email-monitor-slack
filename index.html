@@ -42,6 +42,7 @@
       border-right: 1px solid var(--border);
       display: flex; flex-direction: column; padding: 1.5rem 1rem;
       position: fixed; top:0; left:0; bottom:0; z-index:100;
+      overflow-y: auto;
       transition: background .25s;
     }
     .sidebar-logo { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:.4rem; display:flex; align-items:center; gap:.5rem; }
@@ -64,7 +65,7 @@
     #topbar {
       background:var(--bg-card); border-bottom:1px solid var(--border);
       padding:.75rem 1.5rem; display:flex; align-items:center;
-      justify-content:space-between; gap:1rem;
+      justify-content:space-between; gap:.75rem; flex-wrap:wrap;
       position:sticky; top:0; z-index:50; transition:background .25s;
     }
     .topbar-info { font-size:.8rem; color:var(--text-muted); }
@@ -82,11 +83,11 @@
     .btn-primary:hover { background:var(--accent-h); }
     #btn-export-pdf {
       display:inline-flex; align-items:center; gap:.4rem;
-      padding:.4rem .9rem; background:#4f46e5; color:#fff;
+      padding:.4rem .9rem; background:var(--accent); color:#fff;
       border:none; border-radius:6px; font-size:.8rem; font-weight:600;
       cursor:pointer; transition:background .2s;
     }
-    #btn-export-pdf:hover    { background:#4338ca; }
+    #btn-export-pdf:hover    { background:var(--accent-h); }
     #btn-export-pdf:disabled { opacity:.7; cursor:wait; }
 
     /* ── Modal PDF ── */
@@ -370,6 +371,7 @@
         <div class="stat-card"><div class="stat-label">Canal Slack</div><div class="stat-value" style="font-size:1rem;padding-top:.5rem" id="stat-canal">#notificacoes-email</div></div>
         <div class="stat-card"><div class="stat-label">Última verificação</div><div class="stat-value" style="font-size:1.1rem;padding-top:.4rem" id="stat-ultima">—</div></div>
         <div class="stat-card"><div class="stat-label">Anotações</div><div class="stat-value" id="stat-notes">0</div></div>
+        <div class="stat-card"><div class="stat-label">Arquivos</div><div class="stat-value" id="stat-files">0</div></div>
       </div>
       <div class="panel">
         <div class="panel-header"><h2>Por categoria</h2></div>
@@ -506,48 +508,80 @@
                 </div>
                 <div class="appsscript-code" id="appsscript-snippet">// Cole no Google Apps Script e configure o gatilho
 function monitorarEmails() {
-  var slackWebhookUrl = 'SEU_WEBHOOK_URL_AQUI';
-  var canalSlack = '#notificacoes-email';
+  var SLACK_WEBHOOK_URL = 'SEU_WEBHOOK_URL_AQUI';
+  var CANAL_SLACK       = '#notificacoes-email';
+  var INTERVALO_MIN     = 15;
 
-  var threads = GmailApp.search('is:unread newer_than:15m', 0, 20);
+  // Calcula o horário de corte (15 minutos atrás)
+  var agora    = new Date();
+  var corte    = new Date(agora.getTime() - INTERVALO_MIN * 60 * 1000);
+  var ano      = corte.getFullYear();
+  var mes      = String(corte.getMonth() + 1).padStart(2, '0');
+  var dia      = String(corte.getDate()).padStart(2, '0');
+  var dataStr  = ano + '/' + mes + '/' + dia;
+
+  var threads = GmailApp.search(
+    'is:unread after:' + dataStr, 0, 20
+  );
+
+  var enviados = 0;
   threads.forEach(function(thread) {
-    var msg = thread.getMessages()[0];
-    var assunto = msg.getSubject();
-    var remetente = msg.getFrom();
-    var data = msg.getDate().toLocaleString('pt-BR');
+    var mensagens = thread.getMessages();
+    mensagens.forEach(function(msg) {
+      // Ignora mensagens anteriores ao corte
+      if (msg.getDate() < corte) return;
+      if (msg.isRead()) return;
 
-    var payload = {
-      channel: canalSlack,
-      username: 'Email Monitor',
-      icon_emoji: ':email:',
-      text: '*Novo e-mail recebido*',
-      attachments: [{
-        color: '#6366f1',
-        fields: [
-          { title: 'Assunto', value: assunto, short: false },
-          { title: 'De', value: remetente, short: true },
-          { title: 'Data', value: data, short: true }
-        ]
-      }]
-    };
+      var assunto   = msg.getSubject() || '(sem assunto)';
+      var remetente = msg.getFrom();
+      var data      = Utilities.formatDate(
+        msg.getDate(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'
+      );
 
-    UrlFetchApp.fetch(slackWebhookUrl, {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify(payload)
+      var payload = {
+        channel:    CANAL_SLACK,
+        username:   'Email Monitor',
+        icon_emoji: ':email:',
+        text:       '*📧 Novo e-mail recebido*',
+        attachments: [{
+          color: '#6366f1',
+          fields: [
+            { title: 'Assunto', value: assunto,   short: false },
+            { title: 'De',      value: remetente, short: true  },
+            { title: 'Data',    value: data,       short: true  }
+          ],
+          footer: 'Email Monitor · Apps Script',
+          ts: Math.floor(msg.getDate().getTime() / 1000)
+        }]
+      };
+
+      UrlFetchApp.fetch(SLACK_WEBHOOK_URL, {
+        method:      'post',
+        contentType: 'application/json',
+        payload:     JSON.stringify(payload)
+      });
+
+      msg.markRead();
+      enviados++;
     });
-    thread.markRead();
   });
+
+  Logger.log('Emails enviados ao Slack: ' + enviados);
 }
 
-// Para criar o gatilho de 15 minutos:
-// Executar > monitorarEmails > Adicionar gatilho
-// Tipo: baseado em tempo, a cada 15 minutos</div>
+// ── Como configurar o gatilho de 15 minutos ──
+// 1. Abra script.google.com e cole este código
+// 2. Clique em "Acionadores" (ícone de relógio) no menu lateral
+// 3. Clique em "+ Adicionar acionador"
+// 4. Função: monitorarEmails
+// 5. Origem do evento: baseado em tempo
+// 6. Tipo: temporizador por minuto → a cada 15 minutos
+// 7. Clique em Salvar e autorize as permissões</div>
               </div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
-              <span style="font-size:.75rem;color:var(--green);font-weight:600">Ativo</span>
-              <div class="toggle on" id="toggle-monitor" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+              <span style="font-size:.75rem;color:var(--green);font-weight:600" id="toggle-monitor-label">Ativo</span>
+              <div class="toggle on" id="toggle-monitor" onclick="toggleMonitor()"></div>
             </div>
           </div>
 
@@ -843,6 +877,17 @@ function updateBadges() {
   document.getElementById('badge-files').textContent = state.files.length;
   document.getElementById('stat-total').textContent  = state.notifications.length;
   document.getElementById('stat-notes').textContent  = state.notes.length;
+  document.getElementById('stat-files').textContent  = state.files.length;
+  // Cat chips
+  const chips = document.getElementById('cat-chips');
+  if (state.notifications.length) {
+    const counts = {};
+    state.notifications.forEach(n => { const k = n.tag||'INFO'; counts[k] = (counts[k]||0)+1; });
+    chips.innerHTML = Object.entries(counts).map(([k,v]) =>
+      `<span class="chip">${escHtml(k)} <strong>${v}</strong></span>`).join('');
+  } else {
+    chips.innerHTML = '<span class="chip">Sem dados ainda</span>';
+  }
 }
 
 // ── Notifications ──────────────────────────────────────────────
@@ -879,7 +924,7 @@ function renderNotes() {
   const from=document.getElementById('note-from').value;
   const to=document.getElementById('note-to').value;
   const el=document.getElementById('notes-list');
-  const filtered=state.notes.filter(n => {
+  const filtered=state.notes.map((n,i)=>({n,i})).filter(({n}) => {
     if (q && !n.txt.toLowerCase().includes(q)) return false;
     const d=n.date.slice(0,10);
     if (from && d<from) return false;
@@ -887,11 +932,11 @@ function renderNotes() {
     return true;
   });
   if (!filtered.length) { el.innerHTML='<div class="empty" style="margin-top:.5rem">Nenhuma anotação encontrada.</div>'; return; }
-  el.innerHTML = filtered.map(n => `
+  el.innerHTML = filtered.map(({n,i}) => `
     <div class="note-card">
       <p>${escHtml(n.txt)}</p>
       <div class="note-date">${new Date(n.date).toLocaleString('pt-BR')}</div>
-      <button class="note-del" onclick="deleteNote(${state.notes.indexOf(n)})">✕</button>
+      <button class="note-del" onclick="deleteNote(${i})">✕</button>
     </div>`).join('');
 }
 function deleteNote(i) { state.notes.splice(i,1); save('em_notes',state.notes); renderNotes(); updateBadges(); }
@@ -1022,7 +1067,7 @@ function handleFileInput(input) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const entry = {
-        id: Date.now() + Math.random(),
+        id: Date.now() + '_' + Math.floor(Math.random()*10000),
         name: file.name,
         size: file.size,
         type: getFileType(file.name),
@@ -1100,8 +1145,8 @@ function renderFiles() {
         </div>
       </div>
       <div class="file-actions">
-        <button class="file-btn" onclick="downloadFile(${f.id})" title="Baixar">⬇️</button>
-        <button class="file-btn del" onclick="deleteFile(${f.id})" title="Remover">🗑️</button>
+        <button class="file-btn" onclick="downloadFile('${f.id}')" title="Baixar">⬇️</button>
+        <button class="file-btn del" onclick="deleteFile('${f.id}')" title="Remover">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -1201,7 +1246,7 @@ function applyConfig() {
 }
 
 // ── Utility ────────────────────────────────────────────────────
-function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 // ── PDF export ─────────────────────────────────────────────────
 let _pdfMode = 'all';
@@ -1331,28 +1376,51 @@ async function executePdfExport() {
 }
 
 // ── Monitor countdown (15 min) ──────────────────────────────────
+let _monitorActive = true;
 (function() {
-  const INTERVAL_SEC = 15 * 60; // 15 minutos
+  const INTERVAL_SEC = 15 * 60;
   let remaining = INTERVAL_SEC;
-  function fmt(s) { const m=Math.floor(s/60), ss=s%60; return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
+  function fmt(s) {
+    const m = Math.floor(s / 60), ss = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+  }
   function tick() {
+    if (!_monitorActive) return;
+    if (remaining <= 0) {
+      remaining = INTERVAL_SEC;
+      const now = new Date().toLocaleTimeString('pt-BR');
+      const el = document.getElementById('stat-ultima');
+      if (el) el.textContent = now;
+      log('Verificação automática de e-mails realizada (15 min).','ok');
+    }
     const str = fmt(remaining);
     const t1 = document.getElementById('topbar-countdown');
     const t2 = document.getElementById('cfg-countdown');
     if (t1) t1.textContent = str;
     if (t2) t2.textContent = str;
-    if (remaining <= 0) {
-      remaining = INTERVAL_SEC;
-      const now = new Date().toLocaleTimeString('pt-BR');
-      document.getElementById('stat-ultima').textContent = now;
-      log('Verificação automática de e-mails realizada (15 min).','ok');
-    } else {
-      remaining--;
-    }
+    remaining--;
   }
   tick();
   setInterval(tick, 1000);
 })();
+
+function toggleMonitor() {
+  _monitorActive = !_monitorActive;
+  const tog = document.getElementById('toggle-monitor');
+  const lbl = document.getElementById('toggle-monitor-label');
+  const dot = document.querySelectorAll('.countdown-dot');
+  if (_monitorActive) {
+    tog.classList.replace('off','on');
+    if (lbl) { lbl.textContent='Ativo'; lbl.style.color='var(--green)'; }
+    dot.forEach(d => d.style.background='var(--green)');
+    log('Monitor reativado.','ok'); toast('▶️ Monitor ativo');
+  } else {
+    tog.classList.replace('on','off');
+    if (lbl) { lbl.textContent='Pausado'; lbl.style.color='var(--yellow)'; }
+    dot.forEach(d => d.style.background='var(--yellow)');
+    log('Monitor pausado.','sys'); toast('⏸️ Monitor pausado');
+  }
+}
 
 function copyAppsScript() {
   const code = document.getElementById('appsscript-snippet').textContent;
