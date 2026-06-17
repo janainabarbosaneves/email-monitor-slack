@@ -203,13 +203,16 @@
     .ws-del:hover { background:rgba(239,68,68,.12); color:var(--red); }
 
     /* ── Contatos ── */
-    .contacts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:.6rem; }
+    .contacts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:.6rem; }
     .contact-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem; position:relative; cursor:pointer; transition:border-color .15s, background .15s; }
     .contact-card:hover { border-color:var(--accent); background:rgba(var(--accent-rgb),.05); }
     .contact-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.9rem; color:#fff; margin-bottom:.6rem; }
     .contact-name { font-size:.88rem; font-weight:600; }
     .contact-role { font-size:.75rem; color:var(--text-muted); }
     .contact-cat  { font-size:.68rem; font-weight:600; padding:2px 6px; border-radius:20px; background:rgba(var(--accent-rgb),.15); color:var(--accent-h); display:inline-block; margin-top:.4rem; }
+    .contact-tel-pill { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; color:var(--text-muted); margin-top:.35rem; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:2px 8px; text-decoration:none; transition:border-color .15s,color .15s; }
+    .contact-tel-pill:hover { border-color:var(--green); color:var(--green); }
+    .contact-note-pill { display:inline-flex; align-items:center; gap:.3rem; font-size:.7rem; color:var(--accent-h); margin-top:.25rem; background:rgba(var(--accent-rgb),.1); border-radius:20px; padding:2px 8px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .contact-actions { position:absolute; top:.6rem; right:.5rem; display:flex; gap:.25rem; }
     .contact-del  { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.85rem; padding:.15rem .3rem; border-radius:4px; }
     .contact-del:hover { background:rgba(239,68,68,.12); color:var(--red); }
@@ -217,7 +220,7 @@
     .contact-view-btn:hover { background:rgba(var(--accent-rgb),.15); color:var(--accent-h); }
 
     /* ── Modal Visualizar Contato ── */
-    #modal-view-contact .modal { max-width:460px; }
+    #modal-view-contact .modal { max-width:480px; }
     .view-contact-header { display:flex; align-items:center; gap:1rem; padding-bottom:.9rem; border-bottom:1px solid var(--border); }
     .view-contact-avatar { width:56px; height:56px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.3rem; color:#fff; flex-shrink:0; }
     .view-contact-name { font-size:1.1rem; font-weight:700; }
@@ -227,10 +230,19 @@
     .view-contact-row:last-child { border-bottom:none; }
     .view-contact-icon { font-size:1rem; width:20px; text-align:center; flex-shrink:0; }
     .view-contact-label { color:var(--text-muted); font-size:.75rem; min-width:80px; }
-    .view-contact-value { color:var(--text); word-break:break-all; }
+    .view-contact-value { color:var(--text); word-break:break-all; flex:1; }
     .view-contact-value a { color:var(--accent-h); text-decoration:none; }
     .view-contact-value a:hover { text-decoration:underline; }
     .view-obs { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:.6rem .8rem; font-size:.82rem; color:var(--text-muted); white-space:pre-wrap; margin-top:.4rem; }
+    /* Anotação editável no modal */
+    .contact-note-section { margin-top:.5rem; display:flex; flex-direction:column; gap:.5rem; }
+    .contact-note-section label { font-size:.78rem; color:var(--text-muted); font-weight:600; display:flex; align-items:center; gap:.4rem; }
+    .contact-note-textarea { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.6rem .8rem; color:var(--text); font-size:.83rem; font-family:inherit; resize:vertical; min-height:72px; width:100%; transition:border-color .15s; line-height:1.5; }
+    .contact-note-textarea:focus { outline:none; border-color:var(--accent); }
+    .contact-note-footer { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+    .contact-note-hint { font-size:.7rem; color:var(--text-muted); }
+    .contact-note-saved { font-size:.7rem; color:var(--green); opacity:0; transition:opacity .3s; }
+    .contact-note-saved.show { opacity:1; }
 
     /* ── Pasta de Arquivos ── */
     .files-toolbar { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; }
@@ -787,15 +799,24 @@ function monitorarEmails() {
   <div class="modal">
     <div class="view-contact-header">
       <div class="view-contact-avatar" id="vc-avatar">?</div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="view-contact-name" id="vc-nome">—</div>
         <div class="view-contact-role" id="vc-cargo">—</div>
         <span class="contact-cat" id="vc-cat" style="margin-top:.4rem;display:inline-block">—</span>
       </div>
     </div>
     <div class="view-contact-body" id="vc-body"></div>
+    <!-- Anotação editável -->
+    <div class="contact-note-section">
+      <label>📝 Anotação do contato</label>
+      <textarea class="contact-note-textarea" id="vc-note" placeholder="Adicione uma anotação sobre este contato… (salvo automaticamente)"></textarea>
+      <div class="contact-note-footer">
+        <span class="contact-note-hint">Ctrl+Enter para salvar · salvo automaticamente ao digitar</span>
+        <span class="contact-note-saved" id="vc-note-saved">✓ Salvo</span>
+      </div>
+    </div>
     <div class="modal-footer" style="justify-content:space-between">
-      <button class="btn btn-danger" id="vc-del-btn">🗑️ Remover</button>
+      <button class="btn btn-danger" id="vc-del-btn">🗑️ Remover contato</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-view-contact')">Fechar</button>
     </div>
   </div>
@@ -829,12 +850,12 @@ const DEFAULT_WORKSPACE = [
   { tipo:'🗂️', titulo:'Projeto: Integração com Notion',    status:'wait',     link:'https://notion.so',                 desc:'Sincronizar notificações do Slack com páginas do Notion.'},
 ];
 const DEFAULT_CONTACTS = [
-  { nome:'Ana Lima',       cargo:'Gestora de TI',         email:'ana.lima@empresa.com',  tel:'', slack:'@ana.lima',   cat:'Time',      grupo:'TI',      obs:'' },
-  { nome:'Bruno Souza',    cargo:'Analista de Dados',      email:'bruno@empresa.com',     tel:'', slack:'@bruno.s',    cat:'Time',      grupo:'Dados',   obs:'' },
-  { nome:'Carla Mendes',   cargo:'Product Manager',        email:'carla@empresa.com',     tel:'', slack:'@carla.m',    cat:'Área',      grupo:'Produto', obs:'' },
-  { nome:'Diego Ferreira', cargo:'Dev Backend',            email:'diego@empresa.com',     tel:'', slack:'@diego.f',    cat:'Time',      grupo:'Dev',     obs:'' },
-  { nome:'Suporte Google', cargo:'Atendimento',            email:'support@google.com',    tel:'', slack:'',            cat:'Fornecedor',grupo:'',        obs:'Apps Script e Workspace' },
-  { nome:'Fernanda Costa', cargo:'Analista de Comunicação',email:'fernanda@empresa.com',  tel:'', slack:'@feh.costa',  cat:'Área',      grupo:'Comms',   obs:'' },
+  { nome:'Ana Lima',       cargo:'Gestora de TI',          email:'ana.lima@empresa.com', tel:'(11) 91234-5678', slack:'@ana.lima',   cat:'Time',      grupo:'TI',      obs:'',                            nota:'' },
+  { nome:'Bruno Souza',    cargo:'Analista de Dados',       email:'bruno@empresa.com',    tel:'(11) 92345-6789', slack:'@bruno.s',    cat:'Time',      grupo:'Dados',   obs:'',                            nota:'' },
+  { nome:'Carla Mendes',   cargo:'Product Manager',         email:'carla@empresa.com',    tel:'',                slack:'@carla.m',    cat:'Área',      grupo:'Produto', obs:'',                            nota:'' },
+  { nome:'Diego Ferreira', cargo:'Dev Backend',             email:'diego@empresa.com',    tel:'(21) 93456-7890', slack:'@diego.f',    cat:'Time',      grupo:'Dev',     obs:'',                            nota:'' },
+  { nome:'Suporte Google', cargo:'Atendimento',             email:'support@google.com',   tel:'',                slack:'',            cat:'Fornecedor',grupo:'',        obs:'Apps Script e Workspace',     nota:'' },
+  { nome:'Fernanda Costa', cargo:'Analista de Comunicação', email:'fernanda@empresa.com', tel:'(11) 94567-8901', slack:'@feh.costa',  cat:'Área',      grupo:'Comms',   obs:'',                            nota:'' },
 ];
 
 // ── State ──────────────────────────────────────────────────────
@@ -1027,43 +1048,136 @@ function renderWorkspace() {
 function saveContact() {
   const nome=document.getElementById('ct-nome').value.trim();
   if (!nome) return;
-  state.contacts.push({ nome, cargo:document.getElementById('ct-cargo').value.trim(), email:document.getElementById('ct-email').value.trim(), tel:document.getElementById('ct-tel').value.trim(), slack:document.getElementById('ct-slack').value.trim(), cat:document.getElementById('ct-cat').value, grupo:document.getElementById('ct-grupo').value.trim(), obs:document.getElementById('ct-obs').value.trim() });
+  state.contacts.push({
+    nome,
+    cargo:  document.getElementById('ct-cargo').value.trim(),
+    email:  document.getElementById('ct-email').value.trim(),
+    tel:    document.getElementById('ct-tel').value.trim(),
+    slack:  document.getElementById('ct-slack').value.trim(),
+    cat:    document.getElementById('ct-cat').value,
+    grupo:  document.getElementById('ct-grupo').value.trim(),
+    obs:    document.getElementById('ct-obs').value.trim(),
+    nota:   '' // anotação editável no modal
+  });
   save('em_contacts', state.contacts);
   closeModal('modal-contact');
   ['ct-nome','ct-cargo','ct-email','ct-tel','ct-slack','ct-grupo','ct-obs'].forEach(id => document.getElementById(id).value='');
-  renderContacts(); toast('Contato salvo!'); log(`Contato "${nome}" adicionado.`,'ok');
+  renderContacts(); toast('✅ Contato salvo!'); log(`Contato "${nome}" adicionado.`,'ok');
 }
-function deleteContact(i) { state.contacts.splice(i,1); save('em_contacts',state.contacts); renderContacts(); toast('Contato removido.'); }
+
+function deleteContact(i) {
+  state.contacts.splice(i,1);
+  save('em_contacts',state.contacts);
+  renderContacts();
+  toast('Contato removido.');
+}
+
+let _vcIndex = -1; // índice do contato aberto no modal
+let _vcNoteTimer = null;
+
 function viewContact(i) {
   const c = state.contacts[i];
+  _vcIndex = i;
+
   document.getElementById('vc-avatar').textContent = c.nome.charAt(0).toUpperCase();
   document.getElementById('vc-nome').textContent   = c.nome;
   document.getElementById('vc-cargo').textContent  = c.cargo || '—';
   document.getElementById('vc-cat').textContent    = c.cat;
+
+  // Preenche anotação
+  const noteEl = document.getElementById('vc-note');
+  noteEl.value = c.nota || '';
+  document.getElementById('vc-note-saved').classList.remove('show');
+
+  // Linhas de info
   const rows = [];
-  if (c.email) rows.push(`<div class="view-contact-row"><span class="view-contact-icon">📧</span><span class="view-contact-label">E-mail</span><span class="view-contact-value"><a href="mailto:${escHtml(c.email)}">${escHtml(c.email)}</a></span></div>`);
-  if (c.tel)   rows.push(`<div class="view-contact-row"><span class="view-contact-icon">📱</span><span class="view-contact-label">Telefone</span><span class="view-contact-value"><a href="tel:${escHtml(c.tel)}">${escHtml(c.tel)}</a></span></div>`);
-  if (c.slack) rows.push(`<div class="view-contact-row"><span class="view-contact-icon">💬</span><span class="view-contact-label">Slack</span><span class="view-contact-value">${escHtml(c.slack)}</span></div>`);
-  if (c.grupo) rows.push(`<div class="view-contact-row"><span class="view-contact-icon">🏷️</span><span class="view-contact-label">Grupo</span><span class="view-contact-value">${escHtml(c.grupo)}</span></div>`);
-  if (c.obs)   rows.push(`<div class="view-contact-row" style="flex-direction:column;align-items:flex-start;gap:.4rem"><span style="font-size:.78rem;color:var(--text-muted)">📝 Observações</span><div class="view-obs">${escHtml(c.obs)}</div></div>`);
-  if (!rows.length) rows.push(`<div class="view-contact-row" style="color:var(--text-muted);font-size:.82rem;justify-content:center">Nenhuma informação adicional</div>`);
+  if (c.email) rows.push(`
+    <div class="view-contact-row">
+      <span class="view-contact-icon">📧</span>
+      <span class="view-contact-label">E-mail</span>
+      <span class="view-contact-value"><a href="mailto:${escHtml(c.email)}">${escHtml(c.email)}</a></span>
+    </div>`);
+  if (c.tel) rows.push(`
+    <div class="view-contact-row">
+      <span class="view-contact-icon">📱</span>
+      <span class="view-contact-label">Telefone</span>
+      <span class="view-contact-value">
+        <a href="tel:${escHtml(c.tel)}" style="margin-right:.5rem">${escHtml(c.tel)}</a>
+        <a href="https://wa.me/${c.tel.replace(/\D/g,'')}" target="_blank" rel="noopener noreferrer"
+           style="font-size:.72rem;background:rgba(34,197,94,.15);color:var(--green);padding:2px 8px;border-radius:20px;text-decoration:none">
+          💬 WhatsApp
+        </a>
+      </span>
+    </div>`);
+  if (c.slack) rows.push(`
+    <div class="view-contact-row">
+      <span class="view-contact-icon">💬</span>
+      <span class="view-contact-label">Slack</span>
+      <span class="view-contact-value">${escHtml(c.slack)}</span>
+    </div>`);
+  if (c.grupo) rows.push(`
+    <div class="view-contact-row">
+      <span class="view-contact-icon">🏷️</span>
+      <span class="view-contact-label">Grupo</span>
+      <span class="view-contact-value">${escHtml(c.grupo)}</span>
+    </div>`);
+  if (c.obs) rows.push(`
+    <div class="view-contact-row" style="flex-direction:column;align-items:flex-start;gap:.4rem">
+      <span style="font-size:.78rem;color:var(--text-muted)">📋 Observações</span>
+      <div class="view-obs">${escHtml(c.obs)}</div>
+    </div>`);
+  if (!rows.length) rows.push(`
+    <div class="view-contact-row" style="color:var(--text-muted);font-size:.82rem;justify-content:center">
+      Nenhuma informação adicional cadastrada
+    </div>`);
+
   document.getElementById('vc-body').innerHTML = rows.join('');
-  document.getElementById('vc-del-btn').onclick = () => { deleteContact(i); closeModal('modal-view-contact'); };
+  document.getElementById('vc-del-btn').onclick = () => {
+    if (confirm(`Remover o contato "${c.nome}"?`)) {
+      deleteContact(i);
+      closeModal('modal-view-contact');
+    }
+  };
   openModal('modal-view-contact');
 }
+
+// Auto-save da anotação com debounce
+function saveContactNote() {
+  if (_vcIndex < 0 || !state.contacts[_vcIndex]) return;
+  const nota = document.getElementById('vc-note').value;
+  state.contacts[_vcIndex].nota = nota;
+  save('em_contacts', state.contacts);
+  renderContacts(); // atualiza pill de anotação no card
+  const saved = document.getElementById('vc-note-saved');
+  saved.classList.add('show');
+  setTimeout(() => saved.classList.remove('show'), 2000);
+}
+
+document.getElementById('vc-note').addEventListener('input', () => {
+  clearTimeout(_vcNoteTimer);
+  _vcNoteTimer = setTimeout(saveContactNote, 800); // salva 800ms após parar de digitar
+});
+document.getElementById('vc-note').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') { clearTimeout(_vcNoteTimer); saveContactNote(); }
+});
+
 function renderContacts() {
-  const el=document.getElementById('contacts-grid');
-  if (!state.contacts.length) { el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div>Nenhum contato ainda.</div>'; return; }
+  const el = document.getElementById('contacts-grid');
+  if (!state.contacts.length) {
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div>Nenhum contato ainda.</div>';
+    return;
+  }
   el.innerHTML = state.contacts.map((c,i) => `
     <div class="contact-card" onclick="viewContact(${i})">
       <div class="contact-actions">
         <button class="contact-view-btn" onclick="event.stopPropagation();viewContact(${i})" title="Visualizar">👁️</button>
-        <button class="contact-del" onclick="event.stopPropagation();deleteContact(${i})" title="Remover">✕</button>
+        <button class="contact-del"      onclick="event.stopPropagation();deleteContact(${i})" title="Remover">✕</button>
       </div>
       <div class="contact-avatar">${c.nome.charAt(0).toUpperCase()}</div>
       <div class="contact-name">${escHtml(c.nome)}</div>
-      ${c.cargo?`<div class="contact-role">${escHtml(c.cargo)}</div>`:''}
-      ${c.email?`<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.email)}</div>`:''}
+      ${c.cargo ? `<div class="contact-role">${escHtml(c.cargo)}</div>` : ''}
+      ${c.tel   ? `<a href="tel:${escHtml(c.tel)}" onclick="event.stopPropagation()" class="contact-tel-pill">📱 ${escHtml(c.tel)}</a>` : ''}
+      ${c.nota  ? `<div class="contact-note-pill">📝 ${escHtml(c.nota.substring(0,40))}${c.nota.length>40?'…':''}</div>` : ''}
       <span class="contact-cat">${escHtml(c.cat)}</span>
     </div>`).join('');
 }
