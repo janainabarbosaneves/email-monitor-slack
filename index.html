@@ -89,6 +89,26 @@
     #btn-export-pdf:hover    { background:#4338ca; }
     #btn-export-pdf:disabled { opacity:.7; cursor:wait; }
 
+    /* ── Modal PDF ── */
+    #modal-pdf .modal { max-width:420px; }
+    .pdf-options { display:flex; flex-direction:column; gap:.6rem; }
+    .pdf-option {
+      display:flex; align-items:center; gap:.9rem; padding:.8rem 1rem;
+      border:1px solid var(--border); border-radius:8px; cursor:pointer;
+      transition:border-color .15s, background .15s; background:var(--bg);
+    }
+    .pdf-option:hover  { border-color:var(--accent); background:rgba(var(--accent-rgb),.06); }
+    .pdf-option.selected { border-color:var(--accent); background:rgba(var(--accent-rgb),.12); }
+    .pdf-option-icon { font-size:1.4rem; flex-shrink:0; }
+    .pdf-option-title { font-size:.88rem; font-weight:600; }
+    .pdf-option-desc  { font-size:.75rem; color:var(--text-muted); margin-top:2px; }
+    .pdf-section-select { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .75rem; color:var(--text); font-size:.82rem; font-family:inherit; width:100%; margin-top:.5rem; }
+    .pdf-section-select:focus { outline:none; border-color:var(--accent); }
+    .pdf-progress { display:none; text-align:center; padding:1rem; }
+    .pdf-progress-bar { height:4px; background:var(--border); border-radius:2px; margin:1rem 0 .5rem; overflow:hidden; }
+    .pdf-progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .3s; }
+    .pdf-progress-text { font-size:.8rem; color:var(--text-muted); }
+
     /* ── Content ── */
     #content { padding:1.5rem; display:flex; flex-direction:column; gap:1.5rem; }
 
@@ -183,13 +203,58 @@
 
     /* ── Contatos ── */
     .contacts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:.6rem; }
-    .contact-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem; position:relative; }
+    .contact-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem; position:relative; cursor:pointer; transition:border-color .15s, background .15s; }
+    .contact-card:hover { border-color:var(--accent); background:rgba(var(--accent-rgb),.05); }
     .contact-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.9rem; color:#fff; margin-bottom:.6rem; }
     .contact-name { font-size:.88rem; font-weight:600; }
     .contact-role { font-size:.75rem; color:var(--text-muted); }
     .contact-cat  { font-size:.68rem; font-weight:600; padding:2px 6px; border-radius:20px; background:rgba(var(--accent-rgb),.15); color:var(--accent-h); display:inline-block; margin-top:.4rem; }
-    .contact-del  { position:absolute; top:.6rem; right:.75rem; background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.85rem; }
-    .contact-del:hover { color:var(--red); }
+    .contact-actions { position:absolute; top:.6rem; right:.5rem; display:flex; gap:.25rem; }
+    .contact-del  { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.85rem; padding:.15rem .3rem; border-radius:4px; }
+    .contact-del:hover { background:rgba(239,68,68,.12); color:var(--red); }
+    .contact-view-btn { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.8rem; padding:.15rem .3rem; border-radius:4px; }
+    .contact-view-btn:hover { background:rgba(var(--accent-rgb),.15); color:var(--accent-h); }
+
+    /* ── Modal Visualizar Contato ── */
+    #modal-view-contact .modal { max-width:460px; }
+    .view-contact-header { display:flex; align-items:center; gap:1rem; padding-bottom:.9rem; border-bottom:1px solid var(--border); }
+    .view-contact-avatar { width:56px; height:56px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.3rem; color:#fff; flex-shrink:0; }
+    .view-contact-name { font-size:1.1rem; font-weight:700; }
+    .view-contact-role { font-size:.8rem; color:var(--text-muted); margin-top:2px; }
+    .view-contact-body { display:flex; flex-direction:column; gap:0; }
+    .view-contact-row { display:flex; align-items:center; gap:.75rem; padding:.65rem 0; border-bottom:1px solid var(--border); font-size:.84rem; }
+    .view-contact-row:last-child { border-bottom:none; }
+    .view-contact-icon { font-size:1rem; width:20px; text-align:center; flex-shrink:0; }
+    .view-contact-label { color:var(--text-muted); font-size:.75rem; min-width:80px; }
+    .view-contact-value { color:var(--text); word-break:break-all; }
+    .view-contact-value a { color:var(--accent-h); text-decoration:none; }
+    .view-contact-value a:hover { text-decoration:underline; }
+    .view-obs { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:.6rem .8rem; font-size:.82rem; color:var(--text-muted); white-space:pre-wrap; margin-top:.4rem; }
+
+    /* ── Pasta de Arquivos ── */
+    .files-toolbar { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem; }
+    .files-toolbar input[type="text"] { flex:1; background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .75rem; color:var(--text); font-size:.82rem; font-family:inherit; min-width:140px; }
+    .files-toolbar input[type="text"]:focus { outline:none; border-color:var(--accent); }
+    .files-toolbar select { background:var(--bg-input); border:1px solid var(--border); border-radius:7px; padding:.4rem .65rem; color:var(--text); font-size:.78rem; font-family:inherit; }
+    .drop-zone { border:2px dashed var(--border); border-radius:10px; padding:2.5rem 1rem; text-align:center; color:var(--text-muted); font-size:.85rem; cursor:pointer; transition:border-color .2s, background .2s; margin-bottom:1rem; }
+    .drop-zone:hover, .drop-zone.drag-over { border-color:var(--accent); background:rgba(var(--accent-rgb),.05); color:var(--text); }
+    .drop-zone-icon { font-size:2rem; margin-bottom:.4rem; }
+    .drop-zone input[type="file"] { display:none; }
+    .files-grid { display:flex; flex-direction:column; gap:.45rem; }
+    .file-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.7rem 1rem; display:flex; align-items:center; gap:.8rem; transition:background .15s; }
+    .file-item:hover { background:rgba(var(--accent-rgb),.04); }
+    .file-icon { font-size:1.5rem; flex-shrink:0; }
+    .file-info { flex:1; min-width:0; }
+    .file-name { font-size:.85rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .file-meta { font-size:.72rem; color:var(--text-muted); margin-top:2px; }
+    .file-tag  { font-size:.65rem; font-weight:600; padding:2px 6px; border-radius:20px; background:rgba(var(--accent-rgb),.15); color:var(--accent-h); }
+    .file-actions { display:flex; gap:.3rem; align-items:center; }
+    .file-btn { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:.82rem; padding:.2rem .35rem; border-radius:4px; transition:background .15s; }
+    .file-btn:hover { background:rgba(var(--accent-rgb),.12); color:var(--accent-h); }
+    .file-btn.del:hover { background:rgba(239,68,68,.12); color:var(--red); }
+    .files-stats { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:.5rem; }
+    .files-stat { font-size:.75rem; color:var(--text-muted); }
+    .files-stat strong { color:var(--text); }
 
     /* ── Configurações ── */
     .config-section { display:flex; flex-direction:column; gap:0; }
@@ -245,6 +310,14 @@
     #toast { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--accent); color:#fff; padding:.6rem 1.1rem; border-radius:8px; font-size:.82rem; font-weight:600; opacity:0; transform:translateY(8px); transition:opacity .25s,transform .25s; pointer-events:none; z-index:999; }
     #toast.show { opacity:1; transform:translateY(0); }
 
+    /* ── Monitor countdown ── */
+    .monitor-status { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-top:.5rem; }
+    .countdown-pill { background:rgba(var(--accent-rgb),.12); color:var(--accent-h); font-size:.75rem; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:.35rem; }
+    .countdown-dot  { width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; animation:pulse-dot 1.5s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+    .appsscript-code { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:.8rem 1rem; font-family:'Courier New',monospace; font-size:.72rem; color:var(--text-muted); overflow-x:auto; white-space:pre; margin-top:.75rem; line-height:1.5; max-height:200px; overflow-y:auto; }
+    .copy-btn { font-size:.72rem; padding:.25rem .65rem; border-radius:5px; }
+
     @media print {
       #btn-export-pdf,#sidebar { display:none !important; }
       #main { margin-left:0 !important; }
@@ -266,6 +339,7 @@
     <button class="nav-item" data-section="links">🔗 Links rápidos</button>
     <button class="nav-item" data-section="workspace">🗂️ Workspace</button>
     <button class="nav-item" data-section="contatos">👥 Contatos</button>
+    <button class="nav-item" data-section="arquivos">📁 Arquivos <span class="nav-badge" id="badge-files">0</span></button>
     <span class="nav-label">Sistema</span>
     <button class="nav-item" data-section="config">⚙️ Configurações</button>
     <button class="nav-item" data-section="logs">🖥️ Logs</button>
@@ -276,8 +350,9 @@
 <div id="main">
   <div id="topbar">
     <div class="topbar-info">
-      <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 5 minutos e envia para o Slack automaticamente.
+      <strong>Monitor automático ativo</strong> — Google Apps Script verifica emails a cada 15 minutos e envia para o Slack automaticamente.
       <a href="https://script.google.com" target="_blank">Gerenciar →</a>
+      &nbsp;<span class="countdown-pill"><span class="countdown-dot"></span> Próxima verificação: <span id="topbar-countdown">15:00</span></span>
     </div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" id="btn-refresh">🔄 Atualizar</button>
@@ -364,8 +439,47 @@
       <div class="panel">
         <div class="panel-header"><h2>Contatos</h2><button class="btn btn-ghost" onclick="openModal('modal-contact')">+ Novo contato</button></div>
         <div class="panel-body">
-          <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Times, áreas e pessoas que você mais utiliza.</p>
+          <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Times, áreas e pessoas que você mais utiliza. Clique em um contato para ver os detalhes.</p>
           <div class="contacts-grid" id="contacts-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARQUIVOS -->
+    <div class="section" id="sec-arquivos">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📁 Pasta de Arquivos</h2>
+          <button class="btn btn-ghost" onclick="document.getElementById('file-input').click()">+ Adicionar arquivo</button>
+          <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.png,.jpg,.jpeg,.gif,.zip,.csv" style="display:none" onchange="handleFileInput(this)" />
+        </div>
+        <div class="panel-body">
+          <div class="files-toolbar">
+            <input type="text" id="files-search" placeholder="🔍 Pesquisar arquivos..." oninput="renderFiles()" />
+            <select id="files-filter-type" onchange="renderFiles()">
+              <option value="">Todos os tipos</option>
+              <option value="pdf">📄 PDF</option>
+              <option value="doc">📝 Word</option>
+              <option value="xls">📊 Excel</option>
+              <option value="ppt">📑 PowerPoint</option>
+              <option value="img">🖼️ Imagem</option>
+              <option value="outro">📦 Outros</option>
+            </select>
+            <select id="files-sort" onchange="renderFiles()">
+              <option value="date-desc">Mais recentes</option>
+              <option value="date-asc">Mais antigos</option>
+              <option value="name-asc">Nome A-Z</option>
+              <option value="name-desc">Nome Z-A</option>
+              <option value="size-desc">Maior tamanho</option>
+            </select>
+          </div>
+          <div class="files-stats" id="files-stats"></div>
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="drop-zone-icon">📂</div>
+            <div>Arraste arquivos aqui ou <strong>clique para selecionar</strong></div>
+            <div style="font-size:.75rem;margin-top:.3rem">PDF, Word, Excel, PowerPoint, imagens, ZIP…</div>
+          </div>
+          <div class="files-grid" id="files-grid"></div>
         </div>
       </div>
     </div>
@@ -377,11 +491,59 @@
         <div class="panel-body config-section">
 
           <!-- Monitor -->
-          <div class="config-row">
-            <div>
+          <div class="config-row" style="flex-wrap:wrap;gap:1rem">
+            <div style="flex:1;min-width:220px">
               <div class="config-label">Monitor automático</div>
-              <div class="config-desc">Apps Script verifica emails a cada 5 minutos e envia ao Slack.</div>
-              <a href="https://script.google.com" target="_blank" style="font-size:.78rem;color:var(--accent-h);text-decoration:none;display:inline-block;margin-top:.3rem">Abrir Google Apps Script ↗</a>
+              <div class="config-desc">Apps Script verifica emails a cada <strong style="color:var(--accent-h)">15 minutos</strong> e envia ao Slack.</div>
+              <div class="monitor-status">
+                <span class="countdown-pill"><span class="countdown-dot"></span> Próxima verificação: <span id="cfg-countdown">15:00</span></span>
+                <a href="https://script.google.com" target="_blank" style="font-size:.78rem;color:var(--accent-h);text-decoration:none">Abrir Apps Script ↗</a>
+              </div>
+              <div style="margin-top:.75rem">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">
+                  <span style="font-size:.75rem;color:var(--text-muted)">Código do gatilho de 15 minutos (Google Apps Script):</span>
+                  <button class="btn btn-ghost copy-btn" onclick="copyAppsScript()">📋 Copiar</button>
+                </div>
+                <div class="appsscript-code" id="appsscript-snippet">// Cole no Google Apps Script e configure o gatilho
+function monitorarEmails() {
+  var slackWebhookUrl = 'SEU_WEBHOOK_URL_AQUI';
+  var canalSlack = '#notificacoes-email';
+
+  var threads = GmailApp.search('is:unread newer_than:15m', 0, 20);
+  threads.forEach(function(thread) {
+    var msg = thread.getMessages()[0];
+    var assunto = msg.getSubject();
+    var remetente = msg.getFrom();
+    var data = msg.getDate().toLocaleString('pt-BR');
+
+    var payload = {
+      channel: canalSlack,
+      username: 'Email Monitor',
+      icon_emoji: ':email:',
+      text: '*Novo e-mail recebido*',
+      attachments: [{
+        color: '#6366f1',
+        fields: [
+          { title: 'Assunto', value: assunto, short: false },
+          { title: 'De', value: remetente, short: true },
+          { title: 'Data', value: data, short: true }
+        ]
+      }]
+    };
+
+    UrlFetchApp.fetch(slackWebhookUrl, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload)
+    });
+    thread.markRead();
+  });
+}
+
+// Para criar o gatilho de 15 minutos:
+// Executar > monitorarEmails > Adicionar gatilho
+// Tipo: baseado em tempo, a cada 15 minutos</div>
+              </div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
               <span style="font-size:.75rem;color:var(--green);font-weight:600">Ativo</span>
@@ -451,6 +613,66 @@
 
 <!-- Toast -->
 <div id="toast"></div>
+
+<!-- ══ MODAL PDF ══ -->
+<div class="modal-overlay" id="modal-pdf">
+  <div class="modal">
+    <h3>📄 Salvar como PDF</h3>
+    <div id="pdf-form">
+      <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:.75rem">Escolha o que deseja exportar:</p>
+      <div class="pdf-options">
+        <div class="pdf-option selected" data-mode="all" onclick="selectPdfMode(this)">
+          <span class="pdf-option-icon">📋</span>
+          <div>
+            <div class="pdf-option-title">Dashboard completo</div>
+            <div class="pdf-option-desc">Exporta todas as seções: notificações, anotações, workspace, contatos e logs</div>
+          </div>
+        </div>
+        <div class="pdf-option" data-mode="current" onclick="selectPdfMode(this)">
+          <span class="pdf-option-icon">🖥️</span>
+          <div>
+            <div class="pdf-option-title">Seção atual</div>
+            <div class="pdf-option-desc">Exporta somente a seção que está sendo visualizada no momento</div>
+          </div>
+        </div>
+        <div class="pdf-option" data-mode="choose" onclick="selectPdfMode(this)">
+          <span class="pdf-option-icon">🔍</span>
+          <div>
+            <div class="pdf-option-title">Escolher seção</div>
+            <div class="pdf-option-desc">Selecione uma seção específica para exportar</div>
+            <select class="pdf-section-select" id="pdf-section-select" onclick="event.stopPropagation()">
+              <option value="dashboard">📊 Dashboard</option>
+              <option value="notificacoes">🔔 Notificações</option>
+              <option value="anotacoes">📝 Anotações</option>
+              <option value="links">🔗 Links rápidos</option>
+              <option value="workspace">🗂️ Workspace</option>
+              <option value="contatos">👥 Contatos</option>
+              <option value="arquivos">📁 Arquivos</option>
+              <option value="config">⚙️ Configurações</option>
+              <option value="logs">🖥️ Logs</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:.9rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;">
+        <label style="font-size:.78rem;color:var(--text-muted);">Orientação:</label>
+        <select id="pdf-orientation" style="background:var(--bg-input);border:1px solid var(--border);border-radius:6px;padding:.3rem .6rem;color:var(--text);font-size:.78rem;font-family:inherit;">
+          <option value="portrait">Retrato (A4)</option>
+          <option value="landscape">Paisagem (A4)</option>
+        </select>
+      </div>
+    </div>
+    <div class="pdf-progress" id="pdf-progress">
+      <div style="font-size:.88rem;font-weight:600;margin-bottom:.25rem" id="pdf-progress-label">Gerando PDF…</div>
+      <div class="pdf-progress-bar"><div class="pdf-progress-fill" id="pdf-progress-fill" style="width:0%"></div></div>
+      <div class="pdf-progress-text" id="pdf-progress-text">Preparando conteúdo...</div>
+    </div>
+    <div class="modal-footer" id="pdf-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pdf')">Cancelar</button>
+      <button class="btn btn-primary" onclick="executePdfExport()">📄 Gerar PDF</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ MODAIS ══ -->
 
@@ -523,6 +745,25 @@
   </div>
 </div>
 
+<!-- Visualizar Contato -->
+<div class="modal-overlay" id="modal-view-contact">
+  <div class="modal">
+    <div class="view-contact-header">
+      <div class="view-contact-avatar" id="vc-avatar">?</div>
+      <div>
+        <div class="view-contact-name" id="vc-nome">—</div>
+        <div class="view-contact-role" id="vc-cargo">—</div>
+        <span class="contact-cat" id="vc-cat" style="margin-top:.4rem;display:inline-block">—</span>
+      </div>
+    </div>
+    <div class="view-contact-body" id="vc-body"></div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn btn-danger" id="vc-del-btn">🗑️ Remover</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-view-contact')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ SCRIPT ══ -->
 <script>
 // ── Defaults ───────────────────────────────────────────────────
@@ -566,6 +807,7 @@ const state = {
   links:         JSON.parse(localStorage.getItem('em_links')     || 'null') ?? DEFAULT_LINKS,
   workspace:     JSON.parse(localStorage.getItem('em_ws')        || 'null') ?? DEFAULT_WORKSPACE,
   contacts:      JSON.parse(localStorage.getItem('em_contacts')  || 'null') ?? DEFAULT_CONTACTS,
+  files:         JSON.parse(localStorage.getItem('em_files')     || '[]'),
   config:        JSON.parse(localStorage.getItem('em_config')    || 'null') ?? { theme:'dark', accent:'#6366f1', accentH:'#818cf8', rgb:'99,102,241', fontSize:'14px', canal:'#notificacoes-email' },
   logs: []
 };
@@ -598,6 +840,7 @@ document.querySelectorAll('.nav-item').forEach(btn => {
 function updateBadges() {
   document.getElementById('badge-notif').textContent = state.notifications.length;
   document.getElementById('badge-notes').textContent = state.notes.length;
+  document.getElementById('badge-files').textContent = state.files.length;
   document.getElementById('stat-total').textContent  = state.notifications.length;
   document.getElementById('stat-notes').textContent  = state.notes.length;
 }
@@ -725,18 +968,159 @@ function saveContact() {
   renderContacts(); toast('Contato salvo!'); log(`Contato "${nome}" adicionado.`,'ok');
 }
 function deleteContact(i) { state.contacts.splice(i,1); save('em_contacts',state.contacts); renderContacts(); toast('Contato removido.'); }
+function viewContact(i) {
+  const c = state.contacts[i];
+  document.getElementById('vc-avatar').textContent = c.nome.charAt(0).toUpperCase();
+  document.getElementById('vc-nome').textContent   = c.nome;
+  document.getElementById('vc-cargo').textContent  = c.cargo || '—';
+  document.getElementById('vc-cat').textContent    = c.cat;
+  const rows = [];
+  if (c.email) rows.push(`<div class="view-contact-row"><span class="view-contact-icon">📧</span><span class="view-contact-label">E-mail</span><span class="view-contact-value"><a href="mailto:${escHtml(c.email)}">${escHtml(c.email)}</a></span></div>`);
+  if (c.tel)   rows.push(`<div class="view-contact-row"><span class="view-contact-icon">📱</span><span class="view-contact-label">Telefone</span><span class="view-contact-value"><a href="tel:${escHtml(c.tel)}">${escHtml(c.tel)}</a></span></div>`);
+  if (c.slack) rows.push(`<div class="view-contact-row"><span class="view-contact-icon">💬</span><span class="view-contact-label">Slack</span><span class="view-contact-value">${escHtml(c.slack)}</span></div>`);
+  if (c.grupo) rows.push(`<div class="view-contact-row"><span class="view-contact-icon">🏷️</span><span class="view-contact-label">Grupo</span><span class="view-contact-value">${escHtml(c.grupo)}</span></div>`);
+  if (c.obs)   rows.push(`<div class="view-contact-row" style="flex-direction:column;align-items:flex-start;gap:.4rem"><span style="font-size:.78rem;color:var(--text-muted)">📝 Observações</span><div class="view-obs">${escHtml(c.obs)}</div></div>`);
+  if (!rows.length) rows.push(`<div class="view-contact-row" style="color:var(--text-muted);font-size:.82rem;justify-content:center">Nenhuma informação adicional</div>`);
+  document.getElementById('vc-body').innerHTML = rows.join('');
+  document.getElementById('vc-del-btn').onclick = () => { deleteContact(i); closeModal('modal-view-contact'); };
+  openModal('modal-view-contact');
+}
 function renderContacts() {
   const el=document.getElementById('contacts-grid');
   if (!state.contacts.length) { el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div>Nenhum contato ainda.</div>'; return; }
   el.innerHTML = state.contacts.map((c,i) => `
-    <div class="contact-card">
+    <div class="contact-card" onclick="viewContact(${i})">
+      <div class="contact-actions">
+        <button class="contact-view-btn" onclick="event.stopPropagation();viewContact(${i})" title="Visualizar">👁️</button>
+        <button class="contact-del" onclick="event.stopPropagation();deleteContact(${i})" title="Remover">✕</button>
+      </div>
       <div class="contact-avatar">${c.nome.charAt(0).toUpperCase()}</div>
       <div class="contact-name">${escHtml(c.nome)}</div>
       ${c.cargo?`<div class="contact-role">${escHtml(c.cargo)}</div>`:''}
+      ${c.email?`<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.email)}</div>`:''}
       <span class="contact-cat">${escHtml(c.cat)}</span>
-      <button class="contact-del" onclick="deleteContact(${i})" title="Remover">✕</button>
     </div>`).join('');
 }
+
+// ── Files ───────────────────────────────────────────────────────
+const FILE_ICONS = { pdf:'📄', doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📑', pptx:'📑', txt:'📃', png:'🖼️', jpg:'🖼️', jpeg:'🖼️', gif:'🖼️', zip:'📦', rar:'📦', csv:'📊' };
+const FILE_TYPES = { pdf:'pdf', doc:'doc', docx:'doc', xls:'xls', xlsx:'xls', ppt:'ppt', pptx:'ppt', png:'img', jpg:'img', jpeg:'img', gif:'img' };
+
+function getFileExt(name) { return name.split('.').pop().toLowerCase(); }
+function getFileIcon(name) { return FILE_ICONS[getFileExt(name)] || '📁'; }
+function getFileType(name) { return FILE_TYPES[getFileExt(name)] || 'outro'; }
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+function handleFileInput(input) {
+  const files = Array.from(input.files);
+  let added = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const entry = {
+        id: Date.now() + Math.random(),
+        name: file.name,
+        size: file.size,
+        type: getFileType(file.name),
+        date: new Date().toISOString(),
+        dataUrl: e.target.result
+      };
+      state.files.push(entry);
+      try { save('em_files', state.files); } catch(ex) { toast('⚠️ Arquivo muito grande para armazenar localmente'); state.files.pop(); return; }
+      added++;
+      renderFiles(); updateBadges();
+      log(`Arquivo "${file.name}" adicionado (${formatBytes(file.size)}).`,'ok');
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+  if (files.length) toast(`✅ ${files.length} arquivo(s) carregado(s)`);
+}
+
+function deleteFile(id) {
+  const idx = state.files.findIndex(f => f.id === id);
+  if (idx < 0) return;
+  const name = state.files[idx].name;
+  state.files.splice(idx, 1);
+  save('em_files', state.files);
+  renderFiles(); updateBadges();
+  toast('Arquivo removido.'); log(`Arquivo "${name}" removido.`,'sys');
+}
+
+function downloadFile(id) {
+  const f = state.files.find(x => x.id === id);
+  if (!f) return;
+  const a = document.createElement('a');
+  a.href = f.dataUrl; a.download = f.name; a.click();
+  log(`Download: "${f.name}".`,'ok');
+}
+
+function renderFiles() {
+  const grid  = document.getElementById('files-grid');
+  const stats = document.getElementById('files-stats');
+  const q     = (document.getElementById('files-search').value || '').toLowerCase();
+  const type  = document.getElementById('files-filter-type').value;
+  const sort  = document.getElementById('files-sort').value;
+
+  let list = state.files.filter(f => {
+    if (q && !f.name.toLowerCase().includes(q)) return false;
+    if (type && f.type !== type) return false;
+    return true;
+  });
+
+  list.sort((a,b) => {
+    if (sort==='name-asc')   return a.name.localeCompare(b.name);
+    if (sort==='name-desc')  return b.name.localeCompare(a.name);
+    if (sort==='size-desc')  return b.size - a.size;
+    if (sort==='date-asc')   return new Date(a.date)-new Date(b.date);
+    return new Date(b.date)-new Date(a.date);
+  });
+
+  const totalSize = state.files.reduce((s,f)=>s+f.size,0);
+  stats.innerHTML = `<span class="files-stat"><strong>${state.files.length}</strong> arquivo(s)</span><span class="files-stat"><strong>${formatBytes(totalSize)}</strong> total</span>${list.length!==state.files.length?`<span class="files-stat">${list.length} resultado(s)</span>`:''}`;
+
+  if (!state.files.length) {
+    grid.innerHTML='<div class="empty"><div class="empty-icon">📂</div>Nenhum arquivo ainda. Arraste ou clique para adicionar.</div>';
+    return;
+  }
+  if (!list.length) { grid.innerHTML='<div class="empty" style="margin-top:.5rem">Nenhum arquivo encontrado.</div>'; return; }
+
+  grid.innerHTML = list.map(f => `
+    <div class="file-item">
+      <span class="file-icon">${getFileIcon(f.name)}</span>
+      <div class="file-info">
+        <div class="file-name" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
+        <div class="file-meta">
+          <span class="file-tag">${f.type.toUpperCase()}</span>
+          &nbsp;${formatBytes(f.size)} · ${new Date(f.date).toLocaleDateString('pt-BR')}
+        </div>
+      </div>
+      <div class="file-actions">
+        <button class="file-btn" onclick="downloadFile(${f.id})" title="Baixar">⬇️</button>
+        <button class="file-btn del" onclick="deleteFile(${f.id})" title="Remover">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// Drop zone
+(function() {
+  const dz = document.getElementById('drop-zone');
+  if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const fi = document.getElementById('file-input');
+    const dt = new DataTransfer();
+    Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+    fi.files = dt.files;
+    handleFileInput(fi);
+  });
+})();
 
 // ── Logs ───────────────────────────────────────────────────────
 function renderLogs() {
@@ -820,30 +1204,165 @@ function applyConfig() {
 function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── PDF export ─────────────────────────────────────────────────
-document.getElementById('btn-export-pdf').addEventListener('click', function () {
-  const btn = this;
-  btn.disabled = true; btn.textContent = '⏳ Gerando PDF…';
-  const sections = document.querySelectorAll('.section');
-  const wasActive = [];
-  sections.forEach(s => { wasActive.push(s.classList.contains('active')); s.classList.add('active'); });
-  btn.style.display = 'none';
-  const bgColor = document.body.dataset.theme === 'light' ? '#f1f5f9' : '#0f172a';
-  html2pdf().set({
-    margin: [8,8,8,8], filename: 'email-monitor-dashboard.pdf',
-    image: { type:'jpeg', quality:.95 },
-    html2canvas: { scale:2, useCORS:true, scrollY:0, windowWidth:document.body.scrollWidth, backgroundColor:bgColor },
-    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-    pagebreak: { mode:['avoid-all','css','legacy'] }
-  }).from(document.getElementById('main')).save().then(() => {
-    sections.forEach((s,i) => { s.classList.remove('active'); if (wasActive[i]) s.classList.add('active'); });
-    btn.style.display=''; btn.disabled=false; btn.textContent='📄 Salvar PDF';
-    log('Dashboard exportado como PDF.','ok'); toast('PDF salvo!');
-  }).catch(err => {
-    sections.forEach((s,i) => { s.classList.remove('active'); if (wasActive[i]) s.classList.add('active'); });
-    btn.style.display=''; btn.disabled=false; btn.textContent='📄 Salvar PDF';
-    log('Erro ao gerar PDF: '+err.message,'err');
-  });
+let _pdfMode = 'all';
+
+document.getElementById('btn-export-pdf').addEventListener('click', () => {
+  _pdfMode = 'all';
+  document.querySelectorAll('.pdf-option').forEach(o => o.classList.remove('selected'));
+  document.querySelector('.pdf-option[data-mode="all"]').classList.add('selected');
+  document.getElementById('pdf-form').style.display = '';
+  document.getElementById('pdf-progress').style.display = 'none';
+  document.getElementById('pdf-footer').style.display = '';
+  openModal('modal-pdf');
 });
+
+function selectPdfMode(el) {
+  document.querySelectorAll('.pdf-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  _pdfMode = el.dataset.mode;
+}
+
+function setPdfProgress(pct, text) {
+  document.getElementById('pdf-progress-fill').style.width = pct + '%';
+  document.getElementById('pdf-progress-text').textContent = text;
+}
+
+async function executePdfExport() {
+  const mode        = _pdfMode;
+  const orientation = document.getElementById('pdf-orientation').value;
+  const bgColor     = document.body.dataset.theme === 'light' ? '#f1f5f9' : '#0f172a';
+  const sections    = document.querySelectorAll('.section');
+  const wasActive   = Array.from(sections).map(s => s.classList.contains('active'));
+
+  // Show progress
+  document.getElementById('pdf-form').style.display = 'none';
+  document.getElementById('pdf-footer').style.display = 'none';
+  const prog = document.getElementById('pdf-progress');
+  prog.style.display = '';
+  setPdfProgress(10, 'Preparando conteúdo...');
+
+  // Determine which element to export
+  let targetEl;
+  const sectionNames = {
+    dashboard:'Dashboard', notificacoes:'Notificações', anotacoes:'Anotações',
+    links:'Links rápidos', workspace:'Workspace', contatos:'Contatos',
+    arquivos:'Arquivos', config:'Configurações', logs:'Logs'
+  };
+
+  if (mode === 'all') {
+    sections.forEach(s => s.classList.add('active'));
+    targetEl = document.getElementById('content');
+    setPdfProgress(20, 'Ativando todas as seções...');
+  } else if (mode === 'current') {
+    targetEl = document.querySelector('.section.active') || document.getElementById('content');
+    setPdfProgress(20, 'Capturando seção atual...');
+  } else {
+    const chosen = document.getElementById('pdf-section-select').value;
+    sections.forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('sec-' + chosen);
+    if (el) el.classList.add('active');
+    targetEl = el || document.getElementById('content');
+    setPdfProgress(20, 'Ativando seção selecionada...');
+  }
+
+  // Build filename
+  const dateStr = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+  let filename = 'email-monitor-' + dateStr;
+  if (mode === 'current') {
+    const activeSection = document.querySelector('.section.active');
+    if (activeSection) {
+      const id = activeSection.id.replace('sec-','');
+      filename += '-' + (sectionNames[id] || id).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    }
+  } else if (mode === 'choose') {
+    const chosen = document.getElementById('pdf-section-select').value;
+    filename += '-' + (sectionNames[chosen] || chosen);
+  } else {
+    filename += '-completo';
+  }
+  filename += '.pdf';
+
+  // Hide PDF button during capture
+  document.getElementById('btn-export-pdf').style.visibility = 'hidden';
+  setPdfProgress(40, 'Renderizando conteúdo...');
+
+  try {
+    await new Promise(r => setTimeout(r, 120)); // allow reflow
+    setPdfProgress(60, 'Capturando imagem da página...');
+
+    await html2pdf().set({
+      margin: [10, 8, 10, 8],
+      filename,
+      image: { type: 'jpeg', quality: 0.97 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        scrollX: 0,
+        windowWidth: 1200,
+        backgroundColor: bgColor,
+        logging: false
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    }).from(targetEl).save();
+
+    setPdfProgress(100, 'Concluído!');
+    await new Promise(r => setTimeout(r, 400));
+    log('PDF exportado: ' + filename, 'ok');
+    toast('✅ PDF salvo!');
+    closeModal('modal-pdf');
+  } catch (err) {
+    log('Erro ao gerar PDF: ' + err.message, 'err');
+    toast('❌ Erro ao gerar PDF');
+    document.getElementById('pdf-form').style.display = '';
+    document.getElementById('pdf-footer').style.display = '';
+    prog.style.display = 'none';
+  } finally {
+    // Restore section states
+    sections.forEach((s, i) => {
+      s.classList.remove('active');
+      if (wasActive[i]) s.classList.add('active');
+    });
+    document.getElementById('btn-export-pdf').style.visibility = '';
+    document.getElementById('btn-export-pdf').disabled = false;
+    document.getElementById('btn-export-pdf').textContent = '📄 Salvar PDF';
+  }
+}
+
+// ── Monitor countdown (15 min) ──────────────────────────────────
+(function() {
+  const INTERVAL_SEC = 15 * 60; // 15 minutos
+  let remaining = INTERVAL_SEC;
+  function fmt(s) { const m=Math.floor(s/60), ss=s%60; return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
+  function tick() {
+    const str = fmt(remaining);
+    const t1 = document.getElementById('topbar-countdown');
+    const t2 = document.getElementById('cfg-countdown');
+    if (t1) t1.textContent = str;
+    if (t2) t2.textContent = str;
+    if (remaining <= 0) {
+      remaining = INTERVAL_SEC;
+      const now = new Date().toLocaleTimeString('pt-BR');
+      document.getElementById('stat-ultima').textContent = now;
+      log('Verificação automática de e-mails realizada (15 min).','ok');
+    } else {
+      remaining--;
+    }
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+function copyAppsScript() {
+  const code = document.getElementById('appsscript-snippet').textContent;
+  navigator.clipboard.writeText(code).then(() => toast('📋 Código copiado!')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = code; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('📋 Código copiado!');
+  });
+}
 
 // ── Init ───────────────────────────────────────────────────────
 if (!localStorage.getItem('em_links'))    save('em_links',    state.links);
@@ -856,6 +1375,7 @@ renderNotes();
 renderLinks();
 renderWorkspace();
 renderContacts();
+renderFiles();
 renderLogs();
 updateBadges();
 log('Sistema iniciado.','sys');
